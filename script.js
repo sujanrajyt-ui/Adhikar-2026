@@ -609,14 +609,21 @@ async function handleRowAction(e) {
 
       if (reg && typeof emailjs !== "undefined") {
         showToast("Sending verification email...", "info");
+        // Sending multiple common parameter names to ensure template compatibility
+        const templateParams = {
+          to_name: reg.name,
+          user_name: reg.name,
+          to_email: reg.email,
+          user_email: reg.email,
+          email: reg.email,
+          recipient_email: reg.email,
+          registration_id: reg.id,
+          college: reg.college,
+          role: reg.role_preference,
+        };
+        console.log("Sending EmailJS with params:", templateParams);
         emailjs
-          .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-            to_name: reg.name,
-            to_email: reg.email,
-            registration_id: reg.id,
-            college: reg.college,
-            role: reg.role_preference,
-          })
+          .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams)
           .then((res) => {
             console.log("EmailJS Success:", res);
             showToast("Confirmation email sent!");
