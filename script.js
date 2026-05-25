@@ -13,6 +13,11 @@ const API_BASE =
   "/api";
 
 const AWARDS = [
+  {
+    title: "General Championship Award",
+    desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference.",
+    isGrand: true
+  },
   { title: "Best Student Speaker", desc: "Awarded to the delegate who demonstrates the highest level of clarity and persuasion." },
   { title: "Exceptional Debater", desc: "For the individual who masters the art of the rebuttal and logical counter-argument." },
   { title: "Asset of the Ruling Government", desc: "Recognizing the most strategic and effective defender of government policies." },
@@ -58,7 +63,7 @@ function renderAwards() {
   const grid = document.getElementById("awards-grid");
   if (!grid) return;
   grid.innerHTML = AWARDS.map((a, i) => `
-    <article class="award-card reveal" data-testid="award-card-${i}">
+    <article class="award-card reveal ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
         <div class="award-icon">${trophySVG}</div>
         <span class="award-num">${String(i + 1).padStart(2, "0")}</span>

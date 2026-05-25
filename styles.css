@@ -935,6 +935,54 @@ ul, ol { list-style: none; padding: 0; margin: 0; }
   transition: transform 0.4s, box-shadow 0.4s;
 }
 .award-card:hover { transform: translateY(-6px) rotateX(2deg); }
+
+/* The Grand Award */
+.award-card.card-grand {
+  grid-column: 1 / -1;
+  background: linear-gradient(135deg, rgba(74, 16, 25, 0.85) 0%, rgba(122, 28, 42, 0.85) 100%);
+  border: 2px solid var(--gold-500);
+  box-shadow: 
+    0 20px 40px -15px rgba(212, 184, 122, 0.25),
+    inset 0 0 20px rgba(212, 184, 122, 0.1);
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 2.5rem;
+  text-align: left;
+}
+.award-card.card-grand .award-head {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.award-card.card-grand .award-icon {
+  width: 72px; height: 72px;
+  background: var(--gold-400);
+  border: 2px solid var(--gold-200);
+}
+.award-card.card-grand .award-icon svg {
+  width: 32px; height: 32px;
+}
+.award-card.card-grand .award-title {
+  font-size: 2rem;
+  margin: 0;
+  color: var(--gold-400);
+}
+.award-card.card-grand .award-desc {
+  font-size: 1.1rem;
+  max-width: 600px;
+}
+
+@media (max-width: 768px) {
+  .award-card.card-grand {
+    flex-direction: column;
+    text-align: center;
+    padding: 2rem;
+  }
+}
+
 .award-head {
   display: flex;
   justify-content: space-between;
