@@ -12,6 +12,15 @@ const API_BASE =
   ((_apiMeta && _apiMeta.content) || window.location.origin).replace(/\/+$/, "") +
   "/api";
 
+// EmailJS Initialization
+const EMAILJS_PUBLIC_KEY = "7MYjmRFHID52KXBoF";
+const EMAILJS_SERVICE_ID = "service_ih7ntjl";
+const EMAILJS_TEMPLATE_ID = "template_9gk7idl";
+
+if (typeof emailjs !== 'undefined') {
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+}
+
 const AWARDS = [
   {
     title: "General Championship Award",
@@ -30,9 +39,9 @@ const AWARDS = [
   { title: "Most Impactful Presence", desc: "For the individual who commands the room through sheer conviction and parliamentary aura." },
 
   // Institutional Award
-  { 
-    title: "General Championship Award", 
-    desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference." 
+  {
+    title: "General Championship Award",
+    desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference."
   },
 ];
 
@@ -591,6 +600,38 @@ async function handleRowAction(e) {
       body: JSON.stringify({ status: action }),
     });
     if (!res.ok) throw new Error("Update failed");
+
+    // Send confirmation email via EmailJS
+    if (action === "verified") {
+      console.log("Verification triggered for ID:", id);
+      const reg = lastRegistrations.find((r) => String(r.id) === String(id));
+      console.log("Registration found:", reg);
+
+      if (reg && typeof emailjs !== "undefined") {
+        showToast("Sending verification email...", "info");
+        emailjs
+          .send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+            to_name: reg.name,
+            to_email: reg.email,
+            registration_id: reg.id,
+            college: reg.college,
+            role: reg.role_preference,
+          })
+          .then((res) => {
+            console.log("EmailJS Success:", res);
+            showToast("Confirmation email sent!");
+          })
+          .catch((err) => {
+            console.error("EmailJS Error:", err);
+            showToast("Failed to send email: " + (err.text || err.message || "Unknown error"), "error");
+          });
+      } else {
+        console.warn("EmailJS not ready or registration not found", { reg, emailjs: typeof emailjs });
+        if (!reg) showToast("Error: Registration data not found locally", "error");
+        if (typeof emailjs === "undefined") showToast("Error: EmailJS SDK not loaded", "error");
+      }
+    }
+
     await loadRegistrations();
     showToast(`Marked as ${formatStatus(action)}`);
   } catch (ex) {
