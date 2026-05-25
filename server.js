@@ -51,7 +51,7 @@ app.post('/api/registrations', async (req, res) => {
   }
 
   // Create temporary local registration first
-  const reg = db.create({
+  const reg = await db.create({
     name,
     email,
     phone,
@@ -136,13 +136,13 @@ app.post('/api/registrations/:id/submit-utr', async (req, res) => {
     return res.status(400).json({ detail: "UTR must be a 12-digit reference number" });
   }
 
-  const reg = db.getById(id);
+  const reg = await db.getById(id);
   if (!reg) {
     return res.status(404).json({ detail: "Registration not found" });
   }
 
   // Update local database status
-  db.update(id, {
+  await db.update(id, {
     status: 'payment_claimed',
     utr: utr
   });
@@ -177,7 +177,7 @@ app.post('/api/registrations/:id/submit-utr', async (req, res) => {
 });
 
 // 3. UroPay Payment Confirmation Webhook
-app.post('/api/webhook/uropay', (req, res) => {
+app.post('/api/webhook/uropay', async (req, res) => {
   console.log("[Webhook Received] UroPay Webhook incoming header parameters:");
   const env = req.headers['x-uropay-environment'] || 'PRODUCTION';
   const webhookId = req.headers['x-uropay-webhook-id'];
@@ -222,11 +222,11 @@ app.post('/api/webhook/uropay', (req, res) => {
 
   // Process the payment confirmation
   // Look up registration matching this UTR / Reference Number
-  const reg = db.getByUtr(utr);
+  const reg = await db.getByUtr(utr);
   
   if (reg) {
     console.log(`[Webhook Confirmed] UTR Match! Auto-verifying Registration: ${reg.id}`);
-    db.update(reg.id, { status: 'verified' });
+    await db.update(reg.id, { status: 'verified' });
   } else {
     // If not found by UTR, look up by Order ID if present in incoming data, or log it
     console.log(`[Webhook Warning] No local registration found for UTR: ${utr}. Payment received, but unmapped.`);
@@ -262,17 +262,17 @@ app.post('/api/admin/login', (req, res) => {
 });
 
 // Get all registrations
-app.get('/api/admin/registrations', adminAuth, (req, res) => {
-  res.json(db.getAll());
+app.get('/api/admin/registrations', adminAuth, async (req, res) => {
+  res.json(await db.getAll());
 });
 
 // Get stats summary
-app.get('/api/admin/stats', adminAuth, (req, res) => {
-  res.json(db.getStats());
+app.get('/api/admin/stats', adminAuth, async (req, res) => {
+  res.json(await db.getStats());
 });
 
 // Manually update status of a registration (verify / reject)
-app.post('/api/admin/registrations/:id/status', adminAuth, (req, res) => {
+app.post('/api/admin/registrations/:id/status', adminAuth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
@@ -281,7 +281,7 @@ app.post('/api/admin/registrations/:id/status', adminAuth, (req, res) => {
     return res.status(400).json({ detail: "Invalid status state" });
   }
 
-  const updated = db.update(id, { status });
+  const updated = await db.update(id, { status });
   if (!updated) {
     return res.status(404).json({ detail: "Registration not found" });
   }
@@ -291,9 +291,9 @@ app.post('/api/admin/registrations/:id/status', adminAuth, (req, res) => {
 });
 
 // Delete a registration
-app.delete('/api/admin/registrations/:id', adminAuth, (req, res) => {
+app.delete('/api/admin/registrations/:id', adminAuth, async (req, res) => {
   const { id } = req.params;
-  const deleted = db.delete(id);
+  const deleted = await db.delete(id);
 
   if (!deleted) {
     return res.status(404).json({ detail: "Registration not found" });
