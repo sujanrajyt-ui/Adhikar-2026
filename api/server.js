@@ -19,6 +19,11 @@ app.use(express.urlencoded({ extended: true }));
 // Serve static frontend files from parent directory (root directory)
 app.use(express.static(path.join(__dirname, '..')));
 
+// Health Check Endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 /* ============ Helper Functions ============ */
 
 // Generate SHA-512 hash of UroPay Secret
@@ -77,7 +82,7 @@ app.post('/api/registrations', async (req, res) => {
 
   try {
     console.log(`[UroPay] Generating payment order for Registration ID: ${reg.id}`);
-    
+
     // Call UroPay Generate Order API
     const response = await fetch('https://api.uropay.me/order/generate', {
       method: 'POST',
@@ -98,13 +103,13 @@ app.post('/api/registrations', async (req, res) => {
     }
 
     const result = await response.json();
-    
+
     if (result.status === 'success' && result.data) {
       // Save the returned UroPay Order ID locally
       db.update(reg.id, { uropay_order_id: result.data.uroPayOrderId });
-      
+
       console.log(`[UroPay] Order created successfully: ${result.data.uroPayOrderId}`);
-      
+
       return res.json({
         ...reg,
         uropay_order_id: result.data.uroPayOrderId,
@@ -151,7 +156,7 @@ app.post('/api/registrations/:id/submit-utr', async (req, res) => {
   if (reg.uropay_order_id) {
     try {
       console.log(`[UroPay] Submitting UTR ${utr} for Order ${reg.uropay_order_id}`);
-      
+
       const response = await fetch('https://api.uropay.me/order/update', {
         method: 'PATCH',
         headers: getUroPayHeaders(),
@@ -199,7 +204,7 @@ app.post('/api/webhook/uropay', async (req, res) => {
       const hashedSecret = getHashedSecret();
       // Concatenate transaction data string and environment string (per documentation findings)
       const dataToSign = JSON.stringify(payload) + env;
-      
+
       const expectedSignature = crypto
         .createHmac('sha256', hashedSecret)
         .update(dataToSign)
@@ -223,7 +228,7 @@ app.post('/api/webhook/uropay', async (req, res) => {
   // Process the payment confirmation
   // Look up registration matching this UTR / Reference Number
   const reg = await db.getByUtr(utr);
-  
+
   if (reg) {
     console.log(`[Webhook Confirmed] UTR Match! Auto-verifying Registration: ${reg.id}`);
     await db.update(reg.id, { status: 'verified' });
@@ -308,12 +313,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
-// Start Server - only listen if run directly (local development)
+// Start Server - listen on 0.0.0.0 for accessibility
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '0.0.0.0', () => {
     console.log(`===============================================`);
     console.log(` ADHIKAR'26 REPLICATED BACKEND SERVER IS RUNNING`);
-    console.log(` http://localhost:${PORT}`);
+    console.log(` Listening on: 0.0.0.0:${PORT}`);
     console.log(` Admin Desk default password: secretariat2026`);
     console.log(`===============================================`);
   });
