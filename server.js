@@ -70,7 +70,7 @@ app.post('/api/registrations', async (req, res) => {
     return res.json({
       ...reg,
       useFallback: true,
-      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=599.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
+      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=650.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
       qrCodeUrl: 'assets/fallback_qr.jpeg'
     });
   }
@@ -83,7 +83,7 @@ app.post('/api/registrations', async (req, res) => {
       method: 'POST',
       headers: getUroPayHeaders(),
       body: JSON.stringify({
-        amount: 59900, // 599 INR in paise
+        amount: 65000, // 650 INR in paise
         merchantOrderId: reg.id,
         customerName: reg.name,
         customerEmail: reg.email,
@@ -121,7 +121,7 @@ app.post('/api/registrations', async (req, res) => {
     return res.json({
       ...reg,
       useFallback: true,
-      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=599.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
+      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=650.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
       qrCodeUrl: 'assets/fallback_qr.jpeg'
     });
   }
