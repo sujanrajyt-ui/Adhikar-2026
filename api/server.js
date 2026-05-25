@@ -16,8 +16,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static frontend files from /public directory
-app.use(express.static(path.join(__dirname, 'public')));
+// Serve static frontend files from parent directory (root directory)
+app.use(express.static(path.join(__dirname, '..')));
 
 /* ============ Helper Functions ============ */
 
@@ -305,7 +305,7 @@ app.delete('/api/admin/registrations/:id', adminAuth, async (req, res) => {
 
 /* ============ Fallback Web Route ============ */
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
 
 // Start Server - only listen if run directly (local development)
