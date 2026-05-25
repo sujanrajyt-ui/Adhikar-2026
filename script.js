@@ -10,7 +10,7 @@ const EVENT_DATE = new Date("2026-06-13T09:00:00+05:30");
 const _apiMeta = document.querySelector('meta[name="adhikar-api"]');
 const API_BASE =
   ((_apiMeta && _apiMeta.content) || window.location.origin).replace(/\/+$/, "") +
-  "api";
+  "/api";
 
 const AWARDS = [
   { title: "Best Student Speaker", desc: "Awarded to the delegate who demonstrates the highest level of clarity and persuasion." },
@@ -382,7 +382,7 @@ function initRegistration() {
     const overlay = document.getElementById("register-overlay");
     if (overlay && e.key === "Escape" && !overlay.classList.contains("hidden")) closeRegisterOverlay();
   });
-  
+
   document.getElementById("reg-form")?.addEventListener("submit", submitRegistration);
   document.getElementById("utr-form")?.addEventListener("submit", submitUtr);
   document.getElementById("back-to-form")?.addEventListener("click", () => setStep(1));
