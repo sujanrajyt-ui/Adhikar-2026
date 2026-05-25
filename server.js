@@ -308,11 +308,15 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`===============================================`);
-  console.log(` ADHIKAR'26 REPLICATED BACKEND SERVER IS RUNNING`);
-  console.log(` http://localhost:${PORT}`);
-  console.log(` Admin Desk default password: secretariat2026`);
-  console.log(`===============================================`);
-});
+// Start Server - only listen if run directly (local development)
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`===============================================`);
+    console.log(` ADHIKAR'26 REPLICATED BACKEND SERVER IS RUNNING`);
+    console.log(` http://localhost:${PORT}`);
+    console.log(` Admin Desk default password: secretariat2026`);
+    console.log(`===============================================`);
+  });
+}
+
+module.exports = app;
