@@ -3417,18 +3417,25 @@ a.contact-value:hover {
 }
 
 .avatar {
-  width: 60px;
-  height: 60px;
+  width: 100px;
+  height: 100px;
   background: var(--maroon-700);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border: 2px solid var(--gold);
+  border: 3px solid var(--gold);
   overflow: hidden;
   position: relative;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.avatar-lg {
+  width: 160px;
+  height: 160px;
+  border-width: 4px;
 }
 
 .avatar img {
@@ -3439,11 +3446,27 @@ a.contact-value:hover {
 }
 
 .team-card:hover .avatar img {
-  transform: scale(1.15);
+  transform: scale(1.1);
 }
 
 .team-card:hover .avatar {
   border-color: #fff;
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(212, 184, 122, 0.4);
+}
+
+.avatar-glow {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, var(--gold) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.team-card:hover .avatar-glow {
+  opacity: 0.2;
 }
 
 .qr-box {
