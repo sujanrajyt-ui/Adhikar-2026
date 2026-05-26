@@ -40,18 +40,18 @@ const AWARDS = [
 ];
 
 const TEAM = [
-  { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member" },
-  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member" },
+  { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
-  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member" },
-  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member" },
-  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member" },
-  { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member" },
-  { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member" },
-  { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member" },
-  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member" },
-  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member" },
-  { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member" },
+  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member", bio: "Bio coming soon." },
 ];
 
 const MIDMAC_LOGO = "assets/midmac.png";
