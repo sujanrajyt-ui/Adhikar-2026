@@ -3416,11 +3416,11 @@ a.contact-value:hover {
   }
 }
 
-/* Portrait Styling (Founders + Team) */
+/* Circular Avatar Styling (Founders + Team) */
 .portrait-wrapper {
-  aspect-ratio: 4/5;
+  aspect-ratio: 1/1;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 50%;
   overflow: hidden;
   border: 1px solid rgba(212, 184, 122, 0.2);
   background: var(--maroon-900);
@@ -3515,7 +3515,8 @@ a.contact-value:hover {
 @media (max-width: 520px) {
   .founders-portrait-grid {
     grid-template-columns: 1fr;
-    max-width: 260px;
+    max-width: 220px;
+    /* Slightly narrower for better circular balance on small screens */
     gap: 2rem;
   }
 }
