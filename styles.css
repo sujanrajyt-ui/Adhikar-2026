@@ -3432,41 +3432,73 @@ a.contact-value:hover {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
-.avatar-lg {
-  width: 160px;
-  height: 160px;
-  border-width: 4px;
+.founders-portrait-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
-.avatar img {
+.founder-portrait-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.portrait-wrapper {
+  aspect-ratio: 4/5;
+  width: 100%;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 184, 122, 0.2);
+  background: var(--maroon-900);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.portrait-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
+  object-position: center 15%;
+  /* Moves up slightly to prioritize face/head */
+  transition: transform 0.6s ease;
 }
 
-.team-card:hover .avatar img {
-  transform: scale(1.1);
+.founder-portrait-card:hover .portrait-wrapper {
+  transform: translateY(-5px);
+  border-color: var(--gold);
 }
 
-.team-card:hover .avatar {
-  border-color: #fff;
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(212, 184, 122, 0.4);
+.founder-portrait-card:hover .portrait-img {
+  transform: scale(1.05);
 }
 
-.avatar-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, var(--gold) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-  pointer-events: none;
+.founder-info .founder-name {
+  font-family: inherit;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--maroon-700);
+  margin-bottom: 0.15rem;
 }
 
-.team-card:hover .avatar-glow {
-  opacity: 0.2;
+.founder-info .kicker {
+  font-size: 9px;
+}
+
+@media (max-width: 520px) {
+  .founders-portrait-grid {
+    grid-template-columns: 1fr;
+    max-width: 260px;
+    gap: 2rem;
+  }
+
+  .portrait-wrapper {
+    aspect-ratio: 4/5.5;
+    /* Slightly taller on mobile for better stacking feel */
+  }
 }
 
 .qr-box {
