@@ -42,7 +42,7 @@ const AWARDS = [
 const TEAM = [
   { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member" },
   { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member" },
-  { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member" },
+  { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
   { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member" },
   { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member" },
   { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member" },
@@ -96,7 +96,7 @@ function renderTeam() {
   if (!grid) return;
   grid.innerHTML = TEAM.map((m, i) => `
     <article class="team-portrait-card reveal" data-testid="team-card-${i}">
-      <div class="portrait-wrapper">
+      <div class="portrait-wrapper" ${m.bio ? 'data-bio="true"' : ''}>
         ${m.image ? `
           <img class="portrait-img" src="${m.image}" alt="${m.name}" 
             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
@@ -104,6 +104,7 @@ function renderTeam() {
         <div class="portrait-fallback" style="${m.image ? 'display:none' : 'display:flex'}">
           ${initials(m.name)}
         </div>
+        ${m.bio ? `<div class="portrait-bio"><p>${m.bio}</p></div>` : ''}
       </div>
       <div class="team-info">
         <h3 class="team-name">${m.name}</h3>
@@ -791,6 +792,24 @@ async function handlePortfolioChange(id, value) {
   }
 }
 
+/* ============ Portrait Bio Toggle ============ */
+function initPortraitBio() {
+  // Use event delegation so it works for dynamically rendered team cards too
+  document.addEventListener("click", (e) => {
+    const wrapper = e.target.closest(".portrait-wrapper[data-bio]");
+    if (wrapper) {
+      e.stopPropagation();
+      const isOpen = wrapper.classList.contains("bio-open");
+      // close all others first
+      document.querySelectorAll(".portrait-wrapper.bio-open").forEach(w => w.classList.remove("bio-open"));
+      if (!isOpen) wrapper.classList.add("bio-open");
+    } else {
+      // click outside closes all
+      document.querySelectorAll(".portrait-wrapper.bio-open").forEach(w => w.classList.remove("bio-open"));
+    }
+  });
+}
+
 /* ============ Boot ============ */
 document.addEventListener("DOMContentLoaded", () => {
   renderAwards();
@@ -805,4 +824,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initAccordion();
   initRegistration();
   initAdmin();
+  initPortraitBio();
 });

@@ -3418,9 +3418,9 @@ a.contact-value:hover {
 
 /* Circular Avatar Styling (Founders + Team) */
 .portrait-wrapper {
-  aspect-ratio: 1/1;
+  aspect-ratio: 3/4;
   width: 100%;
-  border-radius: 50%;
+  border-radius: 12px;
   overflow: hidden;
   border: 1px solid rgba(212, 184, 122, 0.2);
   background: var(--maroon-900);
@@ -3436,8 +3436,12 @@ a.contact-value:hover {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 15%;
+  object-position: center 10%;
   transition: transform 0.6s ease;
+}
+
+.keerath-img {
+  object-position: center 5%;
 }
 
 .portrait-fallback {
@@ -3676,4 +3680,63 @@ a.contact-value:hover {
 
 .td-portfolio input.saved {
   border-color: #4ade80;
+}
+
+/* ============ Portrait Bio Overlay ============ */
+.portrait-wrapper {
+  position: relative;
+  overflow: hidden;
+}
+
+.portrait-bio {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(74, 16, 25, 0.88);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  transform: translateY(100%);
+  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: inherit;
+  cursor: pointer;
+}
+
+.portrait-bio p {
+  color: var(--cream-100);
+  font-size: 0.82rem;
+  line-height: 1.55;
+  text-align: center;
+  margin: 0;
+}
+
+.portrait-wrapper[data-bio="true"] {
+  cursor: pointer;
+}
+
+.portrait-wrapper[data-bio="true"].bio-open .portrait-bio {
+  transform: translateY(0);
+}
+
+/* hint pulse on portraits that have a bio */
+.portrait-wrapper[data-bio="true"]::after {
+  content: "tap";
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-400);
+  opacity: 0.75;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+
+.portrait-wrapper[data-bio="true"].bio-open::after {
+  opacity: 0;
 }
