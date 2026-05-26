@@ -3683,10 +3683,6 @@ a.contact-value:hover {
 }
 
 /* ============ Portrait Bio Overlay ============ */
-.portrait-wrapper {
-  position: relative;
-  overflow: hidden;
-}
 
 .portrait-bio {
   position: absolute;
@@ -3694,20 +3690,18 @@ a.contact-value:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  background: rgba(74, 16, 25, 0.88);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
-  transform: translateY(100%);
-  transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
-  border-radius: inherit;
-  cursor: pointer;
+  padding: 1.25rem;
+  background: rgba(74, 16, 25, 0.92);
+  transform: translateY(101%);
+  transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  z-index: 2;
 }
 
 .portrait-bio p {
   color: var(--cream-100);
   font-size: 0.82rem;
-  line-height: 1.55;
+  line-height: 1.6;
   text-align: center;
   margin: 0;
 }
@@ -3718,25 +3712,4 @@ a.contact-value:hover {
 
 .portrait-wrapper[data-bio="true"].bio-open .portrait-bio {
   transform: translateY(0);
-}
-
-/* hint pulse on portraits that have a bio */
-.portrait-wrapper[data-bio="true"]::after {
-  content: "tap";
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--gold-400);
-  opacity: 0.75;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.portrait-wrapper[data-bio="true"].bio-open::after {
-  opacity: 0;
 }
