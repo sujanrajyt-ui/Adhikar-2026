@@ -283,14 +283,23 @@ app.get('/api/admin/stats', adminAuth, async (req, res) => {
 // Manually update status of a registration (verify / reject)
 app.post('/api/admin/registrations/:id/status', adminAuth, async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  const { status, portfolio } = req.body;
+  const updates = {};
 
-  const allowed = ['pending', 'payment_claimed', 'verified', 'rejected'];
-  if (!status || !allowed.includes(status)) {
-    return res.status(400).json({ detail: "Invalid status state" });
+  if (status) {
+    const allowed = ['pending', 'payment_claimed', 'verified', 'rejected'];
+    if (!allowed.includes(status)) return res.status(400).json({ detail: "Invalid status state" });
+    updates.status = status;
+  }
+  if (portfolio !== undefined) {
+    updates.portfolio = portfolio;
   }
 
-  const updated = await db.update(id, { status });
+  if (Object.keys(updates).length === 0) {
+    return res.status(400).json({ detail: "No updates provided" });
+  }
+
+  const updated = await db.update(id, updates);
   if (!updated) {
     return res.status(404).json({ detail: "Registration not found" });
   }

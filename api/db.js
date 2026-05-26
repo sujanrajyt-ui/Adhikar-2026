@@ -43,6 +43,7 @@ async function init() {
       // Ensure new columns exist for existing tables
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_name VARCHAR(255);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_phone VARCHAR(50);`);
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS portfolio VARCHAR(255);`);
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
@@ -173,13 +174,14 @@ module.exports = {
       uropay_order_id: fields.uropay_order_id || null,
       utr: null,
       created_at: now,
-      updated_at: now
+      updated_at: now,
+      portfolio: fields.portfolio || ''
     };
 
     if (isPg) {
       await pool.query(`
-        INSERT INTO registrations (id, name, email, phone, parent_name, parent_phone, year, college, role_preference, notes, status, uropay_order_id, utr, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+        INSERT INTO registrations (id, name, email, phone, parent_name, parent_phone, year, college, role_preference, notes, status, uropay_order_id, utr, created_at, updated_at, portfolio)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
       `, [
         registration.id,
         registration.name,
@@ -195,7 +197,8 @@ module.exports = {
         registration.uropay_order_id,
         registration.utr,
         registration.created_at,
-        registration.updated_at
+        registration.updated_at,
+        registration.portfolio
       ]);
     } else {
       const list = readData();

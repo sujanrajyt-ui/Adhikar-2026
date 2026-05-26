@@ -417,6 +417,8 @@ function initRegistration() {
 let adminPassword = "";
 let currentFilter = "all";
 let lastRegistrations = [];
+let adminSearchText = "";
+let adminCollegeFilter = "all";
 
 function adminHeaders() {
   return { "X-Admin-Password": adminPassword };
@@ -498,7 +500,10 @@ async function loadRegistrations() {
     if (!rRes.ok) throw new Error("Failed to load");
     lastRegistrations = await rRes.json();
     const stats = await sRes.json();
+
+    updateCollegeDropdown();
     renderStats(stats);
+    renderAnalytics(lastRegistrations);
     renderRows();
   } catch (ex) {
     showToast(ex.message || "Could not load", "error");
@@ -508,24 +513,89 @@ async function loadRegistrations() {
 function renderStats(s) {
   const el = document.getElementById("admin-stats");
   if (!el) return;
-  el.innerHTML = [
+
+  const statsList = [
     ["Total", s.total],
     ["Pending", s.pending],
     ["Payment claimed", s.payment_claimed],
     ["Verified", s.verified],
     ["Rejected", s.rejected],
-  ].map(([k, v]) => `
+  ];
+
+  el.innerHTML = statsList.map(([k, v]) => `
     <span class="stat-pill"><strong>${v}</strong> ${k}</span>
   `).join("");
+}
+
+function renderAnalytics(list) {
+  const el = document.getElementById("admin-analytics");
+  if (!el) return;
+
+  const total = list.length;
+  if (total === 0) {
+    el.innerHTML = "";
+    return;
+  }
+
+  // Role Distribution
+  const ruling = list.filter(r => (r.role_preference || "").toLowerCase().includes("ruling")).length;
+  const opposition = list.filter(r => (r.role_preference || "").toLowerCase().includes("opposition")).length;
+
+  const rulingPct = Math.round((ruling / (ruling + opposition || 1)) * 100);
+  const oppositionPct = 100 - rulingPct;
+
+  el.innerHTML = `
+    <div class="analytic-bar-group">
+      <div class="analytic-label">
+        <span>Balance of Power (Ruling vs Opposition)</span>
+        <span>${ruling} / ${opposition}</span>
+      </div>
+      <div class="analytic-bar-bg" title="Ruling: ${rulingPct}% | Opposition: ${oppositionPct}%">
+        <div class="analytic-bar-fill" style="width: ${rulingPct}%; background: var(--gold);"></div>
+      </div>
+    </div>
+  `;
+}
+
+function updateCollegeDropdown() {
+  const select = document.getElementById("admin-filter-college");
+  if (!select) return;
+
+  const colleges = [...new Set(lastRegistrations.map(r => r.college))].sort();
+  const current = select.value;
+
+  select.innerHTML = `<option value="all">All Institutions</option>` +
+    colleges.map(c => `<option value="${escapeHtml(c)}" ${c === current ? 'selected' : ''}>${escapeHtml(c)}</option>`).join("");
 }
 
 function renderRows() {
   const tbody = document.getElementById("admin-rows");
   const empty = document.getElementById("admin-empty");
   if (!tbody) return;
-  const list = currentFilter === "all"
-    ? lastRegistrations
-    : lastRegistrations.filter(r => r.status === currentFilter);
+
+  let list = lastRegistrations;
+
+  // 1. Status Filter
+  if (currentFilter !== "all") {
+    list = list.filter(r => r.status === currentFilter);
+  }
+
+  // 2. Search
+  if (adminSearchText) {
+    const q = adminSearchText.toLowerCase();
+    list = list.filter(r =>
+      r.name.toLowerCase().includes(q) ||
+      r.email.toLowerCase().includes(q) ||
+      r.phone.includes(q) ||
+      (r.portfolio && r.portfolio.toLowerCase().includes(q))
+    );
+  }
+
+  // 3. College Filter
+  if (adminCollegeFilter !== "all") {
+    list = list.filter(r => r.college === adminCollegeFilter);
+  }
+
   if (list.length === 0) {
     tbody.innerHTML = "";
     empty?.classList.remove("hidden");
@@ -536,7 +606,12 @@ function renderRows() {
     <tr data-id="${r.id}" data-testid="admin-row-${r.id}">
       <td class="td-delegate">
         <strong>${escapeHtml(r.name)}</strong>
-        <small>${escapeHtml(r.role_preference)} · ${escapeHtml(r.year)}</small>
+        <p style="font-size:0.75rem; color:#bca0a0; margin:4px 0 0;">${escapeHtml(r.role_preference)} · ${escapeHtml(r.year)}</p>
+      </td>
+      <td class="td-portfolio">
+        <input type="text" value="${escapeHtml(r.portfolio || '')}" 
+          placeholder="Assign Portfolio..." 
+          onchange="handlePortfolioChange('${r.id}', this.value)" />
       </td>
       <td class="td-parent">
         <strong>${escapeHtml(r.parent_name || "-")}</strong>
@@ -654,6 +729,16 @@ function initAdmin() {
     });
   });
 
+  document.getElementById("admin-search")?.addEventListener("input", (e) => {
+    adminSearchText = e.target.value.trim();
+    renderRows();
+  });
+
+  document.getElementById("admin-filter-college")?.addEventListener("change", (e) => {
+    adminCollegeFilter = e.target.value;
+    renderRows();
+  });
+
   // restore session
   const saved = sessionStorage.getItem("adhikar_admin");
   if (saved) {
@@ -663,6 +748,27 @@ function initAdmin() {
     if (loginEl) loginEl.classList.add("hidden");
     if (panelEl) panelEl.classList.remove("hidden");
     loadRegistrations();
+  }
+}
+
+async function handlePortfolioChange(id, value) {
+  const input = document.querySelector(`tr[data-id="${id}"] .td-portfolio input`);
+  try {
+    const res = await fetch(`${API_BASE}/admin/registrations/${id}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ portfolio: value }),
+    });
+    if (!res.ok) throw new Error("Save failed");
+
+    // Update local data
+    const reg = lastRegistrations.find(r => r.id === id);
+    if (reg) reg.portfolio = value;
+
+    input?.classList.add("saved");
+    setTimeout(() => input?.classList.remove("saved"), 2000);
+  } catch (err) {
+    showToast("Portfolio save failed", "error");
   }
 }
 

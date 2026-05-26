@@ -790,8 +790,14 @@
       <!-- Panel -->
       <div class="admin-panel hidden" id="admin-panel" data-testid="admin-panel">
         <div class="admin-topbar">
-          <div class="admin-stats" id="admin-stats"></div>
+          <div class="admin-stats-row">
+            <div class="admin-stats" id="admin-stats"></div>
+            <div class="admin-analytics" id="admin-analytics">
+              <!-- Visual bars will be injected here -->
+            </div>
+          </div>
           <div class="admin-tools">
+            <button class="btn-ghost admin-refresh" id="admin-refresh">Refresh</button>
             <button class="btn-ghost admin-export" id="admin-export" data-testid="admin-export">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -816,12 +822,25 @@
           </div>
         </div>
 
-        <div class="admin-filters" id="admin-filters">
-          <button class="filter-chip active" data-filter="all">All</button>
-          <button class="filter-chip" data-filter="pending">Pending</button>
-          <button class="filter-chip" data-filter="payment_claimed">Payment claimed</button>
-          <button class="filter-chip" data-filter="verified">Verified</button>
-          <button class="filter-chip" data-filter="rejected">Rejected</button>
+        <div class="admin-controls-bar">
+          <div class="admin-search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input type="text" id="admin-search" placeholder="Search name, email, or phone..." />
+          </div>
+          <div class="admin-filter-chips">
+            <button class="filter-chip active" data-filter="all">All</button>
+            <button class="filter-chip" data-filter="pending">Pending</button>
+            <button class="filter-chip" data-filter="payment_claimed">Claimed</button>
+            <button class="filter-chip" data-filter="verified">Verified</button>
+            <button class="filter-chip" data-filter="rejected">Rejected</button>
+          </div>
+          <select id="admin-filter-college" class="admin-select">
+            <option value="all">All Institutions</option>
+          </select>
         </div>
 
         <div class="admin-table-wrap">
@@ -829,12 +848,13 @@
             <thead>
               <tr>
                 <th>Delegate</th>
-                <th>Parent Info</th>
+                <th>Portfolio Allocation</th>
+                <th>Parent/Guardian</th>
                 <th>Contact</th>
                 <th>Institution</th>
                 <th>Status</th>
-                <th>Submitted</th>
-                <th>Action</th>
+                <th>Date</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody id="admin-rows"></tbody>
