@@ -40,9 +40,18 @@ const AWARDS = [
 ];
 
 const TEAM = [
-  "Kshiti Thakkar", "Saad Neelgund", "Khushi Dalbanjan", "Manish Tilvalli",
-  "Maitri Sabharwal", "Kiran Badami", "Reeth Markumbi", "Nishtha I",
-  "Shreya Naikar", "Sambhav Bafna", "Shashank Habib", "Kavan Bhatt",
+  { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Organizing Secretary" },
+  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Director General" },
+  { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Under Secretary General" },
+  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Logistics Head" },
+  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Public Relations" },
+  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Finance Head" },
+  { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Content Head" },
+  { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Delegate Affairs" },
+  { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Hospitality Head" },
+  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Creative Head" },
+  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Technical Head" },
+  { name: "Kavan Bhatt", image: "assets/team/kavan.jpg", role: "Media Head" },
 ];
 
 const MIDMAC_LOGO = "assets/midmac.png";
@@ -85,12 +94,15 @@ function renderAwards() {
 function renderTeam() {
   const grid = document.getElementById("team-grid");
   if (!grid) return;
-  grid.innerHTML = TEAM.map((name, i) => `
+  grid.innerHTML = TEAM.map((m, i) => `
     <article class="team-card reveal" data-testid="team-card-${i}">
-      <div class="avatar"><span class="avatar-text">${initials(name)}</span></div>
-      <div>
-        <p class="team-name">${name}</p>
-        <p class="team-role">Member</p>
+      <div class="avatar">
+        ${m.image ? `<img src="${m.image}" alt="${m.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />` : ''}
+        <span class="avatar-text" style="${m.image ? 'display:none' : 'display:flex'}">${initials(m.name)}</span>
+      </div>
+      <div class="team-info">
+        <p class="team-name">${m.name}</p>
+        <p class="team-role">${m.role || 'Member'}</p>
       </div>
     </article>
   `).join("");
