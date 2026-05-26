@@ -49,9 +49,11 @@ function getUroPayHeaders() {
 // 1. Submit Registration Form
 app.post('/api/registrations', async (req, res) => {
   const { name, email, phone, parent_name, parent_phone, year, college, role_preference, notes } = req.body;
+  console.log("[API] Registration request received:", { name, email, phone, parent_name, parent_phone });
 
   // Basic validation
   if (!name || !email || !phone || !year || !college) {
+    console.error("[API] Registration failed: Missing required fields", { name, email, phone, year, college });
     return res.status(400).json({ detail: "Missing required registration details" });
   }
 
