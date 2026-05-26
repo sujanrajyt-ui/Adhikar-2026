@@ -95,6 +95,52 @@ function renderTeam() {
     </article>
   `).join("");
 }
+
+async function renderPublicPortfolios() {
+  const container = document.getElementById("portfolio-list");
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/portfolios`);
+    if (!res.ok) throw new Error("Failed to load composition");
+    const list = await res.json();
+
+    if (list.length === 0) {
+      container.innerHTML = `
+        <div class="portfolio-loading">
+          <p style="color: #64748b;">House is currently in recess. Check back soon for allocations.</p>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = list.map(item => `
+      <article class="portfolio-item reveal">
+        <span class="pi-role-badge">${escapeHtml(item.role_preference)}</span>
+        <h3 class="pi-name">${escapeHtml(item.name)}</h3>
+        <p class="pi-college">${escapeHtml(item.college)}</p>
+        <div class="pi-portfolio">
+          ${escapeHtml(item.portfolio)}
+        </div>
+      </article>
+    `).join("");
+
+    // Trigger reveals for new items
+    if (typeof ScrollReveal !== 'undefined') {
+      ScrollReveal().reveal('.portfolio-item', {
+        interval: 100,
+        distance: '20px',
+        origin: 'bottom',
+        opacity: 0,
+        scale: 0.95,
+        duration: 800,
+        easing: 'cubic-bezier(0.5, 0, 0, 1)'
+      });
+    }
+  } catch (err) {
+    container.innerHTML = `<p style="text-align:center; color: var(--maroon-700);">Connectivity to House records lost. Please refresh.</p>`;
+  }
+}
 function renderMarquee() {
   const track = document.getElementById("marquee-track");
   if (!track) return;
@@ -787,4 +833,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initAccordion();
   initRegistration();
   initAdmin();
+  renderPublicPortfolios();
 });

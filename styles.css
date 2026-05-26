@@ -2780,8 +2780,122 @@ a.contact-value:hover {
 }
 
 .upi-copy.copied {
-  background: rgba(46, 139, 87, 0.35);
-  border-color: rgba(46, 139, 87, 0.5);
+  background: rgba(46, 213, 115, 0.2);
+  border-color: #2ed573;
+}
+
+/* ============ Public Portfolio List ============ */
+.portfolios {
+  position: relative;
+  border-top: 1px solid rgba(212, 175, 55, 0.1);
+}
+
+.portfolio-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.portfolio-item {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.1);
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.portfolio-item:hover {
+  transform: translateY(-8px);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.portfolio-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.portfolio-item:hover::before {
+  opacity: 1;
+}
+
+.pi-name {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--gold);
+  margin: 0;
+  font-weight: 600;
+}
+
+.pi-college {
+  font-size: 0.85rem;
+  color: #bca0a0;
+  margin-bottom: 0.5rem;
+  line-height: 1.4;
+}
+
+.pi-role-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(212, 175, 55, 0.1);
+  color: var(--gold);
+  padding: 2px 8px;
+  border-radius: 4px;
+  width: fit-content;
+  margin-bottom: 0.5rem;
+}
+
+.pi-portfolio {
+  margin-top: auto;
+  font-weight: 700;
+  color: white;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-top: 1px solid rgba(212, 175, 55, 0.05);
+  padding-top: 0.75rem;
+  font-size: 0.95rem;
+}
+
+.portfolio-loading {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem;
+  color: #bca0a0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(212, 175, 55, 0.1);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 1s infinite linear;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .pay-cta {

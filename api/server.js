@@ -185,7 +185,25 @@ app.post('/api/registrations/:id/submit-utr', async (req, res) => {
   res.json({ success: true });
 });
 
-// 3. UroPay Payment Confirmation Webhook
+// 4. Get Public Portfolios (Verified only)
+app.get('/api/portfolios', async (req, res) => {
+  try {
+    const all = await db.getAll();
+    const verified = all
+      .filter(r => r.status === 'verified')
+      .map(r => ({
+        name: r.name,
+        college: r.college,
+        portfolio: r.portfolio || "Portfolio assignment in progress",
+        role_preference: r.role_preference
+      }));
+    res.json(verified);
+  } catch (err) {
+    res.status(500).json({ detail: "Failed to fetch portfolios" });
+  }
+});
+
+// 5. UroPay Payment Confirmation Webhook
 app.post('/api/webhook/uropay', async (req, res) => {
   console.log("[Webhook Received] UroPay Webhook incoming header parameters:");
   const env = req.headers['x-uropay-environment'] || 'PRODUCTION';
