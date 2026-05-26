@@ -3416,37 +3416,7 @@ a.contact-value:hover {
   }
 }
 
-.avatar {
-  width: 100px;
-  height: 100px;
-  background: var(--maroon-700);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border: 3px solid var(--gold);
-  overflow: hidden;
-  position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-}
-
-.founders-portrait-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.founder-portrait-card {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-  text-align: center;
-}
-
+/* Portrait Styling (Founders + Team) */
 .portrait-wrapper {
   aspect-ratio: 4/5;
   width: 100%;
@@ -3456,6 +3426,10 @@ a.contact-value:hover {
   background: var(--maroon-900);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .portrait-img {
@@ -3463,29 +3437,79 @@ a.contact-value:hover {
   height: 100%;
   object-fit: cover;
   object-position: center 15%;
-  /* Moves up slightly to prioritize face/head */
   transition: transform 0.6s ease;
 }
 
-.founder-portrait-card:hover .portrait-wrapper {
-  transform: translateY(-5px);
+.portrait-fallback {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--maroon-800);
+  color: var(--cream-100);
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+/* Founders Specific */
+.founders-portrait-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.founder-portrait-card,
+.team-portrait-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+}
+
+.founder-portrait-card:hover .portrait-wrapper,
+.team-portrait-card:hover .portrait-wrapper {
+  transform: translateY(-8px);
   border-color: var(--gold);
+  box-shadow: 0 15px 40px rgba(212, 184, 122, 0.3);
 }
 
-.founder-portrait-card:hover .portrait-img {
-  transform: scale(1.05);
+.founder-portrait-card:hover .portrait-img,
+.team-portrait-card:hover .portrait-img {
+  transform: scale(1.08);
 }
 
-.founder-info .founder-name {
-  font-family: inherit;
+.founder-info .founder-name,
+.team-info .team-name {
   font-size: 1.1rem;
   font-weight: 700;
   color: var(--maroon-700);
-  margin-bottom: 0.15rem;
+  margin-bottom: 0.1rem;
 }
 
-.founder-info .kicker {
-  font-size: 9px;
+.team-info .team-role {
+  font-size: 0.8rem;
+  color: #a8884a;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 600;
+}
+
+/* Team Grid Styling */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .team-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+  }
 }
 
 @media (max-width: 520px) {
@@ -3494,12 +3518,9 @@ a.contact-value:hover {
     max-width: 260px;
     gap: 2rem;
   }
-
-  .portrait-wrapper {
-    aspect-ratio: 4/5.5;
-    /* Slightly taller on mobile for better stacking feel */
-  }
 }
+
+
 
 .qr-box {
   width: 168px;

@@ -95,14 +95,19 @@ function renderTeam() {
   const grid = document.getElementById("team-grid");
   if (!grid) return;
   grid.innerHTML = TEAM.map((m, i) => `
-    <article class="team-card reveal" data-testid="team-card-${i}">
-      <div class="avatar">
-        ${m.image ? `<img src="${m.image}" alt="${m.name}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />` : ''}
-        <span class="avatar-text" style="${m.image ? 'display:none' : 'display:flex'}">${initials(m.name)}</span>
+    <article class="team-portrait-card reveal" data-testid="team-card-${i}">
+      <div class="portrait-wrapper">
+        ${m.image ? `
+          <img class="portrait-img" src="${m.image}" alt="${m.name}" 
+            onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        ` : ''}
+        <div class="portrait-fallback" style="${m.image ? 'display:none' : 'display:flex'}">
+          ${initials(m.name)}
+        </div>
       </div>
       <div class="team-info">
-        <p class="team-name">${m.name}</p>
-        <p class="team-role">${m.role || 'Member'}</p>
+        <h3 class="team-name">${m.name}</h3>
+        <p class="team-role">${m.role || 'Team Member'}</p>
       </div>
     </article>
   `).join("");
