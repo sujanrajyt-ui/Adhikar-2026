@@ -51,7 +51,7 @@ const TEAM = [
   { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member" },
   { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member" },
   { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member" },
-  { name: "Kavan Bhatt", image: "assets/team/kavan.jpg", role: "Team Member" },
+  { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member" },
 ];
 
 const MIDMAC_LOGO = "assets/midmac.png";
