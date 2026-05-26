@@ -185,24 +185,6 @@ app.post('/api/registrations/:id/submit-utr', async (req, res) => {
   res.json({ success: true });
 });
 
-// 4. Get Public Portfolios (Verified only)
-app.get('/api/portfolios', async (req, res) => {
-  try {
-    const all = await db.getAll();
-    const verified = all
-      .filter(r => r.status === 'verified')
-      .map(r => ({
-        name: r.name,
-        college: r.college,
-        portfolio: r.portfolio || "Portfolio assignment in progress",
-        role_preference: r.role_preference
-      }));
-    res.json(verified);
-  } catch (err) {
-    res.status(500).json({ detail: "Failed to fetch portfolios" });
-  }
-});
-
 // 5. UroPay Payment Confirmation Webhook
 app.post('/api/webhook/uropay', async (req, res) => {
   console.log("[Webhook Received] UroPay Webhook incoming header parameters:");
@@ -265,70 +247,48 @@ app.post('/api/webhook/uropay', async (req, res) => {
 
 /* ============ Admin Secretariat APIs (Protected) ============ */
 
-// Middleware to protect admin routes
-function adminAuth(req, res, next) {
-  const providedPassword = req.headers['x-admin-password'] || '';
-  const actualPassword = process.env.ADMIN_PASSWORD || 'secretariat2026';
-
-  if (providedPassword !== actualPassword) {
-    return res.status(401).json({ detail: "Unauthorized Secretariat Password" });
-  }
-  next();
-}
-
 // Admin login
 app.post('/api/admin/login', (req, res) => {
-  const { password } = req.body;
-  const actualPassword = process.env.ADMIN_PASSWORD || 'secretariat2026';
-
-  if (password === actualPassword) {
-    res.json({ success: true });
+  if (req.body.password === process.env.ADMIN_PASSWORD) {
+    res.json({ token: 'dummy-token' });
   } else {
-    res.status(401).json({ detail: "Invalid Password" });
+    res.status(401).json({ detail: 'Wrong password' });
   }
 });
 
 // Get all registrations
-app.get('/api/admin/registrations', adminAuth, async (req, res) => {
+app.get('/api/admin/registrations', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
   res.json(await db.getAll());
 });
 
 // Get stats summary
-app.get('/api/admin/stats', adminAuth, async (req, res) => {
+app.get('/api/admin/stats', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
   res.json(await db.getStats());
 });
 
 // Manually update status of a registration (verify / reject)
-app.post('/api/admin/registrations/:id/status', adminAuth, async (req, res) => {
+app.post('/api/admin/registrations/:id/status', async (req, res) => {
   const { id } = req.params;
   const { status, portfolio } = req.body;
-  const updates = {};
-
-  if (status) {
-    const allowed = ['pending', 'payment_claimed', 'verified', 'rejected'];
-    if (!allowed.includes(status)) return res.status(400).json({ detail: "Invalid status state" });
-    updates.status = status;
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
   }
-  if (portfolio !== undefined) {
-    updates.portfolio = portfolio;
-  }
-
-  if (Object.keys(updates).length === 0) {
-    return res.status(400).json({ detail: "No updates provided" });
-  }
-
-  const updated = await db.update(id, updates);
-  if (!updated) {
-    return res.status(404).json({ detail: "Registration not found" });
-  }
-
-  console.log(`[Admin Action] Manual status change for ${id} to ${status}`);
-  res.json(updated);
+  await db.update(id, { status, portfolio });
+  res.json({ success: true });
 });
 
 // Delete a registration
-app.delete('/api/admin/registrations/:id', adminAuth, async (req, res) => {
+app.delete('/api/admin/registrations/:id', async (req, res) => {
   const { id } = req.params;
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
   const deleted = await db.delete(id);
 
   if (!deleted) {
