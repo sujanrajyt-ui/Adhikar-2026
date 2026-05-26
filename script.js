@@ -688,6 +688,7 @@ async function handleRowAction(e) {
           registration_id: reg.id,
           college: reg.college,
           role: reg.role_preference,
+          portfolio: reg.portfolio || "will be assigned soon",
         };
         console.log("Sending EmailJS with params:", templateParams);
         emailjs
