@@ -37,12 +37,6 @@ const AWARDS = [
   { title: "Best Orator", desc: "For the speaker with the most powerful command over rhetoric and public address." },
   { title: "Distinguished Policy Advocate", desc: "Awarded for the most thoroughly researched and detailed legislative contributions." },
   { title: "Most Impactful Presence", desc: "For the individual who commands the room through sheer conviction and parliamentary aura." },
-
-  // Institutional Award
-  {
-    title: "General Championship Award",
-    desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference."
-  },
 ];
 
 const TEAM = [
