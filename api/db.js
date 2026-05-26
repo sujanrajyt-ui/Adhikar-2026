@@ -33,8 +33,6 @@ async function init() {
           college VARCHAR(255) NOT NULL,
           role_preference VARCHAR(255),
           notes TEXT,
-          parent_name VARCHAR(255),
-          parent_phone VARCHAR(50),
           status VARCHAR(50) DEFAULT 'pending',
           utr VARCHAR(50),
           uropay_order_id VARCHAR(255),
@@ -42,7 +40,10 @@ async function init() {
           updated_at VARCHAR(100) NOT NULL
         );
       `);
-      console.log("[Database] PostgreSQL table initialized.");
+      // Ensure new columns exist for existing tables
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_name VARCHAR(255);`);
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_phone VARCHAR(50);`);
+      console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
     } finally {
