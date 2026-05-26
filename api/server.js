@@ -79,7 +79,7 @@ app.post('/api/registrations', async (req, res) => {
     return res.json({
       ...reg,
       useFallback: true,
-      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=650.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
+      upiString: `upi://pay?pa=9980964089@cnrb&pn=ADHIKAR'26&am=599.00&cu=INR&tn=Adhikar26 Registration ${reg.id.slice(0, 8)}`,
       qrCodeUrl: 'assets/fallback_qr.jpeg'
     });
   }
