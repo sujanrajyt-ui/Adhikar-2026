@@ -1502,134 +1502,7 @@ ol {
 
 /* ============ Founders + Team ============ */
 /* ============ Founders + Team ============ */
-.founders-grid {
-  max-width: 760px;
-  margin: 0 auto;
-}
-
-.team-head {
-  margin-top: 7rem;
-}
-
-.founder-card {
-  position: relative;
-  border-radius: 24px;
-  padding: 2rem;
-  background: var(--cream-100);
-  box-shadow: var(--shadow-3d);
-  border: 1px solid rgba(122, 28, 42, 0.1);
-  overflow: hidden;
-}
-
-.founder-row {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-}
-
-.avatar {
-  position: relative;
-  flex-shrink: 0;
-  border-radius: 50%;
-  background: var(--maroon-700);
-  color: var(--cream-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Playfair Display", serif;
-  font-weight: 700;
-  border: 1px solid rgba(201, 169, 97, 0.4);
-  box-shadow: var(--shadow-press);
-}
-
-.avatar-lg {
-  width: 80px;
-  height: 80px;
-  font-size: 1.5rem;
-}
-
-.avatar-glow {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: rgba(201, 169, 97, 0.2);
-  filter: blur(12px);
-  z-index: -1;
-}
-
-.founder-name {
-  font-family: "Playfair Display", serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--maroon-700);
-  margin: 0.25rem 0 0;
-}
-
-/* ============ Founders Portrait Grid ============ */
-/* ============ Founders Portraits ============ */
-.founders-portrait-grid {
-  display: flex;
-  justify-content: center;
-  gap: 2.5rem;
-  flex-wrap: wrap;
-  margin-top: 2rem;
-}
-
-.founder-portrait-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.9rem;
-  text-align: center;
-}
-
-.founder-avatar {
-  width: 110px;
-  height: 110px;
-  padding: 0;
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: var(--shadow-press);
-  border: 1px solid rgba(201, 169, 97, 0.4);
-  background: var(--maroon-700);
-}
-
-.portrait-wrapper {
-  position: relative;
-}
-
-.portrait-img {
-  width: 100%;
-  height: 100%;
-  display: block;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center;
-}
-
-/* Keep Keerath perfectly centered */
-.keerath-img {
-  object-position: center;
-}
-
-.portrait-bio {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  background: rgba(99, 21, 35, 0.88);
-  color: var(--cream-100);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 1rem;
-  font-size: 0.75rem;
-  line-height: 1.4;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
+  
 .portrait-wrapper:hover .portrait-bio,
 .portrait-wrapper.active .portrait-bio {
   opacity: 1;
@@ -1644,12 +1517,7 @@ ol {
   font-size: 1.15rem;
 }
 
-/* Fix Keerath placeholder SVG centering */
-.keerath-img {
-  object-position: center center;
-}
-
-/* When image fails and SVG kicks in — ensure it fills circle cleanly */
+/* When image fails — fallback fills circle cleanly */
 .portrait-wrapper img[src*="data:image"] {
   object-fit: contain;
   object-position: center center;
