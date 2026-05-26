@@ -33,6 +33,8 @@ async function init() {
           college VARCHAR(255) NOT NULL,
           role_preference VARCHAR(255),
           notes TEXT,
+          parent_name VARCHAR(255),
+          parent_phone VARCHAR(50),
           status VARCHAR(50) DEFAULT 'pending',
           utr VARCHAR(50),
           uropay_order_id VARCHAR(255),
@@ -85,7 +87,7 @@ async function generateRegistrationId() {
   for (let i = 0; i < 5; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
-  
+
   // Guarantee uniqueness
   let exists = false;
   if (isPg) {
@@ -95,7 +97,7 @@ async function generateRegistrationId() {
     const existing = readData();
     exists = existing.some(r => r.id === code);
   }
-  
+
   if (exists) {
     return generateRegistrationId();
   }
@@ -154,12 +156,14 @@ module.exports = {
   async create(fields) {
     const now = new Date().toISOString();
     const id = await generateRegistrationId();
-    
+
     const registration = {
       id,
       name: fields.name,
       email: fields.email,
       phone: fields.phone,
+      parent_name: fields.parent_name || '',
+      parent_phone: fields.parent_phone || '',
       year: fields.year,
       college: fields.college,
       role_preference: fields.role_preference || 'No Preference',
@@ -173,13 +177,15 @@ module.exports = {
 
     if (isPg) {
       await pool.query(`
-        INSERT INTO registrations (id, name, email, phone, year, college, role_preference, notes, status, uropay_order_id, utr, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        INSERT INTO registrations (id, name, email, phone, parent_name, parent_phone, year, college, role_preference, notes, status, uropay_order_id, utr, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
       `, [
         registration.id,
         registration.name,
         registration.email,
         registration.phone,
+        registration.parent_name,
+        registration.parent_phone,
         registration.year,
         registration.college,
         registration.role_preference,
@@ -201,21 +207,21 @@ module.exports = {
   // Update an existing registration
   async update(id, updates) {
     const now = new Date().toISOString();
-    
+
     if (isPg) {
       const keys = Object.keys(updates);
       if (keys.length === 0) return null;
-      
+
       const setClauses = keys.map((key, index) => `"${key}" = $${index + 2}`);
       setClauses.push(`"updated_at" = $${keys.length + 2}`);
-      
+
       const queryText = `
         UPDATE registrations
         SET ${setClauses.join(', ')}
         WHERE id = $1
         RETURNING *
       `;
-      
+
       const values = [id, ...keys.map(k => updates[k]), now];
       const res = await pool.query(queryText, values);
       return res.rows[0] || null;
@@ -223,7 +229,7 @@ module.exports = {
       const list = readData();
       const index = list.findIndex(r => r.id === id);
       if (index === -1) return null;
- 
+
       const updated = {
         ...list[index],
         ...updates,
@@ -260,7 +266,7 @@ module.exports = {
         verified: 0,
         rejected: 0
       };
-      
+
       const res = await pool.query('SELECT status, COUNT(*) as count FROM registrations GROUP BY status');
       let total = 0;
       res.rows.forEach(row => {
@@ -281,7 +287,7 @@ module.exports = {
         verified: 0,
         rejected: 0
       };
-      
+
       list.forEach(r => {
         if (stats[r.status] !== undefined) {
           stats[r.status]++;

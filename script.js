@@ -216,6 +216,8 @@ const FIELD_LABELS = {
   name: "Name",
   email: "Email",
   phone: "Phone",
+  parent_name: "Parent Name",
+  parent_phone: "Parent Phone",
   year: "Year",
   college: "College",
   role_preference: "Preferred Role",
@@ -263,7 +265,7 @@ async function submitRegistration(e) {
   const data = Object.fromEntries(new FormData(form).entries());
 
   // basic validation
-  for (const k of ["name", "email", "phone", "year", "college"]) {
+  for (const k of ["name", "email", "phone", "parent_name", "parent_phone", "year", "college"]) {
     if (!data[k] || !String(data[k]).trim()) {
       err.textContent = `Please fill in ${FIELD_LABELS[k] || k}.`;
       err.classList.add("visible");
@@ -280,15 +282,7 @@ async function submitRegistration(e) {
     const res = await fetch(`${API_BASE}/registrations`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        year: data.year,
-        college: data.college,
-        role_preference: data.role_preference || "No Preference",
-        notes: data.notes || "",
-      }),
+      body: JSON.stringify(data),
     });
     if (!res.ok) {
       const j = await res.json().catch(() => ({}));
@@ -302,6 +296,7 @@ async function submitRegistration(e) {
       ["Name", reg.name],
       ["Email", reg.email],
       ["Phone", reg.phone],
+      ["Parent", reg.parent_name],
       ["Institution", reg.college],
       ["Year", reg.year],
       ["Role", reg.role_preference],
@@ -481,9 +476,9 @@ function exportCsv() {
     showToast("Nothing to export yet", "error");
     return;
   }
-  const headers = ["ID", "Name", "Email", "Phone", "Year", "College", "Role Preference", "Notes", "Status", "UTR", "Created At", "Updated At"];
+  const headers = ["ID", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role Preference", "Notes", "Status", "UTR", "Created At", "Updated At"];
   const rows = lastRegistrations.map(r => [
-    r.id, r.name, r.email, r.phone, r.year, r.college, r.role_preference, r.notes, r.status, r.utr, r.created_at, r.updated_at
+    r.id, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.notes, r.status, r.utr, r.created_at, r.updated_at
   ]);
   const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -548,6 +543,10 @@ function renderRows() {
       <td class="td-delegate">
         <strong>${escapeHtml(r.name)}</strong>
         <small>${escapeHtml(r.role_preference)} · ${escapeHtml(r.year)}</small>
+      </td>
+      <td class="td-parent">
+        <strong>${escapeHtml(r.parent_name || "-")}</strong>
+        <small>${r.parent_phone ? `<a href="tel:${escapeHtml(r.parent_phone)}">${escapeHtml(r.parent_phone)}</a>` : "-"}</small>
       </td>
       <td class="td-contact">
         <a href="mailto:${escapeHtml(r.email)}">${escapeHtml(r.email)}</a>

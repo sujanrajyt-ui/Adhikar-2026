@@ -829,6 +829,7 @@
             <thead>
               <tr>
                 <th>Delegate</th>
+                <th>Parent Info</th>
                 <th>Contact</th>
                 <th>Institution</th>
                 <th>Status</th>
@@ -954,6 +955,14 @@
               <span class="field-label">Phone (WhatsApp) *</span>
               <input type="tel" name="phone" required pattern="[0-9 +\-]{7,15}" autocomplete="tel"
                 data-testid="reg-phone" />
+            </label>
+            <label class="field">
+              <span class="field-label">Parent / Guardian Name *</span>
+              <input type="text" name="parent_name" required data-testid="reg-parent-name" />
+            </label>
+            <label class="field">
+              <span class="field-label">Parent / Guardian Phone *</span>
+              <input type="tel" name="parent_phone" required pattern="[0-9 +\-]{7,15}" data-testid="reg-parent-phone" />
             </label>
             <label class="field">
               <span class="field-label">Year of Study *</span>

@@ -48,7 +48,7 @@ function getUroPayHeaders() {
 
 // 1. Submit Registration Form
 app.post('/api/registrations', async (req, res) => {
-  const { name, email, phone, year, college, role_preference, notes } = req.body;
+  const { name, email, phone, parent_name, parent_phone, year, college, role_preference, notes } = req.body;
 
   // Basic validation
   if (!name || !email || !phone || !year || !college) {
@@ -60,6 +60,8 @@ app.post('/api/registrations', async (req, res) => {
     name,
     email,
     phone,
+    parent_name,
+    parent_phone,
     year,
     college,
     role_preference,
