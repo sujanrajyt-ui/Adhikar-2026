@@ -3418,9 +3418,9 @@ a.contact-value:hover {
 
 /* Circular Avatar Styling (Founders + Team) */
 .portrait-wrapper {
-  aspect-ratio: 3/4;
+  aspect-ratio: 1 / 1;
   width: 100%;
-  border-radius: 12px;
+  border-radius: 50%;
   overflow: hidden;
   border: 1px solid rgba(212, 184, 122, 0.2);
   background: var(--maroon-900);
@@ -3432,11 +3432,6 @@ a.contact-value:hover {
   justify-content: center;
 }
 
-/* Team cards use circular portraits */
-.team-portrait-card .portrait-wrapper {
-  aspect-ratio: 1 / 1;
-  border-radius: 50%;
-}
 
 .portrait-img {
   width: 100%;
