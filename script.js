@@ -40,18 +40,18 @@ const AWARDS = [
 ];
 
 const TEAM = [
-  { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Organizing Secretary" },
-  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Director General" },
-  { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Under Secretary General" },
-  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Logistics Head" },
-  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Public Relations" },
-  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Finance Head" },
-  { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Content Head" },
-  { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Delegate Affairs" },
-  { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Hospitality Head" },
-  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Creative Head" },
-  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Technical Head" },
-  { name: "Kavan Bhatt", image: "assets/team/kavan.jpg", role: "Media Head" },
+  { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member" },
+  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member" },
+  { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member" },
+  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member" },
+  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member" },
+  { name: "Kiran Badami", image: null, role: "Team Member" },
+  { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member" },
+  { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member" },
+  { name: "Shreya Naikar", image: null, role: "Team Member" },
+  { name: "Sambhav Bafna", image: null, role: "Team Member" },
+  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member" },
+  { name: "Kavan Bhatt", image: "assets/team/kavan.jpg", role: "Team Member" },
 ];
 
 const MIDMAC_LOGO = "assets/midmac.png";
