@@ -1501,6 +1501,7 @@ ol {
 }
 
 /* ============ Founders + Team ============ */
+/* ============ Founders + Team ============ */
 .founders-grid {
   max-width: 760px;
   margin: 0 auto;
@@ -1565,6 +1566,86 @@ ol {
   margin: 0.25rem 0 0;
 }
 
+/* ============ Founders Portrait Grid ============ */
+.founders-portrait-grid {
+  display: flex;
+  justify-content: center;
+  gap: 4rem;
+  flex-wrap: wrap;
+  margin-bottom: 3rem;
+}
+
+.founder-portrait-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.portrait-wrapper {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(201, 169, 97, 0.5);
+  box-shadow: var(--shadow-3d);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.portrait-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
+  border-radius: 50%;
+}
+
+/* Fix Keerath placeholder SVG centering */
+.keerath-img {
+  object-position: center center;
+}
+
+/* When image fails and SVG kicks in — ensure it fills circle cleanly */
+.portrait-wrapper img[src*="data:image"] {
+  object-fit: contain;
+  object-position: center center;
+  background-color: var(--maroon-700);
+}
+
+.portrait-bio {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(99, 21, 35, 0.88);
+  color: var(--cream-100);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.25rem;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.portrait-wrapper:hover .portrait-bio,
+.portrait-wrapper.active .portrait-bio {
+  opacity: 1;
+}
+
+.founder-info {
+  text-align: center;
+}
+
+.founder-info .founder-name {
+  font-size: 1.2rem;
+  margin: 0;
+}
+
 /* ============ Team ============ */
 .team-grid {
   display: grid;
@@ -1625,7 +1706,7 @@ ol {
   display: none;
 }
 
-.team-card>div:not(.avatar) {
+.team-card > div:not(.avatar) {
   min-width: 0;
   flex: 1 1 0;
 }
@@ -1650,7 +1731,6 @@ ol {
   font-weight: 600;
   margin: 2px 0 0;
 }
-
 /* ============ Venue / Fee ============ */
 .venue-grid {
   display: grid;
