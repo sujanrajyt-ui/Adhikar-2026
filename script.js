@@ -41,17 +41,17 @@ const AWARDS = [
 
 const TEAM = [
   { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member", bio: "The Official Unpaid Therapist" },
-  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Loves Background Noice" },
   { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
   { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Outasses Everyone" },
-  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "Official Bluepaglu💙" },
+  { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "The Official Bluepaglu💙" },
   { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member", bio: "Partly philosophical, mostly stupid." },
-  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member", bio: "Exists." },
   { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member", bio: "On My Shawshank Redemption Arc" },
-  { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member", bio: "Doesn't even know why he is here" },
 ];
 
 const MIDMAC_LOGO = "assets/midmac.png";
