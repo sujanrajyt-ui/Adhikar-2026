@@ -81,7 +81,7 @@ function renderAwards() {
   const grid = document.getElementById("awards-grid");
   if (!grid) return;
   grid.innerHTML = AWARDS.map((a, i) => `
-    <article class="award-card reveal ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
+    <article class="award-card anim-border ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
         <div class="award-icon">${trophySVG}</div>
         <span class="award-num">${String(i + 1).padStart(2, "0")}</span>
@@ -95,7 +95,7 @@ function renderTeam() {
   const grid = document.getElementById("team-grid");
   if (!grid) return;
   grid.innerHTML = TEAM.map((m, i) => `
-    <article class="team-portrait-card reveal" data-testid="team-card-${i}">
+    <article class="team-portrait-card" data-testid="team-card-${i}">
       <div class="portrait-wrapper" ${m.bio ? 'data-bio="true"' : ''}>
         ${m.image ? `
           <img class="portrait-img" src="${m.image}" alt="${m.name}" 
