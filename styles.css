@@ -3961,7 +3961,26 @@ body:hover #cursor-spotlight {
   border-color: var(--gold-400);
 }
 
-/* ---- Number counter ---- */
+/* [data-count] display inline */
 [data-count] {
   display: inline-block;
+}
+
+/* ---- anim-border on light sections ---- */
+.section-white .anim-border {
+  background:
+    linear-gradient(#fff, #fff) padding-box,
+    conic-gradient(from var(--ba),
+      var(--gold-500) 0%,
+      rgba(212, 184, 122, 0.08) 40%,
+      var(--gold-500) 100%) border-box;
+}
+
+.section-cream .anim-border {
+  background:
+    linear-gradient(var(--cream-100), var(--cream-100)) padding-box,
+    conic-gradient(from var(--ba),
+      var(--gold-500) 0%,
+      rgba(212, 184, 122, 0.08) 40%,
+      var(--gold-500) 100%) border-box;
 }
