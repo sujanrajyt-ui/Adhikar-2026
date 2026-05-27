@@ -41,7 +41,7 @@ const AWARDS = [
 
 const TEAM = [
   { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member", bio: "The Official Unpaid Therapist" },
-  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Loves Background Noice" },
+  { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Loves Background Noise" },
   { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
   { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Outasses Everyone" },
   { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "The Official Bluepaglu💙" },
