@@ -50,7 +50,7 @@ const TEAM = [
   { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member", bio: "Partly philosophical, mostly stupid." },
   { name: "Sambhav Bafna", image: "assets/team/sambhav.jpg", role: "Team Member", bio: "Bio coming soon." },
-  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Shashank Habib", image: "assets/team/shashank.jpg", role: "Team Member", bio: "On My Shawshank Redemption Arc" },
   { name: "Kavan Bhat", image: "assets/team/kavan.jpg", role: "Team Member", bio: "Bio coming soon." },
 ];
 
