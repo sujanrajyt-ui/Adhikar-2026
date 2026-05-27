@@ -810,8 +810,112 @@ function initPortraitBio() {
   });
 }
 
+/* ============ Loading Screen ============ */
+function initLoadingScreen() {
+  const loader = document.getElementById("page-loader");
+  if (!loader) return;
+  const hide = () => {
+    loader.classList.add("fade-out");
+    loader.addEventListener("transitionend", () => loader.remove(), { once: true });
+  };
+  if (document.readyState === "complete") {
+    setTimeout(hide, 300);
+  } else {
+    window.addEventListener("load", () => setTimeout(hide, 400), { once: true });
+  }
+}
+
+/* ============ Smooth Scroll ============ */
+function initSmoothScroll() {
+  document.querySelectorAll("a[href^='#']").forEach(link => {
+    link.addEventListener("click", e => {
+      const id = link.getAttribute("href");
+      const target = id === "#" ? document.body : document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
+}
+
+/* ============ Scroll Reveal ============ */
+function initReveal() {
+  const els = document.querySelectorAll(".reveal, .reveal-stagger");
+  if (!els.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("active");
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: "0px 0px -40px 0px" });
+  els.forEach(el => observer.observe(el));
+}
+
+/* ============ Number Counters ============ */
+function animateCounter(el) {
+  const target = +el.dataset.count;
+  const suffix = el.dataset.suffix || "";
+  const duration = 1800;
+  const start = performance.now();
+  const step = (now) => {
+    const t = Math.min((now - start) / duration, 1);
+    const val = Math.floor((1 - Math.pow(1 - t, 3)) * target);
+    el.textContent = val + suffix;
+    if (t < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+function initCounters() {
+  const counters = document.querySelectorAll("[data-count]");
+  if (!counters.length) return;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounter(entry.target);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.8 });
+  counters.forEach(el => observer.observe(el));
+}
+
+/* ============ Cursor Spotlight ============ */
+function initCursorSpotlight() {
+  const el = document.getElementById("cursor-spotlight");
+  if (!el || window.matchMedia("(hover: none)").matches) return;
+  let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+  let cx = tx, cy = ty;
+  window.addEventListener("mousemove", e => { tx = e.clientX; ty = e.clientY; });
+  const tick = () => {
+    cx += (tx - cx) * 0.1;
+    cy += (ty - cy) * 0.1;
+    el.style.left = cx + "px";
+    el.style.top = cy + "px";
+    requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+/* ============ Magnetic Buttons ============ */
+function initMagneticButtons() {
+  if (window.matchMedia("(hover: none)").matches) return;
+  document.querySelectorAll(".btn-primary").forEach(btn => {
+    btn.addEventListener("mousemove", e => {
+      const r = btn.getBoundingClientRect();
+      const x = (e.clientX - r.left - r.width / 2) * 0.22;
+      const y = (e.clientY - r.top - r.height / 2) * 0.22;
+      btn.style.transform = `translate(${x}px, ${y}px)`;
+    });
+    btn.addEventListener("mouseleave", () => btn.style.transform = "");
+  });
+}
+
 /* ============ Boot ============ */
 document.addEventListener("DOMContentLoaded", () => {
+  initLoadingScreen();
   renderAwards();
   renderTeam();
   renderMarquee();
@@ -825,4 +929,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initRegistration();
   initAdmin();
   initPortraitBio();
+  initCounters();
+  initCursorSpotlight();
+  initMagneticButtons();
 });

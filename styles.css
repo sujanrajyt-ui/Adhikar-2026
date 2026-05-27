@@ -1502,7 +1502,7 @@ ol {
 
 /* ============ Founders + Team ============ */
 /* ============ Founders + Team ============ */
-  
+
 .portrait-wrapper:hover .portrait-bio,
 .portrait-wrapper.active .portrait-bio {
   opacity: 1;
@@ -1550,6 +1550,7 @@ ol {
   margin: 0;
   color: rgba(255, 240, 215, 0.95);
 }
+
 .founder-info {
   text-align: center;
 }
@@ -1619,7 +1620,7 @@ ol {
   display: none;
 }
 
-.team-card > div:not(.avatar) {
+.team-card>div:not(.avatar) {
   min-width: 0;
   flex: 1 1 0;
 }
@@ -1644,6 +1645,7 @@ ol {
   font-weight: 600;
   margin: 2px 0 0;
 }
+
 /* ============ Venue / Fee ============ */
 .venue-grid {
   display: grid;
@@ -3706,4 +3708,260 @@ a.contact-value:hover {
 
 .portrait-wrapper[data-bio="true"].bio-open .portrait-bio {
   transform: translateY(0);
+}
+
+/* ======================================================
+   PREMIUM VISUAL ENHANCEMENTS
+   ====================================================== */
+
+/* ---- Smooth Scroll ---- */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ---- Loading Screen ---- */
+#page-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: var(--maroon-900);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.25rem;
+  transition: opacity 0.6s ease, visibility 0.6s ease;
+}
+
+#page-loader.fade-out {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loader-logo {
+  width: 72px;
+  height: 72px;
+  animation: loaderPulse 1.4s ease-in-out infinite;
+}
+
+.loader-bar {
+  width: 140px;
+  height: 2px;
+  background: rgba(212, 184, 122, 0.18);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.loader-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gold-500), var(--gold-400));
+  border-radius: 999px;
+  animation: loaderFill 1.1s ease forwards;
+}
+
+@keyframes loaderPulse {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.65;
+    transform: scale(0.93);
+  }
+}
+
+@keyframes loaderFill {
+  to {
+    width: 100%;
+  }
+}
+
+/* ---- Cursor Spotlight ---- */
+#cursor-spotlight {
+  pointer-events: none;
+  position: fixed;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba(212, 184, 122, 0.06) 0%, transparent 68%);
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+body:hover #cursor-spotlight {
+  opacity: 1;
+}
+
+/* ---- Gold Shimmer Text ---- */
+@keyframes goldShimmer {
+  0% {
+    background-position: -200% center;
+  }
+
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg,
+      var(--gold-500) 0%,
+      #f5e09a 30%,
+      var(--gold-400) 50%,
+      #f5e09a 70%,
+      var(--gold-500) 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShimmer 4s linear infinite;
+}
+
+/* ---- Scroll Reveal ---- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.65s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.65s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.active {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Staggered Reveal ---- */
+.reveal-stagger>* {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+    transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-stagger.active>*:nth-child(1) {
+  transition-delay: 0.04s;
+}
+
+.reveal-stagger.active>*:nth-child(2) {
+  transition-delay: 0.10s;
+}
+
+.reveal-stagger.active>*:nth-child(3) {
+  transition-delay: 0.16s;
+}
+
+.reveal-stagger.active>*:nth-child(4) {
+  transition-delay: 0.22s;
+}
+
+.reveal-stagger.active>*:nth-child(5) {
+  transition-delay: 0.28s;
+}
+
+.reveal-stagger.active>*:nth-child(6) {
+  transition-delay: 0.34s;
+}
+
+.reveal-stagger.active>*:nth-child(7) {
+  transition-delay: 0.40s;
+}
+
+.reveal-stagger.active>*:nth-child(8) {
+  transition-delay: 0.46s;
+}
+
+.reveal-stagger.active>*:nth-child(9) {
+  transition-delay: 0.52s;
+}
+
+.reveal-stagger.active>*:nth-child(10) {
+  transition-delay: 0.58s;
+}
+
+.reveal-stagger.active>* {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---- Section Ornamental Divider ---- */
+.ornament {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 auto 2.5rem;
+  width: max-content;
+}
+
+.ornament::before,
+.ornament::after {
+  content: "";
+  width: 60px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--gold-500), transparent);
+}
+
+.ornament-diamond {
+  width: 7px;
+  height: 7px;
+  background: var(--gold-400);
+  transform: rotate(45deg);
+  flex-shrink: 0;
+}
+
+/* ---- Animated Gradient Card Border ---- */
+@property --ba {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+@keyframes borderSpin {
+  to {
+    --ba: 360deg;
+  }
+}
+
+.anim-border {
+  border: 1.5px solid transparent;
+  background:
+    linear-gradient(var(--maroon-900), var(--maroon-900)) padding-box,
+    conic-gradient(from var(--ba),
+      var(--gold-500) 0%,
+      rgba(212, 184, 122, 0.08) 40%,
+      var(--gold-500) 100%) border-box;
+  animation: borderSpin 5s linear infinite;
+}
+
+/* ---- Brochure nav link ---- */
+.nav-brochure {
+  font-size: 0.82rem;
+  padding: 0.42rem 0.85rem;
+  border: 1px solid rgba(212, 184, 122, 0.3);
+  border-radius: 6px;
+  color: var(--gold-400);
+  text-decoration: none;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.nav-brochure:hover {
+  background: rgba(212, 184, 122, 0.08);
+  border-color: var(--gold-400);
+}
+
+/* ---- Number counter ---- */
+[data-count] {
+  display: inline-block;
 }
