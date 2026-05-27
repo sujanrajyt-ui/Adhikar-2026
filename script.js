@@ -43,7 +43,7 @@ const TEAM = [
   { name: "Kshiti Thakkar", image: "assets/team/kshiti.jpg", role: "Team Member", bio: "The Official Unpaid Therapist" },
   { name: "Saad Neelgund", image: "assets/team/saad.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
-  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Outasses Everyone" },
   { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "Official Bluepaglu💙" },
   { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member", bio: "Bio coming soon." },
   { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member", bio: "Bio coming soon." },
