@@ -915,7 +915,6 @@ function initMagneticButtons() {
 
 /* ============ Boot ============ */
 document.addEventListener("DOMContentLoaded", () => {
-  initLoadingScreen();
   renderAwards();
   renderTeam();
   renderMarquee();
