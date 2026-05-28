@@ -618,9 +618,9 @@ function exportCsv() {
     showToast("Nothing to export yet", "error");
     return;
   }
-  const headers = ["ID", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role Preference", "Notes", "Status", "UTR", "Created At", "Updated At"];
+  const headers = ["ID", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role Preference", "Portfolio", "Notes", "Status", "UTR", "Created At"];
   const rows = lastRegistrations.map(r => [
-    r.id, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.notes, r.status, r.utr, r.created_at, r.updated_at
+    r.id, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio, r.notes, r.status, r.utr, r.created_at
   ]);
   const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -634,6 +634,30 @@ function exportCsv() {
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast(`Exported ${lastRegistrations.length} registrations`);
+}
+
+function exportVerifiedSheet() {
+  const verified = lastRegistrations.filter(r => r.status === 'verified');
+  if (!verified.length) {
+    showToast("No verified participants yet", "error");
+    return;
+  }
+  const headers = ["#", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role", "Portfolio"];
+  const rows = verified.map((r, i) => [
+    i + 1, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio || ''
+  ]);
+  const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  const ts = new Date().toISOString().slice(0, 10);
+  a.href = url;
+  a.download = `adhikar26-verified-delegates-${ts}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast(`✓ Downloaded sheet for ${verified.length} verified delegate${verified.length !== 1 ? 's' : ''}`);
 }
 
 async function loadRegistrations() {
@@ -866,6 +890,7 @@ function initAdmin() {
   document.getElementById("admin-logout")?.addEventListener("click", adminLogout);
   document.getElementById("admin-refresh")?.addEventListener("click", loadRegistrations);
   document.getElementById("admin-export")?.addEventListener("click", exportCsv);
+  document.getElementById("admin-verified-sheet")?.addEventListener("click", exportVerifiedSheet);
   document.getElementById("admin-rows")?.addEventListener("click", handleRowAction);
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {
