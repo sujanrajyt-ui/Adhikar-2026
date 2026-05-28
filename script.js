@@ -882,6 +882,9 @@ function renderRows() {
 
     const portfolioCell = isVerified ? `
       <div class="assign-cell">
+        <input type="text" value="${escapeHtml(r.portfolio || '')}"
+          placeholder="Assign Portfolio..."
+          onchange="handlePortfolioChange('${r.id}', this.value)" />
         <select class="assign-select" id="party-sel-${r.id}" title="Party">
           <option value="">— Party —</option>
           ${parties.map(p => `<option value="${escapeHtml(p.name)}" ${r.assigned_party === p.name ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
@@ -896,8 +899,8 @@ function renderRows() {
       }
       </div>
     ` : `
-      <input type="text" value="${escapeHtml(r.portfolio || '')}" 
-        placeholder="Assign Portfolio..." 
+      <input type="text" value="${escapeHtml(r.portfolio || '')}"
+        placeholder="Assign Portfolio..."
         onchange="handlePortfolioChange('${r.id}', this.value)" />
     `;
 
