@@ -657,6 +657,7 @@ let lastRegistrations = [];
 let adminSearchText = "";
 let adminCollegeFilter = "all";
 let _partiesCache = null; // cached full list from /api/parties
+let showOverviewDashboard = false;
 
 async function loadPartiesCache() {
   try {
@@ -693,6 +694,7 @@ async function adminLogin(e) {
     document.getElementById("admin-panel").classList.remove("hidden");
     await loadPartiesCache();       // must complete before renderRows() reads it
     await loadRegistrations();
+    if (showOverviewDashboard) renderOverview();
     initPartiesAdmin();
   } catch (ex) {
     err.textContent = ex.message || "Login failed";
@@ -776,7 +778,7 @@ async function loadRegistrations() {
     updateCollegeDropdown();
     renderStats(stats);
     renderAnalytics(lastRegistrations);
-    renderRows();
+    if (showOverviewDashboard) renderOverview();
   } catch (ex) {
     showToast(ex.message || "Could not load", "error");
   }
@@ -1020,6 +1022,7 @@ function initAdmin() {
   document.getElementById("admin-export")?.addEventListener("click", exportCsv);
   document.getElementById("admin-verified-sheet")?.addEventListener("click", exportVerifiedSheet);
   document.getElementById("admin-rows")?.addEventListener("click", handleRowAction);
+  document.getElementById("admin-view-overview")?.addEventListener("click", toggleOverview);
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {
       document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
@@ -1047,9 +1050,90 @@ function initAdmin() {
     const panelEl = document.getElementById("admin-panel");
     if (loginEl) loginEl.classList.add("hidden");
     if (panelEl) panelEl.classList.remove("hidden");
-    loadPartiesCache().then(() => loadRegistrations()); // parties first so dropdowns populate
+    loadPartiesCache().then(() => {
+      loadRegistrations().then(() => {
+        if (showOverviewDashboard) renderOverview();
+      });
+    });
     initPartiesAdmin();
   }
+}
+
+function toggleOverview() {
+  showOverviewDashboard = !showOverviewDashboard;
+  const btn = document.getElementById("admin-view-overview");
+  const tableWrap = document.getElementById("admin-table-wrap");
+  const overviewSection = document.getElementById("admin-overview");
+  const controlsBar = document.querySelector(".admin-controls-bar");
+
+  if (showOverviewDashboard) {
+    btn.classList.add("admin-view-overview-active");
+    tableWrap.classList.add("hidden");
+    controlsBar.classList.add("hidden");
+    overviewSection.classList.remove("hidden");
+    renderOverview();
+  } else {
+    btn.classList.remove("admin-view-overview-active");
+    tableWrap.classList.remove("hidden");
+    controlsBar.classList.remove("hidden");
+    overviewSection.classList.add("hidden");
+  }
+}
+
+function renderOverview() {
+  const containerParties = document.getElementById("overview-parties");
+  const containerComms = document.getElementById("overview-committees");
+  if (!containerParties || !containerComms) return;
+
+  const verified = lastRegistrations.filter(r => r.status === 'verified');
+
+  // Groups
+  const partyGroups = {};
+  const commGroups = {};
+
+  verified.forEach(r => {
+    if (r.assigned_party) {
+      if (!partyGroups[r.assigned_party]) partyGroups[r.assigned_party] = [];
+      partyGroups[r.assigned_party].push(r);
+    }
+    if (r.assigned_committee) {
+      if (!commGroups[r.assigned_committee]) commGroups[r.assigned_committee] = [];
+      commGroups[r.assigned_committee].push(r);
+    }
+  });
+
+  // Render Parties
+  const partyNames = Object.keys(partyGroups).sort();
+  containerParties.innerHTML = partyNames.length ? partyNames.map(name => `
+    <div class="group-card">
+      <div class="group-name">
+        <span>${escapeHtml(name)}</span>
+        <span class="group-count">${partyGroups[name].length}</span>
+      </div>
+      <div class="member-pills">
+        ${partyGroups[name].map(m => `<span class="member-pill">${escapeHtml(m.name)}</span>`).join('')}
+      </div>
+    </div>
+  `).join('') : '<p class="muted">No party assignments yet.</p>';
+
+  // Render Committees
+  const commNames = Object.keys(commGroups).sort();
+  containerComms.innerHTML = commNames.length ? commNames.map(name => `
+    <div class="group-card">
+      <div class="group-name">
+        <span>${escapeHtml(name)}</span>
+        <span class="group-count">${commGroups[name].length}</span>
+      </div>
+      <div class="member-pills">
+        ${commGroups[name].map(m => `
+          <span class="member-pill">
+            ${escapeHtml(m.name)}
+            ${m.assigned_party ? `<span class="member-party">(${escapeHtml(m.assigned_party)})</span>` : ''}
+          </span>
+        `).join('')}
+      </div>
+    </div>
+  `).join('') : '<p class="muted">No committee assignments yet.</p>';
 }
 
 async function handlePortfolioChange(id, value) {

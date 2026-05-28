@@ -4285,3 +4285,118 @@ body:hover #cursor-spotlight {
   color: #6dda9a;
   opacity: 1;
 }
+
+/* ============ Assignment Overview Dashboard ============ */
+.admin-overview {
+  margin-top: 2rem;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  border-radius: 16px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.overview-header {
+  margin-bottom: 2rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+  padding-bottom: 1rem;
+}
+
+.overview-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.5rem;
+  color: #d4af37;
+  margin-bottom: 0.25rem;
+}
+
+.overview-subtitle {
+  font-size: 0.85rem;
+  color: #bca0a0;
+  letter-spacing: 0.02em;
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.overview-col-title {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #e8dfd8;
+  margin-bottom: 1.5rem;
+  padding-left: 0.5rem;
+  border-left: 3px solid #d4af37;
+}
+
+.overview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.group-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 1.2rem;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: transform 0.2s;
+}
+
+.group-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(212, 175, 55, 0.2);
+}
+
+.group-name {
+  font-weight: 600;
+  color: #f0d080;
+  margin-bottom: 0.8rem;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.group-count {
+  font-size: 0.75rem;
+  background: rgba(212, 175, 55, 0.15);
+  color: #d4af37;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.member-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.member-pill {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  color: #e8dfd8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.member-party {
+  color: #d4af37;
+  font-weight: 600;
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+.admin-view-overview-active {
+  background: rgba(212, 175, 55, 0.2) !important;
+  border-color: #d4af37 !important;
+}

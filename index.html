@@ -862,6 +862,17 @@
               </svg>
               Refresh
             </button>
+            <button class="btn-ghost admin-verified-sheet" id="admin-view-overview"
+              style="color:#d4af37;border-color:rgba(212,175,55,0.4);" title="View grouping of assigned delegates">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="9" />
+                <rect x="14" y="3" width="7" height="5" />
+                <rect x="14" y="12" width="7" height="9" />
+                <rect x="3" y="16" width="7" height="5" />
+              </svg>
+              Assignment Overview
+            </button>
             <button class="btn-ghost admin-logout" id="admin-logout" data-testid="admin-logout">
               Sign out
             </button>
@@ -889,7 +900,7 @@
           </select>
         </div>
 
-        <div class="admin-table-wrap">
+        <div class="admin-table-wrap" id="admin-table-wrap">
           <table class="admin-table" data-testid="admin-table">
             <thead>
               <tr>
@@ -906,6 +917,24 @@
             <tbody id="admin-rows"></tbody>
           </table>
           <p class="admin-empty hidden" id="admin-empty">No registrations yet.</p>
+        </div>
+
+        <!-- Assignment Overview Section -->
+        <div class="admin-overview hidden" id="admin-overview">
+          <div class="overview-header">
+            <h3 class="overview-title">Assignment Dashboard</h3>
+            <p class="overview-subtitle">Grouped roster of verified delegates</p>
+          </div>
+          <div class="overview-grid">
+            <div class="overview-col">
+              <h4 class="overview-col-title">Parties</h4>
+              <div id="overview-parties" class="overview-list"></div>
+            </div>
+            <div class="overview-col">
+              <h4 class="overview-col-title">Committees</h4>
+              <div id="overview-committees" class="overview-list"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Parties & Committees sub-panel -->
