@@ -16,6 +16,7 @@ const API_BASE =
 const EMAILJS_PUBLIC_KEY = "7MYjmRFHID52KXBoF";
 const EMAILJS_SERVICE_ID = "service_ih7ntjl";
 const EMAILJS_TEMPLATE_ID = "template_9gk7idl";
+const EMAILJS_OTP_TEMPLATE_ID = "template_8d7elhs";
 
 if (typeof emailjs !== 'undefined') {
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
@@ -223,6 +224,117 @@ function showToast(message, type = "success") {
     setTimeout(() => t.remove(), 320);
   }, 2000);
 }
+/* ============ Email OTP Verification ============ */
+let _otp = null, _otpEmail = null, _otpExpiry = null, _otpVerified = false, _otpTimer = null;
+
+function _genOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000));
+}
+
+async function sendOtp() {
+  const emailInput = document.getElementById('reg-email-input');
+  const nameInput = document.querySelector('#reg-form [name="name"]');
+  const sendBtn = document.getElementById('otp-send-btn');
+  const block = document.getElementById('otp-block');
+  const email = emailInput?.value.trim();
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    showToast('Enter a valid email first', 'error'); return;
+  }
+  sendBtn.disabled = true;
+  const orig = sendBtn.textContent;
+  sendBtn.textContent = 'Sending…';
+  try {
+    _otp = _genOtp();
+    _otpEmail = email;
+    _otpExpiry = Date.now() + 10 * 60 * 1000;
+    _otpVerified = false;
+    const name = nameInput?.value.trim() || email.split('@')[0];
+    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE_ID, {
+      to_email: email, to_name: name, otp: _otp
+    });
+    block.classList.remove('hidden');
+    const otpInput = document.getElementById('otp-input');
+    otpInput.value = '';
+    otpInput.disabled = false;
+    document.getElementById('otp-verify-btn').disabled = false;
+    document.getElementById('otp-verified-msg')?.classList.add('hidden');
+    showToast('OTP sent! Check your inbox.', 'success');
+    _startOtpCountdown();
+  } catch (e) {
+    _otp = null;
+    showToast('Failed to send OTP. Try again.', 'error');
+  } finally {
+    sendBtn.textContent = orig;
+    sendBtn.disabled = false;
+  }
+}
+
+function _startOtpCountdown() {
+  clearInterval(_otpTimer);
+  let t = 60;
+  const btn = document.getElementById('otp-resend-btn');
+  const cd = document.getElementById('otp-countdown');
+  if (!btn || !cd) return;
+  btn.classList.remove('hidden');
+  btn.disabled = true;
+  cd.textContent = t;
+  _otpTimer = setInterval(() => {
+    t--;
+    cd.textContent = t;
+    if (t <= 0) {
+      clearInterval(_otpTimer);
+      btn.disabled = false;
+      btn.innerHTML = 'Resend OTP';
+    }
+  }, 1000);
+}
+
+function checkOtp() {
+  const code = document.getElementById('otp-input')?.value.trim();
+  if (!_otp || !code || Date.now() > _otpExpiry) {
+    showToast('OTP expired. Please request a new one.', 'error'); return;
+  }
+  if (code === _otp) {
+    _otpVerified = true;
+    document.getElementById('otp-verified-msg')?.classList.remove('hidden');
+    document.getElementById('otp-input').disabled = true;
+    document.getElementById('otp-verify-btn').disabled = true;
+    document.getElementById('otp-resend-btn')?.classList.add('hidden');
+    clearInterval(_otpTimer);
+    showToast('✓ Email verified!', 'success');
+  } else {
+    showToast('Incorrect OTP. Try again.', 'error');
+  }
+}
+
+function _resetOtp() {
+  _otp = null; _otpEmail = null; _otpExpiry = null; _otpVerified = false;
+  clearInterval(_otpTimer);
+  document.getElementById('otp-block')?.classList.add('hidden');
+  document.getElementById('otp-input') && (document.getElementById('otp-input').value = '');
+  document.getElementById('otp-verified-msg')?.classList.add('hidden');
+  document.getElementById('otp-resend-btn')?.classList.add('hidden');
+  const sendBtn = document.getElementById('otp-send-btn');
+  if (sendBtn) { sendBtn.disabled = true; sendBtn.textContent = 'Send OTP'; }
+}
+
+function initOtp() {
+  const emailInput = document.getElementById('reg-email-input');
+  emailInput?.addEventListener('input', () => {
+    const sendBtn = document.getElementById('otp-send-btn');
+    if (!sendBtn) return;
+    const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput.value.trim());
+    sendBtn.disabled = !valid;
+    // if email changed after verification, reset
+    if (_otpVerified && emailInput.value.trim() !== _otpEmail) _resetOtp();
+  });
+  document.getElementById('otp-send-btn')?.addEventListener('click', sendOtp);
+  document.getElementById('otp-verify-btn')?.addEventListener('click', checkOtp);
+  document.getElementById('otp-resend-btn')?.addEventListener('click', sendOtp);
+  document.getElementById('otp-input')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); checkOtp(); }
+  });
+}
 
 /* ============ Registration flow ============ */
 const FIELD_LABELS = {
@@ -266,6 +378,7 @@ function closeRegisterOverlay() {
   document.getElementById("utr-form")?.reset();
   currentRegistration = null;
   setStep(1);
+  _resetOtp();
 }
 
 async function submitRegistration(e) {
@@ -274,6 +387,13 @@ async function submitRegistration(e) {
   const btn = document.getElementById("form-submit-btn");
   const err = document.getElementById("form-err");
   err.classList.remove("visible");
+
+  if (!_otpVerified) {
+    err.textContent = "Please verify your email with the OTP before proceeding.";
+    err.classList.add("visible");
+    document.getElementById('reg-email-input')?.focus();
+    return;
+  }
 
   const data = Object.fromEntries(new FormData(form).entries());
 
@@ -931,4 +1051,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initCounters();
   initCursorSpotlight();
   initMagneticButtons();
+  initOtp();
 });

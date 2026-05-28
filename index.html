@@ -1005,10 +1005,27 @@
               <span class="field-label">Full Name *</span>
               <input type="text" name="name" required autocomplete="name" data-testid="reg-name" />
             </label>
-            <label class="field">
+            <label class="field field-wide">
               <span class="field-label">Email *</span>
-              <input type="email" name="email" required autocomplete="email" data-testid="reg-email" />
+              <div class="email-otp-row">
+                <input type="email" name="email" required autocomplete="email" data-testid="reg-email"
+                  id="reg-email-input" />
+                <button type="button" class="btn-ghost otp-send-btn" id="otp-send-btn" disabled>Send OTP</button>
+              </div>
             </label>
+            <div class="field field-wide otp-block hidden" id="otp-block">
+              <span class="field-label">Verification Code <span class="optional">· sent to your inbox</span></span>
+              <div class="otp-input-row">
+                <input type="text" id="otp-input" maxlength="6" placeholder="6-digit code" inputmode="numeric"
+                  autocomplete="one-time-code" />
+                <button type="button" class="btn-primary otp-verify-btn" id="otp-verify-btn">Verify</button>
+              </div>
+              <div class="otp-footer">
+                <span class="otp-verified-msg hidden" id="otp-verified-msg">✓ Email verified</span>
+                <button type="button" class="link-btn hidden" id="otp-resend-btn">Resend in <span
+                    id="otp-countdown">60</span>s</button>
+              </div>
+            </div>
             <label class="field">
               <span class="field-label">Phone (WhatsApp) *</span>
               <input type="tel" name="phone" required pattern="[0-9 +\-]{7,15}" autocomplete="tel"
