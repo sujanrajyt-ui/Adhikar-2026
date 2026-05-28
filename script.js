@@ -17,6 +17,12 @@ const EMAILJS_PUBLIC_KEY = "7MYjmRFHID52KXBoF";
 const EMAILJS_SERVICE_ID = "service_ih7ntjl";
 const EMAILJS_TEMPLATE_ID = "template_9gk7idl";
 const EMAILJS_OTP_TEMPLATE_ID = "template_8d7elhs";
+const EMAILJS_ASSIGN_TEMPLATE_ID = "template_assign"; // ← Party assignment template (primary account)
+
+// Second EmailJS account — used specifically for Committee assignment emails
+const EMAILJS_COMM_PUBLIC_KEY = "zRHLlDneLr7oBZpMg";
+const EMAILJS_COMM_SERVICE_ID = "service_grtfn4f";
+const EMAILJS_COMM_TEMPLATE_ID = "template_jqezo8h";
 
 if (typeof emailjs !== 'undefined') {
   emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
@@ -650,6 +656,15 @@ let currentFilter = "all";
 let lastRegistrations = [];
 let adminSearchText = "";
 let adminCollegeFilter = "all";
+let _partiesCache = null; // cached full list from /api/parties
+
+async function loadPartiesCache() {
+  try {
+    _partiesCache = await fetch(`${API_BASE}/parties`).then(r => r.json());
+  } catch {
+    _partiesCache = [];
+  }
+}
 
 function adminHeaders() {
   return { "X-Admin-Password": adminPassword };
@@ -676,6 +691,7 @@ async function adminLogin(e) {
     sessionStorage.setItem("adhikar_admin", pw);
     document.getElementById("admin-login").classList.add("hidden");
     document.getElementById("admin-panel").classList.remove("hidden");
+    await loadPartiesCache();       // must complete before renderRows() reads it
     await loadRegistrations();
     initPartiesAdmin();
   } catch (ex) {
@@ -704,9 +720,9 @@ function exportCsv() {
     showToast("Nothing to export yet", "error");
     return;
   }
-  const headers = ["ID", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role Preference", "Portfolio", "Notes", "Status", "UTR", "Created At"];
+  const headers = ["ID", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role Preference", "Portfolio", "Assigned Party", "Assigned Committee", "Notes", "Status", "UTR", "Created At"];
   const rows = lastRegistrations.map(r => [
-    r.id, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio, r.notes, r.status, r.utr, r.created_at
+    r.id, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio, r.assigned_party || '', r.assigned_committee || '', r.notes, r.status, r.utr, r.created_at
   ]);
   const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -728,9 +744,9 @@ function exportVerifiedSheet() {
     showToast("No verified participants yet", "error");
     return;
   }
-  const headers = ["#", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role", "Portfolio"];
+  const headers = ["#", "Name", "Email", "Phone", "Parent Name", "Parent Phone", "Year", "College", "Role", "Portfolio", "Assigned Party", "Assigned Committee"];
   const rows = verified.map((r, i) => [
-    i + 1, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio || ''
+    i + 1, r.name, r.email, r.phone, r.parent_name, r.parent_phone, r.year, r.college, r.role_preference, r.portfolio || '', r.assigned_party || '', r.assigned_committee || ''
   ]);
   const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n");
   const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
@@ -858,17 +874,40 @@ function renderRows() {
     return;
   }
   empty?.classList.add("hidden");
-  tbody.innerHTML = list.map(r => `
+  tbody.innerHTML = list.map(r => {
+    const isVerified = r.status === 'verified';
+    const parties = (_partiesCache || []).filter(p => p.type === 'party');
+    const comms = (_partiesCache || []).filter(p => p.type === 'committee');
+    const alreadySent = isVerified && r.assigned_party && r.assigned_committee;
+
+    const portfolioCell = isVerified ? `
+      <div class="assign-cell">
+        <select class="assign-select" id="party-sel-${r.id}" title="Party">
+          <option value="">— Party —</option>
+          ${parties.map(p => `<option value="${escapeHtml(p.name)}" ${r.assigned_party === p.name ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
+        </select>
+        <select class="assign-select" id="comm-sel-${r.id}" title="Committee">
+          <option value="">— Committee —</option>
+          ${comms.map(c => `<option value="${escapeHtml(c.name)}" ${r.assigned_committee === c.name ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
+        </select>
+        ${alreadySent
+        ? `<button class="action-btn inform-btn inform-sent" disabled>✓ Sent</button>`
+        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Inform</button>`
+      }
+      </div>
+    ` : `
+      <input type="text" value="${escapeHtml(r.portfolio || '')}" 
+        placeholder="Assign Portfolio..." 
+        onchange="handlePortfolioChange('${r.id}', this.value)" />
+    `;
+
+    return `
     <tr data-id="${r.id}" data-testid="admin-row-${r.id}">
       <td class="td-delegate">
         <strong>${escapeHtml(r.name)}</strong>
         <p style="font-size:0.75rem; color:#bca0a0; margin:4px 0 0;">${escapeHtml(r.role_preference)} · ${escapeHtml(r.year)}</p>
       </td>
-      <td class="td-portfolio">
-        <input type="text" value="${escapeHtml(r.portfolio || '')}" 
-          placeholder="Assign Portfolio..." 
-          onchange="handlePortfolioChange('${r.id}', this.value)" />
-      </td>
+      <td class="td-portfolio">${portfolioCell}</td>
       <td class="td-parent">
         <strong>${escapeHtml(r.parent_name || "-")}</strong>
         <small>${r.parent_phone ? `<a href="tel:${escapeHtml(r.parent_phone)}">${escapeHtml(r.parent_phone)}</a>` : "-"}</small>
@@ -890,8 +929,8 @@ function renderRows() {
           <button class="action-btn action-delete" data-action="delete">Delete</button>
         </div>
       </td>
-    </tr>
-  `).join("");
+    </tr>`;
+  }).join("");
 }
 
 async function handleRowAction(e) {
@@ -1005,7 +1044,7 @@ function initAdmin() {
     const panelEl = document.getElementById("admin-panel");
     if (loginEl) loginEl.classList.add("hidden");
     if (panelEl) panelEl.classList.remove("hidden");
-    loadRegistrations();
+    loadPartiesCache().then(() => loadRegistrations()); // parties first so dropdowns populate
     initPartiesAdmin();
   }
 }
@@ -1028,6 +1067,67 @@ async function handlePortfolioChange(id, value) {
     setTimeout(() => input?.classList.remove("saved"), 2000);
   } catch (err) {
     showToast("Portfolio save failed", "error");
+  }
+}
+
+async function handleInformDelegate(id) {
+  const partySel = document.getElementById(`party-sel-${id}`);
+  const commSel = document.getElementById(`comm-sel-${id}`);
+  const btn = document.getElementById(`inform-btn-${id}`);
+  if (!partySel || !commSel || !btn) return;
+
+  const assigned_party = partySel.value;
+  const assigned_committee = commSel.value;
+
+  if (!assigned_party || !assigned_committee) {
+    showToast('Please select both a Party and a Committee first.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+
+  try {
+    // 1. Persist assignment to DB
+    const res = await fetch(`${API_BASE}/admin/registrations/${id}/status`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...adminHeaders() },
+      body: JSON.stringify({ assigned_party, assigned_committee }),
+    });
+    if (!res.ok) throw new Error('DB save failed');
+
+    // Update local cache
+    const reg = lastRegistrations.find(r => r.id === id);
+    if (reg) {
+      reg.assigned_party = assigned_party;
+      reg.assigned_committee = assigned_committee;
+    }
+
+    // 2. Send single assignment email (party + committee combined)
+    if (reg && typeof emailjs !== 'undefined') {
+      await emailjs.send(
+        EMAILJS_COMM_SERVICE_ID,
+        EMAILJS_COMM_TEMPLATE_ID,
+        {
+          to_email: reg.email,
+          to_name: reg.name,
+          party_name: assigned_party,
+          committee_name: assigned_committee,
+          reg_id: reg.id,
+        },
+        { publicKey: EMAILJS_COMM_PUBLIC_KEY }
+      );
+    }
+
+    // 3. Swap button to ✓ Sent
+    btn.textContent = '✓ Sent';
+    btn.classList.add('inform-sent');
+    showToast('Assignment email sent!');
+  } catch (err) {
+    console.error('[Inform Delegate] Error:', err);
+    showToast('Failed: ' + (err.text || err.message || 'Unknown error'), 'error');
+    btn.disabled = false;
+    btn.textContent = 'Inform';
   }
 }
 

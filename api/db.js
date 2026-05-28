@@ -45,6 +45,8 @@ async function init() {
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_name VARCHAR(255);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_phone VARCHAR(50);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS portfolio VARCHAR(255);`);
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS assigned_party VARCHAR(255);`);
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS assigned_committee VARCHAR(255);`);
 
       // Parties & Committees table
       await client.query(`

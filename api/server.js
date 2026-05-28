@@ -308,14 +308,19 @@ app.get('/api/admin/stats', async (req, res) => {
   res.json(await db.getStats());
 });
 
-// Manually update status of a registration (verify / reject)
+// Manually update status of a registration (verify / reject / party & committee assignment)
 app.post('/api/admin/registrations/:id/status', async (req, res) => {
   const { id } = req.params;
-  const { status, portfolio } = req.body;
+  const { status, portfolio, assigned_party, assigned_committee } = req.body;
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ detail: 'Forbidden' });
   }
-  await db.update(id, { status, portfolio });
+  const updates = {};
+  if (status !== undefined) updates.status = status;
+  if (portfolio !== undefined) updates.portfolio = portfolio;
+  if (assigned_party !== undefined) updates.assigned_party = assigned_party;
+  if (assigned_committee !== undefined) updates.assigned_committee = assigned_committee;
+  await db.update(id, updates);
   res.json({ success: true });
 });
 

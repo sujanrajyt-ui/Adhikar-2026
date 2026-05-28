@@ -4222,3 +4222,66 @@ body:hover #cursor-spotlight {
 .party-del-btn:hover {
   background: rgba(255, 100, 100, 0.25);
 }
+
+/* ============ Delegate Assignment UI (Admin) ============ */
+.assign-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.assign-select {
+  font-family: inherit;
+  font-size: 0.78rem;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: #e8dfd8;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  width: 100%;
+  cursor: pointer;
+}
+
+.assign-select:focus {
+  border-color: rgba(212, 175, 55, 0.6);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.assign-select option {
+  background: #1a1210;
+  color: #e8dfd8;
+}
+
+.inform-btn {
+  margin-top: 2px;
+  padding: 5px 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  color: #f0d080;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.inform-btn:hover:not(:disabled) {
+  background: rgba(212, 175, 55, 0.3);
+  border-color: rgba(212, 175, 55, 0.7);
+}
+
+.inform-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.inform-btn.inform-sent {
+  background: rgba(39, 174, 96, 0.15);
+  border-color: rgba(39, 174, 96, 0.4);
+  color: #6dda9a;
+  opacity: 1;
+}
