@@ -1084,13 +1084,4 @@ document.addEventListener("DOMContentLoaded", () => {
   initCursorSpotlight();
   initMagneticButtons();
   initOtp();
-
-  // WhatsApp Share FAB
-  const waBtn = document.getElementById('wa-share-btn');
-  if (waBtn) {
-    const text = encodeURIComponent(
-      `🏛️ *ADHIKAR'26 — Mock Parliament, Hubli*\n📅 June 13–14, 2026\n🎓 Empowering Voices. Shaping Leaders.\n\nJoin 100+ delegates from across Karnataka!\n👉 Register here: ${window.location.origin}`
-    );
-    waBtn.href = `https://wa.me/?text=${text}`;
-  }
 });
