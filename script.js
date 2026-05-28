@@ -46,7 +46,7 @@ const TEAM = [
   { name: "Khushi Dalbanjan", image: "assets/team/khushi.jpg", role: "Team Member", bio: "Khushi likes Prateek Kuhad." },
   { name: "Manish Tilvalli", image: "assets/team/manish.jpg", role: "Team Member", bio: "Outasses Everyone" },
   { name: "Maitri Sabharwal", image: "assets/team/maitri.jpg", role: "Team Member", bio: "The Official Bluepaglu💙" },
-  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member", bio: "Bio coming soon." },
+  { name: "Kiran Badami", image: "assets/team/kiran.jpg", role: "Team Member", bio: "The "Pro" in "Procrastinate"" },
   { name: "Reeth Markumbi", image: "assets/team/reeth.jpg", role: "Team Member", bio: "I have hardly anything in common with myself." },
   { name: "Nishtha I", image: "assets/team/nishtha.jpg", role: "Team Member", bio: "Not a bully,It's just you" },
   { name: "Shreya Naikar", image: "assets/team/shreya.jpg", role: "Team Member", bio: "Partly philosophical, mostly stupid." },
