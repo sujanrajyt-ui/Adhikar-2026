@@ -894,7 +894,7 @@ function renderRows() {
           ${comms.map(c => `<option value="${escapeHtml(c.name)}" ${r.assigned_committee === c.name ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
         </select>
         ${alreadySent
-        ? `<button class="action-btn inform-btn inform-sent" disabled>✓ Sent</button>`
+        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Resend</button>`
         : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Inform</button>`
       }
       </div>
@@ -1122,10 +1122,14 @@ async function handleInformDelegate(id) {
       );
     }
 
-    // 3. Swap button to ✓ Sent
+    // 3. Swap button to ✓ Sent momentarily, then allow Resend
     btn.textContent = '✓ Sent';
     btn.classList.add('inform-sent');
     showToast('Assignment email sent!');
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = 'Resend';
+    }, 3000);
   } catch (err) {
     console.error('[Inform Delegate] Error:', err);
     showToast('Failed: ' + (err.text || err.message || 'Unknown error'), 'error');
