@@ -130,6 +130,91 @@ function renderMarquee() {
   track.innerHTML = chunk.repeat(8);
 }
 
+/* ============ Parties & Committees ============ */
+const PARTY_TBA = `<p class="parties-tba">To be announced by the Secretariat.</p>`;
+
+function makePartyCard(p) {
+  const typeClass = p.type === 'committee' ? 'party-card-comm' : (p.side === 'opposition' ? 'party-card-opp' : 'party-card-ruling');
+  return `
+    <article class="party-card ${typeClass}">
+      <h4 class="party-card-name">${escapeHtml(p.name)}</h4>
+      ${p.description ? `<p class="party-card-desc">${escapeHtml(p.description)}</p>` : ''}
+    </article>`;
+}
+
+async function renderParties() {
+  const rulingEl = document.getElementById('ruling-grid');
+  const oppEl = document.getElementById('opposition-grid');
+  const commEl = document.getElementById('committees-grid');
+  if (!rulingEl || !oppEl || !commEl) return;
+  try {
+    const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
+    const ruling = all.filter(p => p.type === 'party' && p.side === 'ruling');
+    const opp = all.filter(p => p.type === 'party' && p.side === 'opposition');
+    const comm = all.filter(p => p.type === 'committee');
+    rulingEl.innerHTML = ruling.length ? ruling.map(makePartyCard).join('') : PARTY_TBA;
+    oppEl.innerHTML = opp.length ? opp.map(makePartyCard).join('') : PARTY_TBA;
+    commEl.innerHTML = comm.length ? comm.map(makePartyCard).join('') : PARTY_TBA;
+  } catch {
+    rulingEl.innerHTML = oppEl.innerHTML = commEl.innerHTML = PARTY_TBA;
+  }
+}
+
+function initPartiesAdmin() {
+  const form = document.getElementById('party-form');
+  const listEl = document.getElementById('parties-admin-list');
+  if (!form || !listEl) return;
+
+  async function loadList() {
+    try {
+      const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
+      if (!all.length) { listEl.innerHTML = '<p style="opacity:.5;font-size:.85rem;">No entries yet.</p>'; return; }
+      listEl.innerHTML = all.map(p => `
+        <div class="party-admin-row">
+          <span class="party-admin-label">
+            <strong>${escapeHtml(p.name)}</strong>
+            <em style="opacity:.6;font-size:.8rem;"> — ${p.type}${p.side ? ' · ' + p.side : ''}</em>
+          </span>
+          <button class="party-del-btn" data-id="${p.id}" title="Delete">✕</button>
+        </div>`).join('');
+      listEl.querySelectorAll('.party-del-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Delete "${btn.closest('.party-admin-row').querySelector('strong').textContent}"?`)) return;
+          btn.disabled = true;
+          try {
+            await fetch(`${API_BASE}/admin/parties/${btn.dataset.id}`, {
+              method: 'DELETE', headers: { 'X-Admin-Password': adminPassword }
+            });
+            await Promise.all([loadList(), renderParties()]);
+            showToast('Deleted');
+          } catch { showToast('Failed to delete', 'error'); btn.disabled = false; }
+        });
+      });
+    } catch { listEl.innerHTML = '<p style="color:#ff6b6b;font-size:.85rem;">Could not load.</p>'; }
+  }
+
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const name = document.getElementById('party-name').value.trim();
+    const type = document.getElementById('party-type').value;
+    const side = document.getElementById('party-side').value;
+    const description = document.getElementById('party-desc').value.trim();
+    if (!name) return;
+    try {
+      await fetch(`${API_BASE}/admin/parties`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({ name, type, side, description })
+      });
+      form.reset();
+      await Promise.all([loadList(), renderParties()]);
+      showToast('Added!');
+    } catch { showToast('Failed to add', 'error'); }
+  });
+
+  loadList();
+}
+
 /* ============ Countdown ============ */
 function tickCountdown() {
   const diff = Math.max(0, EVENT_DATE.getTime() - Date.now());
@@ -592,6 +677,7 @@ async function adminLogin(e) {
     document.getElementById("admin-login").classList.add("hidden");
     document.getElementById("admin-panel").classList.remove("hidden");
     await loadRegistrations();
+    initPartiesAdmin();
   } catch (ex) {
     err.textContent = ex.message || "Login failed";
     err.classList.add("visible");
@@ -920,6 +1006,7 @@ function initAdmin() {
     if (loginEl) loginEl.classList.add("hidden");
     if (panelEl) panelEl.classList.remove("hidden");
     loadRegistrations();
+    initPartiesAdmin();
   }
 }
 
@@ -1084,4 +1171,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initCursorSpotlight();
   initMagneticButtons();
   initOtp();
+  renderParties();
 });

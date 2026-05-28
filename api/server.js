@@ -245,6 +245,42 @@ app.post('/api/webhook/uropay', async (req, res) => {
   res.status(200).send("OK");
 });
 
+/* ============ Parties & Committees APIs ============ */
+
+// Public: get all parties & committees
+app.get('/api/parties', async (req, res) => {
+  try {
+    res.json(await db.getParties());
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Admin: add a party or committee
+app.post('/api/admin/parties', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { name, type, side, description } = req.body;
+  if (!name || !type) return res.status(400).json({ detail: 'name and type required' });
+  try {
+    const entry = await db.createParty({ name, type, side, description });
+    res.json(entry);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Admin: delete a party or committee
+app.delete('/api/admin/parties/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const deleted = await db.deleteParty(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Not found' });
+  res.json({ success: true });
+});
+
 /* ============ Admin Secretariat APIs (Protected) ============ */
 
 // Admin login

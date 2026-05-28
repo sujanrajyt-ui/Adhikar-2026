@@ -3,6 +3,7 @@ const path = require('path');
 const { Pool } = require('pg');
 
 const DB_FILE = path.join(__dirname, 'data.json');
+const PARTIES_FILE = path.join(__dirname, 'parties.json');
 
 // Connect to pg if DATABASE_URL is set in environment
 const isPg = !!process.env.DATABASE_URL;
@@ -44,6 +45,19 @@ async function init() {
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_name VARCHAR(255);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS parent_phone VARCHAR(50);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS portfolio VARCHAR(255);`);
+
+      // Parties & Committees table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS parties (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          type VARCHAR(50) NOT NULL,
+          side VARCHAR(50),
+          description TEXT,
+          created_at VARCHAR(100) NOT NULL
+        );
+      `);
+
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
@@ -53,6 +67,9 @@ async function init() {
   } else {
     if (!fs.existsSync(DB_FILE)) {
       fs.writeFileSync(DB_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(PARTIES_FILE)) {
+      fs.writeFileSync(PARTIES_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
   }
 }
@@ -299,6 +316,48 @@ module.exports = {
       });
 
       return stats;
+    }
+  },
+
+  // ============ Parties & Committees ============
+
+  async getParties() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM parties ORDER BY type, side, name');
+      return res.rows;
+    } else {
+      const raw = fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]';
+      return JSON.parse(raw).sort((a, b) => a.name.localeCompare(b.name));
+    }
+  },
+
+  async createParty({ name, type, side, description }) {
+    const id = 'P-' + Date.now().toString(36).toUpperCase();
+    const now = new Date().toISOString();
+    const entry = { id, name, type, side: side || null, description: description || '', created_at: now };
+    if (isPg) {
+      await pool.query(
+        'INSERT INTO parties (id, name, type, side, description, created_at) VALUES ($1,$2,$3,$4,$5,$6)',
+        [id, name, type, side || null, description || '', now]
+      );
+    } else {
+      const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      list.push(entry);
+      fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return entry;
+  },
+
+  async deleteParty(id) {
+    if (isPg) {
+      const res = await pool.query('DELETE FROM parties WHERE id = $1', [id]);
+      return (res.rowCount || 0) > 0;
+    } else {
+      const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      const filtered = list.filter(p => p.id !== id);
+      if (filtered.length === list.length) return false;
+      fs.writeFileSync(PARTIES_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return true;
     }
   }
 };

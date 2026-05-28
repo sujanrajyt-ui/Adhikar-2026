@@ -4042,3 +4042,183 @@ body:hover #cursor-spotlight {
   cursor: not-allowed;
   opacity: 0.45;
 }
+
+/* ============ Parties & Committees Section ============ */
+.parties-block {
+  margin-top: 3rem;
+}
+
+.parties-block-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin: 0 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.parties-block-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.15;
+}
+
+.parties-ruling-title {
+  color: var(--maroon-600);
+}
+
+.parties-opp-title {
+  color: var(--gold-600);
+}
+
+.parties-comm-title {
+  color: rgba(74, 16, 25, 0.5);
+}
+
+.parties-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.party-card {
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border: 1.5px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.party-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -8px rgba(74, 16, 25, 0.18);
+}
+
+.party-card-ruling {
+  background: rgba(122, 28, 42, 0.05);
+  border-color: rgba(122, 28, 42, 0.18);
+}
+
+.party-card-opp {
+  background: rgba(201, 169, 97, 0.07);
+  border-color: rgba(201, 169, 97, 0.25);
+}
+
+.party-card-comm {
+  background: rgba(74, 16, 25, 0.03);
+  border-color: rgba(74, 16, 25, 0.1);
+}
+
+.party-card-name {
+  font-family: "Playfair Display", serif;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--maroon-700);
+  margin: 0 0 0.3rem;
+}
+
+.party-card-desc {
+  font-size: 0.82rem;
+  color: rgba(74, 16, 25, 0.65);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.parties-tba {
+  font-size: 0.875rem;
+  color: rgba(74, 16, 25, 0.4);
+  font-style: italic;
+  margin: 0;
+}
+
+/* ---- Parties Admin Sub-panel ---- */
+.parties-admin-panel {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(212, 184, 122, 0.15);
+}
+
+.parties-admin-title {
+  font-family: "Playfair Display", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--gold-400);
+  margin: 0 0 1.25rem;
+}
+
+.party-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.party-form input,
+.party-form select {
+  flex: 1;
+  min-width: 140px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: var(--cream-100);
+  font: inherit;
+  font-size: 0.875rem;
+}
+
+.party-form input::placeholder {
+  color: rgba(245, 239, 230, 0.4);
+}
+
+.party-form select option {
+  background: var(--maroon-900);
+  color: var(--cream-100);
+}
+
+.parties-admin-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.party-admin-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--cream-100);
+  font-size: 0.875rem;
+}
+
+.party-admin-label {
+  flex: 1;
+}
+
+.party-del-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(255, 100, 100, 0.12);
+  border: 1px solid rgba(255, 100, 100, 0.2);
+  color: #ff8080;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.party-del-btn:hover {
+  background: rgba(255, 100, 100, 0.25);
+}
