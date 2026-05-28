@@ -778,6 +778,7 @@ async function loadRegistrations() {
     updateCollegeDropdown();
     renderStats(stats);
     renderAnalytics(lastRegistrations);
+    renderRows();
     if (showOverviewDashboard) renderOverview();
   } catch (ex) {
     showToast(ex.message || "Could not load", "error");
