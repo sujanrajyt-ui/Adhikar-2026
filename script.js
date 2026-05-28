@@ -249,8 +249,13 @@ async function sendOtp() {
     _otpExpiry = Date.now() + 10 * 60 * 1000;
     _otpVerified = false;
     const name = nameInput?.value.trim() || email.split('@')[0];
+    console.log('[OTP] Sending to:', email, '| OTP:', _otp);
     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_OTP_TEMPLATE_ID, {
-      to_email: email, to_name: name, otp: _otp
+      to_email: email,
+      email: email,
+      to_name: name,
+      user_name: name,
+      otp: _otp
     });
     block.classList.remove('hidden');
     const otpInput = document.getElementById('otp-input');
@@ -262,7 +267,9 @@ async function sendOtp() {
     _startOtpCountdown();
   } catch (e) {
     _otp = null;
-    showToast('Failed to send OTP. Try again.', 'error');
+    const msg = e?.text || e?.message || JSON.stringify(e) || 'Unknown error';
+    console.error('[OTP] EmailJS send failed:', e);
+    showToast('OTP failed: ' + msg, 'error');
   } finally {
     sendBtn.textContent = orig;
     sendBtn.disabled = false;
