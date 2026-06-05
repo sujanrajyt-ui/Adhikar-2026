@@ -13,10 +13,10 @@ const API_BASE =
   "/api";
 
 // EmailJS Initialization
-const EMAILJS_PUBLIC_KEY = "7MYjmRFHID52KXBoF";
-const EMAILJS_SERVICE_ID = "service_ih7ntjl";
-const EMAILJS_TEMPLATE_ID = "template_9gk7idl";
-const EMAILJS_OTP_TEMPLATE_ID = "template_8d7elhs";
+const EMAILJS_PUBLIC_KEY = "CzcZFPPmnh0lYjeTL";
+const EMAILJS_SERVICE_ID = "service_cujpkh8";
+const EMAILJS_TEMPLATE_ID = "template_lvde63l";
+const EMAILJS_OTP_TEMPLATE_ID = "template_tpacxoq";
 const EMAILJS_ASSIGN_TEMPLATE_ID = "template_assign"; // ← Party assignment template (primary account)
 
 // Second EmailJS account — used specifically for Committee assignment emails
