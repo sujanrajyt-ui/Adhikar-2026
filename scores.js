@@ -144,80 +144,87 @@ function renderDelegates() {
         const maxPoss = allCriteria.reduce((sum, c) => sum + c.max_points, 0);
         const hasScored = d.scores.length > 0;
 
+        const criteriaHtml = allCriteria.map(c => {
+            const existing = d.scores.find(s => s.criteria_id === c.id);
+            const val = existing ? existing.score : '';
+            return `
+        <div class="inline-criteria">
+          <label>${escapeHtml(c.name)} <small>/${c.max_points}</small></label>
+          <input type="number" 
+            id="score_${d.id}_${c.id}" 
+            min="0" max="${c.max_points}" 
+            value="${val}" 
+            onchange="markDirty('${d.id}')"
+            placeholder="—">
+        </div>
+      `;
+        }).join('');
+
         return `
-      <div class="delegate-card" onclick="openScoringModal('${d.id}')">
-        <div class="delegate-info">
-          <h3>${escapeHtml(d.name)}</h3>
-          <div class="delegate-meta">
-            <span class="meta-pill">${escapeHtml(d.assigned_party || 'No Party')}</span>
-            <span class="meta-pill">${escapeHtml(d.assigned_committee || 'No Committee')}</span>
-            ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
+      <div class="delegate-card" id="card-${d.id}">
+        <div class="card-head">
+          <div class="delegate-info">
+            <h3>${escapeHtml(d.name)}</h3>
+            <div class="delegate-meta">
+              <span class="meta-pill">${escapeHtml(d.assigned_party || 'No Party')}</span>
+              <span class="meta-pill">${escapeHtml(d.assigned_committee || 'No Committee')}</span>
+              ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
+            </div>
+          </div>
+          <div class="scrolling-score">
+            ${hasScored ? `<span class="score-badge">${totalScore} / ${maxPoss}</span>` : `<span class="score-empty">Pending</span>`}
           </div>
         </div>
-        <div class="scrolling-score">
-          ${hasScored ? `<span class="score-badge">${totalScore} / ${maxPoss}</span>` : `<span class="score-empty">Pending</span>`}
+        
+        <div class="inline-scoring-box">
+          <div class="criteria-row">
+            ${criteriaHtml}
+          </div>
+          <button class="inline-save-btn" id="save-btn-${d.id}" onclick="handleInlineSave('${d.id}')">
+            Submit Scores
+          </button>
         </div>
       </div>
     `;
     }).join('');
 }
 
-function updateProgress() {
-    const total = allDelegates.length;
-    const scored = allDelegates.filter(d => d.scores.length > 0).length;
-
-    document.getElementById('scored-count').textContent = scored;
-    document.getElementById('total-count').textContent = total;
-
-    const pct = total > 0 ? (scored / total) * 100 : 0;
-    document.getElementById('progress-fill').style.width = `${pct}%`;
+function markDirty(delegateId) {
+    const btn = document.getElementById(`save-btn-${delegateId}`);
+    if (btn) btn.classList.add('dirty');
 }
 
-// Scoring Actions
-function openScoringModal(delegateId) {
-    selectedDelegate = allDelegates.find(d => d.id === delegateId);
-    if (!selectedDelegate) return;
+async function handleInlineSave(delegateId) {
+    const delegate = allDelegates.find(d => d.id === delegateId);
+    if (!delegate) return;
 
-    document.getElementById('modal-delegate-name').textContent = selectedDelegate.name;
-    document.getElementById('modal-delegate-party').textContent = selectedDelegate.assigned_party || 'No Party';
-    document.getElementById('modal-delegate-committee').textContent = selectedDelegate.assigned_committee || 'No Committee';
-
-    const inputsContainer = document.getElementById('criteria-inputs');
-    inputsContainer.innerHTML = allCriteria.map(c => {
-        const existing = selectedDelegate.scores.find(s => s.criteria_id === c.id);
-        const val = existing ? existing.score : '';
-        return `
-      <div class="criteria-input-row">
-        <label>${escapeHtml(c.name)} <small class="muted">/ ${c.max_points}</small></label>
-        <div class="score-input-wrap">
-          <input type="number" name="score_${c.id}" min="0" max="${c.max_points}" step="1" value="${val}" required>
-        </div>
-      </div>
-    `;
-    }).join('');
-
-    scoringModal.classList.remove('hidden');
-}
-
-async function handleScoringSubmit(e) {
-    e.preventDefault();
-    const formData = new FormData(scoringForm);
     const submissions = [];
+    const btn = document.getElementById(`save-btn-${delegateId}`);
 
-    for (const criteria of allCriteria) {
-        const score = parseInt(formData.get(`score_${criteria.id}`), 10);
-        submissions.push({
-            delegate_id: selectedDelegate.id,
-            judge_id: currentJudge,
-            criteria_id: criteria.id,
-            score: score
-        });
-    }
-
-    const btn = e.target.querySelector('button');
     btn.disabled = true;
+    btn.textContent = 'Saving...';
 
     try {
+        for (const criteria of allCriteria) {
+            const input = document.getElementById(`score_${delegateId}_${criteria.id}`);
+            const score = parseInt(input.value, 10);
+            if (isNaN(score)) continue; // skip if empty
+
+            submissions.push({
+                delegate_id: delegateId,
+                judge_id: currentJudge,
+                criteria_id: criteria.id,
+                score: score
+            });
+        }
+
+        if (submissions.length === 0) {
+            showToast("Please enter at least one score", "error");
+            btn.disabled = false;
+            btn.textContent = 'Submit Scores';
+            return;
+        }
+
         await Promise.all(submissions.map(s =>
             fetch(`${API_BASE}/scores/submit`, {
                 method: "POST",
@@ -226,15 +233,19 @@ async function handleScoringSubmit(e) {
             }).then(r => r.json())
         ));
 
-        showToast("Scores saved successfully");
-        scoringModal.classList.add('hidden');
+        showToast(`Scores saved for ${delegate.name}`);
+        btn.classList.remove('dirty');
+        btn.textContent = '✓ Saved';
+
+        // Update local counts without full re-render immediately to keep focus if possible, 
+        // but for now, re-render to update total score badge
         await loadDelegates();
         renderDelegates();
         updateProgress();
     } catch (err) {
         showToast("Failed to save scores", "error");
-    } finally {
         btn.disabled = false;
+        btn.textContent = 'Retry Save';
     }
 }
 
@@ -261,9 +272,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     document.getElementById('scores-logout').addEventListener('click', handleLogout);
-    scoringForm.addEventListener('submit', handleScoringSubmit);
-    modalClose.addEventListener('click', () => scoringModal.classList.add('hidden'));
     delegateSearch.addEventListener('input', renderDelegates);
+
 
     // Auto-login
     const saved = sessionStorage.getItem('adhikar_judge');

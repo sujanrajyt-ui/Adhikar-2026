@@ -207,11 +207,103 @@ h3 {
 }
 
 .delegate-card:hover {
-    transform: translateY(-2px);
     border-color: var(--gold);
 }
 
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.inline-scoring-box {
+    background: rgba(0, 0, 0, 0.2);
+    border-top: 1px solid var(--glass-border);
+    margin: 0 -1.5rem -1.25rem;
+    padding: 1.25rem 1.5rem;
+    border-radius: 0 0 16px 16px;
+}
+
+.criteria-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.inline-criteria {
+    flex: 1;
+    min-width: 120px;
+}
+
+.inline-criteria label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.inline-criteria input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    padding: 8px;
+    border-radius: 8px;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.inline-criteria input:focus {
+    border-color: var(--gold);
+}
+
+.inline-save-btn {
+    width: 100%;
+    background: var(--gold);
+    color: var(--maroon-dark);
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.inline-save-btn:hover {
+    transform: scale(1.02);
+}
+
+.inline-save-btn.dirty {
+    box-shadow: 0 0 15px var(--gold-glow);
+    animation: pulseGold 2s infinite;
+}
+
+@keyframes pulseGold {
+    0% {
+        box-shadow: 0 0 5px var(--gold-glow);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--gold-glow);
+    }
+
+    100% {
+        box-shadow: 0 0 5px var(--gold-glow);
+    }
+}
+
 .delegate-info h3 {
+
     font-size: 1.25rem;
     font-family: 'Outfit', sans-serif;
 }
