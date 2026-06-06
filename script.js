@@ -906,18 +906,19 @@ function renderRows() {
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
             <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
-            <option ${r.elected_role === 'Cabinet Minister' ? 'selected' : ''}>Cabinet Minister</option>
-            <option ${r.elected_role === 'Leader of the House' ? 'selected' : ''}>Leader of the House</option>
+            <option ${r.elected_role === 'Minister of Education' ? 'selected' : ''}>Minister of Education</option>
+            <option ${r.elected_role === 'Minister of Women and Child Developement' ? 'selected' : ''}>Minister of Women and Child Developement</option>
+            <option ${r.elected_role === 'Minister of External Affairs' ? 'selected' : ''}>Minister of External Affairs</option>
+            <option ${r.elected_role === 'Minister of Finance' ? 'selected' : ''}>Minister of Finance</option>
+            <option ${r.elected_role === 'Home Ministry' ? 'selected' : ''}>Home Ministry</option>
           </optgroup>
           <optgroup label="Opposition">
             <option ${r.elected_role === 'Leader of Opposition' ? 'selected' : ''}>Leader of Opposition</option>
             <option ${r.elected_role === 'Deputy Leader of Opposition' ? 'selected' : ''}>Deputy Leader of Opposition</option>
           </optgroup>
           <optgroup label="House Officers">
-            <option ${r.elected_role === 'Speaker of Lok Sabha' ? 'selected' : ''}>Speaker of Lok Sabha</option>
+            <option ${r.elected_role === 'Speaker' ? 'selected' : ''}>Speaker</option>
             <option ${r.elected_role === 'Deputy Speaker' ? 'selected' : ''}>Deputy Speaker</option>
-            <option ${r.elected_role === 'Secretary General' ? 'selected' : ''}>Secretary General</option>
-            <option ${r.elected_role === 'Marshal of the House' ? 'selected' : ''}>Marshal of the House</option>
           </optgroup>
         </select>
         <div class="split-buttons">
