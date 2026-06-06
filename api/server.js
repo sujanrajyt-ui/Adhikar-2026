@@ -745,7 +745,7 @@ app.get('/api/admin/live-log', async (req, res) => {
   console.log('[Recent Scores Audit] Server Env PW exists:', !!process.env.ADMIN_PASSWORD);
 
   if (incomingPw !== process.env.ADMIN_PASSWORD) {
-    console.error('[Recent Scores Audit] Password Mismatch');
+    console.error('[Recent Scores Audit] Authentication failed');
     return res.status(403).json({ detail: 'Forbidden' });
   }
   const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
@@ -818,7 +818,7 @@ if (require.main === module) {
     console.log(`===============================================`);
     console.log(` ADHIKAR'26 REPLICATED BACKEND SERVER IS RUNNING`);
     console.log(` Listening on: 0.0.0.0:${PORT}`);
-    console.log(` Admin Desk default password: secretariat2026`);
+    console.log(` Admin Desk: Authentication via ADMIN_PASSWORD env var`);
     console.log(`===============================================`);
   });
 }

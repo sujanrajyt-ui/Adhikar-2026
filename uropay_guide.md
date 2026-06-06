@@ -24,7 +24,7 @@ Go to your Railway project settings and add the following environment variables:
 | `UROPAY_API_KEY` | Your UroPay X-API-KEY | `upl_...` |
 | `UROPAY_API_SECRET` | Your UroPay Secret Key | `...` |
 | `RECEIVING_VPA` | The UPI ID that should receive funds | `9980964089@cnrb` |
-| `ADMIN_PASSWORD` | Password for the Secretariat Admin panel | `secretariat2026` |
+| `ADMIN_PASSWORD` | Password for the Secretariat Admin panel | `iwantitthatway` |
 | `DATABASE_URL` | (Optional) Railway PostgreSQL URL | `postgresql://...` |
 
 > [!IMPORTANT]

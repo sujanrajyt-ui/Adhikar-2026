@@ -630,15 +630,33 @@
         function toggleAdminMode() {
             if (!isAdmin) {
                 const pw = prompt("Enter Admin Password:");
-                if (pw === 'secretariat2026') {
-                    isAdmin = true;
-                    localStorage.setItem('ldr_admin', 'true');
-                    applyAdminMode();
-                } else if (pw) alert("Invalid password.");
+                if (pw) {
+                    verifyAndEnableAdmin(pw);
+                }
             } else {
                 isAdmin = false;
                 localStorage.setItem('ldr_admin', 'false');
+                sessionStorage.removeItem('ldr_pw');
                 applyAdminMode();
+            }
+        }
+
+        async function verifyAndEnableAdmin(pw) {
+            try {
+                // Verify password with a simple admin call
+                const res = await fetch(`${API_BASE}/admin/stats`, {
+                    headers: { 'x-admin-password': pw }
+                });
+                if (res.ok) {
+                    isAdmin = true;
+                    localStorage.setItem('ldr_admin', 'true');
+                    sessionStorage.setItem('ldr_pw', pw);
+                    applyAdminMode();
+                } else {
+                    alert("Invalid password.");
+                }
+            } catch (e) {
+                alert("Connection error.");
             }
         }
 
@@ -662,15 +680,33 @@
             document.getElementById('modal-title').textContent = `Assign to ${section === 'chair' ? 'The Chair' : section === 'gov' ? 'Government' : 'Opposition'}`;
             showStep('search');
             modal.style.display = 'flex';
+
+            const pw = sessionStorage.getItem('ldr_pw');
+            if (!pw) {
+                isAdmin = false;
+                applyAdminMode();
+                toggleAdminMode();
+                return;
+            }
+
             if (allDelegates.length === 0) {
                 resultsDiv.innerHTML = '<div class="empty-state">Loading delegates...</div>';
                 try {
                     const res = await fetch(`${API_BASE}/admin/registrations`, {
-                        headers: { 'x-admin-password': 'secretariat2026' }
+                        headers: { 'x-admin-password': pw }
                     });
+                    if (res.status === 403) throw new Error("Auth expired");
                     allDelegates = await res.json();
                     filterDelegates();
-                } catch (e) { resultsDiv.innerHTML = '<div class="empty-state">Error loading delegates.</div>'; }
+                } catch (e) {
+                    resultsDiv.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+                    if (e.message.includes("Auth")) {
+                        isAdmin = false;
+                        localStorage.setItem('ldr_admin', 'false');
+                        sessionStorage.removeItem('ldr_pw');
+                        applyAdminMode();
+                    }
+                }
             } else filterDelegates();
         }
 
@@ -706,16 +742,26 @@
         }
 
         async function submitAssignment() {
+            const pw = sessionStorage.getItem('ldr_pw');
+            if (!pw) { alert("Session expired. Please re-login."); closeModal(); return; }
+
             const role = document.getElementById('role-pick').value;
             const btn = document.querySelector('.btn-submit-assign');
             btn.disabled = true; btn.textContent = 'Processing...';
             try {
                 const res = await fetch(`${API_BASE}/admin/registrations/${selectedDelegate.id}/elected_role`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-admin-password': 'secretariat2026' },
+                    headers: { 'Content-Type': 'application/json', 'x-admin-password': pw },
                     body: JSON.stringify({ role })
                 });
                 if (res.ok) { closeModal(); init(); }
+                else if (res.status === 403) {
+                    alert("Auth failed. Re-login.");
+                    isAdmin = false;
+                    localStorage.setItem('ldr_admin', 'false');
+                    sessionStorage.removeItem('ldr_pw');
+                    applyAdminMode();
+                }
                 else alert("Assignment failed.");
             } catch (e) { alert("Error: " + e.message); }
             finally { btn.disabled = false; btn.textContent = 'Confirm Assignment'; }
