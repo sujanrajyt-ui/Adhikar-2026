@@ -49,87 +49,74 @@ function renderLeaderboard() {
     let data = [...allData.leaderboard];
 
     if (filter === 'overall') {
-        // Already sorted by totalScore from backend
+        // Exclude Chairs/Speaker from overall excellence (typically reserved for delegates)
+        data = data.filter(d => {
+            const role = (d.elected_role || "").toLowerCase();
+            return !["speaker", "deputy speaker", "secretary general", "marshal"].some(r => role.includes(r));
+        });
         data.sort((a, b) => b.totalScore - a.totalScore);
-        // exclude Chairs from overall excellence
-        data = data.filter(d => !(d.elected_role || "").toLowerCase().includes("speaker"));
     } else if (filter.startsWith('awd_')) {
-        // Dynamic Award Formula
         const award = allData.awards.find(a => a.id === filter);
-        const items = award ? award.criteria_ids : [];
-        const requiredSide = award ? award.requires_side : null;
-        const requiredRole = award ? award.requires_role : null;
+        const formula = award ? award.criteria_ids : [];
+        const reqSide = award ? (award.requires_side || "").toLowerCase() : null;
+        const reqRole = award ? (award.requires_role || "").toLowerCase() : null;
 
-        // Apply eligibility filter (Robust multi-keyword match)
-        if (requiredSide || requiredRole) {
+        // Strict Requirement Filtering
+        if (reqSide || reqRole) {
             data = data.filter(d => {
-                // Check Role first if specified (Supports comma-separated OR matching)
-                if (requiredRole) {
-                    const reqRoles = requiredRole.split(',').map(r => r.trim().toLowerCase());
-                    const userRole = (d.elected_role || "").trim().toLowerCase();
+                const userRole = (d.elected_role || "").toLowerCase();
+                const userSide = (d.side || "").toLowerCase();
 
-                    if (!userRole) return false;
-
-                    const matched = reqRoles.some(r => {
-                        // Strict check for Speaker/Chair roles to avoid Deputy Speaker mismatch
-                        if (r === 'speaker') {
-                            return userRole === 'speaker' || userRole === 'chair' || userRole === 'the speaker';
-                        }
-                        // Partial match for everything else (e.g. "Minister" matches "Minister of Finance")
-                        return userRole.includes(r);
-                    });
-
-                    if (!matched) return false;
+                // If role is required, must match at least one in comma-separated list
+                if (reqRole) {
+                    const roles = reqRole.split(',').map(r => r.trim());
+                    const roleMatch = roles.some(r => userRole.includes(r));
+                    if (!roleMatch) return false;
                 }
 
-                // Check Side
-                if (requiredSide) {
-                    const s = (d.side || d.party || "").toLowerCase();
-                    if (!s) return false;
-                    const r = requiredSide.toLowerCase();
-                    let sideMatch = false;
-                    if (r === 'ruling') {
-                        sideMatch = s.includes('ruling') || s.includes('government') || s.includes('treasury');
-                    } else if (r === 'opposition') {
-                        sideMatch = s.includes('opposition');
-                    } else {
-                        sideMatch = s.includes(r) || r.includes(s);
+                // If side is required, must match
+                if (reqSide) {
+                    if (reqSide === 'ruling') {
+                        const isRuling = userSide === 'ruling' || userSide.includes('gov') || userSide.includes('treasury');
+                        if (!isRuling) return false;
+                    } else if (reqSide === 'opposition') {
+                        if (userSide !== 'opposition') return false;
+                    } else if (!userSide.includes(reqSide)) {
+                        return false;
                     }
-                    if (!sideMatch) return false;
                 }
-
                 return true;
             });
         } else {
-            // Neutral award fallback: Exclude House Officers by default
+            // General Awards (Neutral): Exclude Chairs/Speakers by default to avoid confusion
             data = data.filter(d => {
-                const er = (d.elected_role || "").toLowerCase();
-                // Exclude Speaker and Deputy Speaker from general awards
-                return !er.includes("speaker") && !er.includes("chair");
+                const role = (d.elected_role || "").toLowerCase();
+                return !["speaker", "deputy speaker"].some(r => role.includes(r));
             });
         }
 
+        // Calculate Award-Specific Score
         data.forEach(d => {
-            d.awardScore = items.reduce((sum, item) => {
+            d.awardScore = formula.reduce((sum, item) => {
                 const cid = item.id || item;
-                const weight = item.weight || 1.0;
+                const weight = item.weight || (1 / formula.length);
                 return sum + ((d.criteriaScores[cid] || 0) * weight);
             }, 0);
         });
 
-        // Tie-breaking
+        // Tie-breaking logic
         data.sort((a, b) => {
             if (b.awardScore !== a.awardScore) return b.awardScore - a.awardScore;
-            if (items.length > 0) {
-                const primaryItem = items.reduce((prev, current) => (prev.weight > current.weight) ? prev : current);
-                const pCid = primaryItem.id || primaryItem;
-                const scoreA = a.criteriaScores[pCid] || 0;
-                const scoreB = b.criteriaScores[pCid] || 0;
-                if (scoreB !== scoreA) return scoreB - scoreA;
+            // Primary criteria tie-breaker
+            if (formula.length > 0) {
+                const primary = formula.reduce((prev, curr) => (prev.weight > curr.weight) ? prev : curr);
+                const pId = primary.id || primary;
+                if (b.criteriaScores[pId] !== a.criteriaScores[pId]) return (b.criteriaScores[pId] || 0) - (a.criteriaScores[pId] || 0);
             }
             return b.totalScore - a.totalScore;
         });
-    } else {
+    }
+    else {
         // Specific criteria sorting
         data.sort((a, b) => {
             const scoreA = a.criteriaScores[filter] || 0;

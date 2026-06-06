@@ -637,7 +637,7 @@ module.exports = {
           { "id": "crit_lead", "weight": 0.15 },
           { "id": "crit_conduct", "weight": 0.10 }
         ],
-        "requires_role": "Speaker",
+        "requires_role": "Speaker, Deputy Speaker, Secretary General, Marshal",
         "created_at": "2026-06-06T15:35:00Z"
       },
       {
@@ -663,6 +663,7 @@ module.exports = {
           { "id": "crit_conduct", "weight": 0.05 }
         ],
         "requires_side": "ruling",
+        "requires_role": "Prime Minister, Deputy Prime Minister, Minister, Leader of the House",
         "created_at": "2026-06-06T15:35:02Z"
       },
       {
@@ -676,6 +677,7 @@ module.exports = {
           { "id": "crit_conduct", "weight": 0.05 }
         ],
         "requires_side": "opposition",
+        "requires_role": "Leader of Opposition, Deputy Leader of Opposition, Whip",
         "created_at": "2026-06-06T15:35:03Z"
       },
       {
@@ -688,7 +690,7 @@ module.exports = {
           { "id": "crit_rebuttal", "weight": 0.10 },
           { "id": "crit_conduct", "weight": 0.10 }
         ],
-        "requires_role": "Prime Minister, Deputy Prime Minister, Leader of Opposition",
+        "requires_role": "Prime Minister, Deputy Prime Minister, Leader of the House, Leader of Opposition",
         "created_at": "2026-06-06T15:35:04Z"
       },
       {
@@ -701,7 +703,6 @@ module.exports = {
           { "id": "crit_rebuttal", "weight": 0.10 },
           { "id": "crit_conduct", "weight": 0.10 }
         ],
-        "requires_side": "ruling",
         "requires_role": "Minister",
         "created_at": "2026-06-06T15:35:05Z"
       },
