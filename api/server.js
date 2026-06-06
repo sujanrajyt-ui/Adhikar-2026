@@ -605,8 +605,9 @@ app.get('/api/admin/scores/raw-log', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ detail: 'Forbidden' });
   }
-  const LOG_FILE = path.join(__dirname, 'scores_log.csv');
+  const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
   if (fs.existsSync(LOG_FILE)) {
+
     res.setHeader('Content-Type', 'text/csv');
     res.setHeader('Content-Disposition', 'attachment; filename=adhikar26_raw_score_log.csv');
     res.sendFile(LOG_FILE);

@@ -7,7 +7,8 @@ const PARTIES_FILE = path.join(__dirname, 'parties.json');
 const JUDGES_FILE = path.join(__dirname, 'judges.json');
 const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
 const SCORES_FILE = path.join(__dirname, 'scores.json');
-const LOG_FILE = path.join(__dirname, 'scores_log.csv');
+const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
+
 
 
 // Connect to pg if DATABASE_URL is set in environment
@@ -121,14 +122,14 @@ async function init() {
       fs.writeFileSync(SCORES_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
   }
+
+  // Always ensure safety log exists (Safety First)
+  if (!fs.existsSync(LOG_FILE)) {
+    const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score\n";
+    fs.writeFileSync(LOG_FILE, header, 'utf-8');
+  }
 }
 
-// Always ensure safety log exists (Safety First)
-if (!fs.existsSync(LOG_FILE)) {
-  const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score\n";
-  fs.writeFileSync(LOG_FILE, header, 'utf-8');
-}
-}
 
 
 init();
