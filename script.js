@@ -669,7 +669,7 @@ async function loadPartiesCache() {
 }
 
 function adminHeaders() {
-  return { "X-Admin-Password": adminPassword };
+  return { "x-admin-password": adminPassword };
 }
 
 async function adminLogin(e) {
@@ -1158,8 +1158,13 @@ async function loadRecentScores() {
   if (!container) return;
 
   try {
-    const res = await fetch(`${API_BASE}/admin/scoring/recent`, { headers: adminHeaders() });
-    if (!res.ok) throw new Error("Log fetch failed");
+    console.log(`[Admin Log] Fetching from: ${API_BASE}/admin/scores/recent`);
+    const res = await fetch(`${API_BASE}/admin/scores/recent`, { headers: adminHeaders() });
+    if (!res.ok) {
+      const errText = await res.text().catch(() => "No response text");
+      console.error(`[Admin Log] Fetch failed: ${res.status} ${res.statusText}`, errText);
+      throw new Error(`Fetch failed (${res.status})`);
+    }
     const scores = await res.json();
 
     if (!scores.length) {

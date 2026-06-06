@@ -619,8 +619,13 @@ app.get('/api/admin/scores/raw-log', async (req, res) => {
 
 
 // GET RECENT SCORES JSON (For Scoring Dashboard)
-app.get('/api/admin/scoring/recent', async (req, res) => {
-  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+app.get('/api/admin/scores/recent', async (req, res) => {
+  const incomingPw = req.headers['x-admin-password'];
+  console.log('[Recent Scores Audit] Incoming Header:', incomingPw);
+  console.log('[Recent Scores Audit] Server Env PW exists:', !!process.env.ADMIN_PASSWORD);
+
+  if (incomingPw !== process.env.ADMIN_PASSWORD) {
+    console.error('[Recent Scores Audit] Password Mismatch');
     return res.status(403).json({ detail: 'Forbidden' });
   }
   const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
