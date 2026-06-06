@@ -238,9 +238,28 @@ async function handleScoringSubmit(e) {
     }
 }
 
+// Reveal Animation
+function initReveal() {
+    const els = document.querySelectorAll(".reveal");
+    if (!els.length) return;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add("active");
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.1 });
+    els.forEach(el => observer.observe(el));
+}
+
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
+    console.log("Scoring Dashboard Initializing...");
+    initReveal();
     document.getElementById('login-form').addEventListener('submit', handleLogin);
+
+
     document.getElementById('scores-logout').addEventListener('click', handleLogout);
     scoringForm.addEventListener('submit', handleScoringSubmit);
     modalClose.addEventListener('click', () => scoringModal.classList.add('hidden'));

@@ -1,14 +1,15 @@
 /* Scoring Dashboard Styles */
 :root {
-    --maroon-dark: #1a0505;
-    --maroon-mid: #2d0a0a;
-    --gold: #c9a961;
+    --maroon-dark: var(--maroon-900);
+    --maroon-mid: var(--maroon-800);
+    --gold: var(--gold-500);
     --gold-glow: rgba(201, 169, 97, 0.4);
-    --cream: #f4eae0;
-    --cream-dim: rgba(244, 234, 224, 0.6);
+    --cream: var(--cream-100);
+    --cream-dim: var(--cream-300);
     --glass: rgba(255, 255, 255, 0.03);
     --glass-border: rgba(255, 255, 255, 0.08);
 }
+
 
 body {
     background-color: var(--maroon-dark);
