@@ -127,6 +127,9 @@ async function init() {
   }
 }
 
+init();
+
+
 
 // Helper to read registrations from file
 function readData() {
