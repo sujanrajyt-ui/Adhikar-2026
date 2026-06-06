@@ -114,7 +114,7 @@ async function loadDelegates() {
 function renderCriteria() {
     if (!criteriaList) return;
     criteriaList.innerHTML = allCriteria.map(c => `
-    <div class="criteria-item">
+    <div class="criteria-item" title="${escapeHtml(c.description)}">
       <span>${escapeHtml(c.name)}</span>
       <span class="gold-text">${c.max_points} pts</span>
     </div>
