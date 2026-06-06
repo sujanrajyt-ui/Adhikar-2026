@@ -303,10 +303,15 @@ h3 {
 }
 
 .delegate-info h3 {
-
+    margin: 0;
     font-size: 1.25rem;
     font-family: 'Outfit', sans-serif;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    line-height: 1.2;
 }
+
 
 .delegate-meta {
     display: flex;
