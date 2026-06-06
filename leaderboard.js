@@ -59,12 +59,22 @@ function renderLeaderboard() {
         const items = award ? award.criteria_ids : [];
         const requiredSide = award ? award.requires_side : null;
 
-        // Apply eligibility filter (Robust case-insensitive substring match)
+        // Apply eligibility filter (Robust multi-keyword match)
         if (requiredSide) {
             data = data.filter(d => {
                 if (!d.side) return false;
                 const s = d.side.toLowerCase();
                 const r = requiredSide.toLowerCase();
+
+                // Map "ruling" to "government" and "treasury"
+                if (r === 'ruling') {
+                    return s.includes('ruling') || s.includes('government') || s.includes('treasury');
+                }
+                // Map "opposition"
+                if (r === 'opposition') {
+                    return s.includes('opposition');
+                }
+
                 return s.includes(r) || r.includes(s);
             });
         }
