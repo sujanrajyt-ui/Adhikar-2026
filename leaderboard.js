@@ -62,8 +62,8 @@ function renderLeaderboard() {
         // Apply eligibility filter (Robust multi-keyword match)
         if (requiredSide) {
             data = data.filter(d => {
-                if (!d.side) return false;
-                const s = d.side.toLowerCase();
+                const s = (d.side || d.party || "").toLowerCase();
+                if (!s) return false;
                 const r = requiredSide.toLowerCase();
 
                 // Map "ruling" to "government" and "treasury"
