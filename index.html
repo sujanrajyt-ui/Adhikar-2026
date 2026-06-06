@@ -1145,11 +1145,17 @@
             </div>
 
             <div class="awards-config-right">
-              <h3
-                style="font-family: 'Playfair Display', serif; color: var(--gold-400); font-size: 1.4rem; margin-bottom: 1.5rem;">
-                ⚙️ Eligibility Mapping</h3>
-              <p class="muted" style="font-size: 0.75rem; margin-bottom: 1.5rem;">Assign specific designations to each
-                award. Delegates with matching roles automatically enter the standings.</p>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h3
+                  style="font-family: 'Playfair Display', serif; color: var(--gold-400); font-size: 1.4rem; margin: 0;">
+                  ⚙️ Eligibility Mapping</h3>
+                <button class="btn-primary" id="btn-sync-leaderboard"
+                  style="background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%); padding: 0.6rem 1.2rem; font-size: 0.85rem; border: none; box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);">
+                  🚀 Push Update to Leaderboard
+                </button>
+              </div>
+              <p class="muted" style="font-size: 0.75rem; margin-bottom: 1.5rem;">Configure eligible designations. Click
+                'Push Update' to sync changes with the public leaderboard.</p>
 
               <div id="awards-eligibility-grid" style="display: flex; flex-direction: column; gap: 1rem;">
                 <p class="muted">Loading eligibility settings...</p>

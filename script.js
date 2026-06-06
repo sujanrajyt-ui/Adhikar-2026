@@ -1763,16 +1763,16 @@ const PARLIAMENTARY_ROLES = [
   "Minister", "Leader of Opposition", "Deputy Leader of Opposition", "Whip"
 ];
 
+let _pendingMappingChanges = {}; // Stores { awardId: { requires_role, requires_side } }
+
 function renderAwardsAdmin() {
   // 1. Render Deletion List (Left Pane)
   const listEl = document.getElementById("awards-admin-list");
   if (listEl) {
     listEl.innerHTML = _awardsCache.map(a => `
-      <div class="party-admin-row" style="background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
-        <div style="flex: 1;">
-          <strong style="color: var(--gold-400); font-size: 0.9rem;">${escapeHtml(a.name)}</strong>
-        </div>
-        <button class="btn-danger-outline" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
+      <div class="party-admin-row" style="background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.6rem 0.8rem; margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center;">
+        <strong style="color: var(--gold-400); font-size: 0.85rem;">${escapeHtml(a.name)}</strong>
+        <button class="btn-danger-outline" style="padding: 0.2rem 0.5rem; font-size: 0.65rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
       </div>
     `).join("");
   }
@@ -1787,84 +1787,138 @@ function renderAwardsAdmin() {
   }
 
   gridEl.innerHTML = _awardsCache.map(a => {
-    const currentRoles = (a.requires_role || "").split(',').map(r => r.trim().toLowerCase());
+    // Look for pending changes first, then fall back to cache
+    const pending = _pendingMappingChanges[a.id];
+    const roleStr = pending ? pending.requires_role : (a.requires_role || "");
+    const currentRoles = roleStr.split(',').map(r => r.trim().toLowerCase());
+    const currentSide = pending ? pending.requires_side : (a.requires_side || "");
+    const isDirty = !!pending;
 
     return `
-      <div class="award-admin-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-          <strong style="color: var(--gold-400); font-size: 1rem;">${escapeHtml(a.name)}</strong>
-          <span style="font-size: 0.7rem; color: #bca0a0;">ID: ${a.id}</span>
+      <div class="award-admin-box" style="background: rgba(255,255,255,0.03); border: 1px solid ${isDirty ? 'rgba(108, 92, 231, 0.4)' : 'rgba(255,255,255,0.08)'}; padding: 1rem; border-radius: 10px; margin-bottom: 1rem; transition: all 0.2s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <strong style="color: var(--gold-400); font-size: 0.95rem;">${escapeHtml(a.name)}</strong>
+          ${isDirty ? '<span style="font-size: 0.65rem; color: #a29bfe; font-weight: 600; text-transform: uppercase;">● Pending Changes</span>' : ''}
         </div>
         
-        <div class="field-grid" style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
-          <div class="checkbox-group">
-            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.5rem;">Eligible Designations (Assignment)</span>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+        <div style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+          <div>
+            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0; display: block; margin-bottom: 0.4rem;">Designations (3-col Grid)</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.4rem; background: rgba(0,0,0,0.25); padding: 0.7rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
               ${PARLIAMENTARY_ROLES.map(role => `
-                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; color: ${currentRoles.includes(role.toLowerCase()) ? '#fff' : '#bca0a0'};">
+                <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.65rem; cursor: pointer; color: ${currentRoles.includes(role.toLowerCase()) ? '#fff' : '#888'};">
                   <input type="checkbox" value="${role}" 
                          ${currentRoles.includes(role.toLowerCase()) ? 'checked' : ''}
-                         onchange="handleUpdateAwardEligibilityClick('${a.id}', this)" />
+                         onchange="handleMappingChange('${a.id}', '${role}', this.checked)" />
                   ${role}
                 </label>
               `).join('')}
             </div>
           </div>
           
-          <label class="field" style="margin-top: 0.5rem;">
-            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0;">Required Side (Restrict to bench)</span>
-            <select onchange="handleUpdateAwardSide('${a.id}', this.value)"
-                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px; font-family: inherit; font-size: 0.8rem;">
-              <option value="" ${!a.requires_side ? 'selected' : ''}>Any / Neutral</option>
-              <option value="ruling" ${a.requires_side === 'ruling' ? 'selected' : ''}>Ruling Government</option>
-              <option value="opposition" ${a.requires_side === 'opposition' ? 'selected' : ''}>Opposition</option>
-            </select>
-          </label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: end;">
+             <label class="field" style="margin:0;">
+                <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Restrict Side</span>
+                <select onchange="handleSideChange('${a.id}', this.value)"
+                        style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.4rem; border-radius: 4px; font-size: 0.75rem;">
+                  <option value="" ${!currentSide ? 'selected' : ''}>Any / Neutral</option>
+                  <option value="ruling" ${currentSide === 'ruling' ? 'selected' : ''}>Ruling Government</option>
+                  <option value="opposition" ${currentSide === 'opposition' ? 'selected' : ''}>Opposition</option>
+                </select>
+              </label>
+              <div style="font-size: 0.65rem; color: #666; font-style: italic;">ID: ${a.id}</div>
+          </div>
         </div>
       </div>
     `;
   }).join('');
 }
 
-async function handleUpdateAwardEligibilityClick(id, checkbox) {
+function handleMappingChange(id, roleName, isChecked) {
   const award = _awardsCache.find(a => a.id === id);
   if (!award) return;
 
-  let currentRoles = (award.requires_role || "").split(',').map(r => r.trim()).filter(x => x);
-  const roleName = checkbox.value;
-
-  if (checkbox.checked) {
-    if (!currentRoles.includes(roleName)) currentRoles.push(roleName);
-  } else {
-    currentRoles = currentRoles.filter(r => r !== roleName);
+  if (!_pendingMappingChanges[id]) {
+    _pendingMappingChanges[id] = {
+      requires_role: award.requires_role || "",
+      requires_side: award.requires_side || ""
+    };
   }
 
-  const roleStr = currentRoles.join(', ');
-  await saveAwardUpdate(id, { ...award, requires_role: roleStr });
+  let roles = _pendingMappingChanges[id].requires_role.split(',').map(r => r.trim()).filter(x => x);
+  if (isChecked) {
+    if (!roles.includes(roleName)) roles.push(roleName);
+  } else {
+    roles = roles.filter(r => r !== roleName);
+  }
+  _pendingMappingChanges[id].requires_role = roles.join(', ');
+
+  // If result is same as original, clear pending
+  if (_pendingMappingChanges[id].requires_role === (award.requires_role || "") &&
+    _pendingMappingChanges[id].requires_side === (award.requires_side || "")) {
+    delete _pendingMappingChanges[id];
+  }
+
+  renderAwardsAdmin();
 }
 
-async function handleUpdateAwardSide(id, side) {
+function handleSideChange(id, side) {
   const award = _awardsCache.find(a => a.id === id);
   if (!award) return;
-  await saveAwardUpdate(id, { ...award, requires_side: side });
+
+  if (!_pendingMappingChanges[id]) {
+    _pendingMappingChanges[id] = {
+      requires_role: award.requires_role || "",
+      requires_side: award.requires_side || ""
+    };
+  }
+  _pendingMappingChanges[id].requires_side = side;
+
+  if (_pendingMappingChanges[id].requires_role === (award.requires_role || "") &&
+    _pendingMappingChanges[id].requires_side === (award.requires_side || "")) {
+    delete _pendingMappingChanges[id];
+  }
+  renderAwardsAdmin();
 }
 
-async function saveAwardUpdate(id, updatedData) {
+async function handleSyncLeaderboard() {
+  const changeCount = Object.keys(_pendingMappingChanges).length;
+  if (changeCount === 0) {
+    showToast("No changes to sync", "info");
+    return;
+  }
+
+  const btn = document.getElementById("btn-sync-leaderboard");
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Syncing...";
+  }
+
   try {
-    const res = await fetch(`${API_BASE}/admin/awards/${id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", ...adminHeaders() },
-      body: JSON.stringify(updatedData),
-    });
-    if (!res.ok) throw new Error("Failed to update award");
+    for (const id in _pendingMappingChanges) {
+      const data = _pendingMappingChanges[id];
+      const award = _awardsCache.find(a => a.id === id);
 
-    const award = _awardsCache.find(a => a.id === id);
-    Object.assign(award, updatedData);
+      const res = await fetch(`${API_BASE}/admin/awards/${id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...adminHeaders() },
+        body: JSON.stringify({ ...award, ...data }),
+      });
+      if (!res.ok) throw new Error(`Failed to update ${award.name}`);
 
-    showToast(`Eligibility updated for ${award.name}`);
+      Object.assign(award, data);
+    }
+
+    _pendingMappingChanges = {};
+    showToast(`Leaderboard updated successfully (${changeCount} awards sync'd)`);
     renderAwardsAdmin();
   } catch (err) {
     showToast(err.message, "error");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = "🚀 Push Update to Leaderboard";
+    }
   }
 }
 
@@ -1974,6 +2028,7 @@ async function handleDeleteAward(id) {
 function initAwardsAdmin() {
   document.getElementById("award-form")?.addEventListener("submit", handleCreateAward);
   document.getElementById("award-name")?.addEventListener("input", updateFormulaPreview);
+  document.getElementById("btn-sync-leaderboard")?.addEventListener("click", handleSyncLeaderboard);
   loadAwards();
 }
 
