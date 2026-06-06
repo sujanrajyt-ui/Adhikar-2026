@@ -6,216 +6,429 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Parliamentary Leadership | ADHIKAR'26</title>
     <link rel="icon" type="image/x-icon" href="assets/logo.png">
-    <link rel="stylesheet" href="styles.css">
-    <link rel="stylesheet" href="leaderboard.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
         rel="stylesheet">
     <style>
-        .leadership-container {
-            padding: 4rem 1rem;
-            max-width: 1000px;
+        :root {
+            --maroon-900: #1a0a0a;
+            --maroon-800: #2a1111;
+            --maroon-700: #3d1a1a;
+            --gold-400: #d4a853;
+            --gold-500: #c9973b;
+            --cream-100: #faf5f0;
+            --cream-300: #c9b8a3;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--maroon-900);
+            color: var(--cream-100);
+            font-family: 'Outfit', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* === Ambient glow === */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -40%;
+            left: -20%;
+            width: 60%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(212, 168, 83, 0.06) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* === Header === */
+        .ldr-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(26, 10, 10, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 1rem 2rem;
+        }
+
+        .ldr-header-inner {
+            max-width: 1100px;
             margin: 0 auto;
-        }
-
-        .leadership-hero {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .leadership-hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.2rem, 5vw, 3.5rem);
-            background: linear-gradient(to bottom, #fff, var(--gold-400));
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin: 0.5rem 0;
-        }
-
-        .leadership-hero .hero-sub {
-            color: var(--cream-300);
-            font-size: 1rem;
-            max-width: 550px;
-            margin: 0 auto;
-        }
-
-        .section-label {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.4rem;
-            color: var(--gold-400);
-            margin: 2.5rem 0 1.5rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 0.75rem;
         }
 
-        .section-label .icon {
-            font-size: 1.6rem;
-        }
-
-        .leader-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.25rem;
-        }
-
-        .leader-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.01));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 1.5rem;
-            transition: transform 0.3s, border-color 0.3s;
-        }
-
-        .leader-card:hover {
-            transform: translateY(-4px);
-            border-color: var(--gold-400);
-        }
-
-        .leader-role {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: var(--gold-400);
+        .ldr-brand {
             font-weight: 700;
-            margin-bottom: 0.5rem;
-        }
-
-        .leader-name {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 0.4rem;
-        }
-
-        .leader-meta {
-            font-size: 0.8rem;
-            color: var(--cream-300);
-            line-height: 1.5;
-        }
-
-        .leader-meta span {
-            display: block;
-        }
-
-        .leader-badge {
-            display: inline-block;
-            margin-top: 0.75rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
+            font-size: 1.1rem;
             letter-spacing: 1px;
         }
 
-        .badge-ruling {
-            background: rgba(76, 175, 80, 0.15);
-            color: #81c784;
-            border: 1px solid rgba(76, 175, 80, 0.3);
-        }
-
-        .badge-opposition {
-            background: rgba(244, 67, 54, 0.15);
-            color: #ef9a9a;
-            border: 1px solid rgba(244, 67, 54, 0.3);
-        }
-
-        .badge-neutral {
-            background: rgba(255, 193, 7, 0.15);
+        .ldr-brand .gold {
             color: var(--gold-400);
-            border: 1px solid rgba(255, 193, 7, 0.3);
         }
 
+        .ldr-brand .tag {
+            font-size: 0.6rem;
+            background: rgba(212, 168, 83, 0.15);
+            color: var(--gold-400);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            margin-left: 0.5rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            vertical-align: middle;
+            font-weight: 600;
+        }
+
+        .btn-back {
+            color: var(--cream-300);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.4rem 1rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            border-color: var(--gold-400);
+            color: var(--gold-400);
+        }
+
+        /* === Hero === */
+        .ldr-hero {
+            max-width: 700px;
+            margin: 0 auto;
+            text-align: center;
+            padding: 4rem 1.5rem 2rem;
+        }
+
+        .ldr-eyebrow {
+            font-size: 0.7rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gold-400);
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+        }
+
+        .ldr-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            background: linear-gradient(180deg, #fff 30%, var(--gold-400) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.15;
+            margin-bottom: 0.75rem;
+        }
+
+        .ldr-hero p {
+            color: var(--cream-300);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* === Content === */
+        .ldr-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.5rem 4rem;
+        }
+
+        /* === Section Dividers === */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 3rem 0 1.5rem;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(212, 168, 83, 0.2), transparent);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+            color: var(--gold-400);
+            white-space: nowrap;
+            letter-spacing: 1px;
+        }
+
+        .section-icon {
+            font-size: 1.3rem;
+        }
+
+        /* === Cards Grid === */
+        .leaders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .leader-card {
+            position: relative;
+            background: linear-gradient(145deg, rgba(42, 17, 17, 0.9), rgba(26, 10, 10, 0.95));
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            padding: 1.5rem 1.5rem 1.25rem;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .leader-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--gold-400), transparent);
+            opacity: 0;
+            transition: opacity 0.35s;
+        }
+
+        .leader-card:hover {
+            transform: translateY(-3px);
+            border-color: rgba(212, 168, 83, 0.2);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .leader-card:hover::before {
+            opacity: 1;
+        }
+
+        /* PM / Speaker highlight */
+        .leader-card.card-highlight {
+            border-color: rgba(212, 168, 83, 0.15);
+            background: linear-gradient(145deg, rgba(61, 26, 26, 0.95), rgba(42, 17, 17, 0.98));
+        }
+
+        .leader-card.card-highlight::before {
+            opacity: 0.5;
+        }
+
+        .leader-card .role-tag {
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2.5px;
+            color: var(--gold-400);
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .role-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dot-ruling {
+            background: #66bb6a;
+        }
+
+        .dot-opposition {
+            background: #ef5350;
+        }
+
+        .dot-neutral {
+            background: var(--gold-400);
+        }
+
+        .leader-card .name {
+            font-size: 1.15rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .leader-card .meta {
+            font-size: 0.78rem;
+            color: var(--cream-300);
+            line-height: 1.7;
+        }
+
+        .leader-card .meta span {
+            display: block;
+        }
+
+        .meta-label {
+            opacity: 0.5;
+        }
+
+        .side-badge {
+            display: inline-block;
+            margin-top: 0.75rem;
+            font-size: 0.55rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+        }
+
+        .side-ruling {
+            background: rgba(76, 175, 80, 0.1);
+            color: #81c784;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+        }
+
+        .side-opposition {
+            background: rgba(244, 67, 54, 0.1);
+            color: #ef9a9a;
+            border: 1px solid rgba(244, 67, 54, 0.2);
+        }
+
+        .side-neutral {
+            background: rgba(255, 193, 7, 0.1);
+            color: var(--gold-400);
+            border: 1px solid rgba(255, 193, 7, 0.2);
+        }
+
+        /* === Empty State === */
         .empty-state {
             text-align: center;
-            padding: 3rem 1rem;
+            padding: 2rem;
             color: var(--cream-300);
-            opacity: 0.6;
-            font-size: 0.9rem;
+            opacity: 0.4;
+            font-size: 0.85rem;
+            font-style: italic;
         }
 
-        @media (max-width: 600px) {
-            .leader-grid {
+        /* === Footer === */
+        .ldr-footer {
+            text-align: center;
+            padding: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 0.75rem;
+            color: var(--cream-300);
+            opacity: 0.5;
+        }
+
+        /* === Responsive === */
+        @media (max-width: 640px) {
+            .leaders-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .ldr-header {
+                padding: 0.75rem 1rem;
+            }
+
+            .ldr-hero {
+                padding: 3rem 1rem 1.5rem;
             }
         }
     </style>
 </head>
 
 <body>
-    <header class="scores-header">
-        <div class="container header-inner">
-            <div class="brand">
-                <span>ADHIKAR<span class="gold-text">'26</span> <span class="tabbing-badge">LEADERSHIP</span></span>
-            </div>
-            <a href="/" class="btn-ghost">Back to Home</a>
+    <header class="ldr-header">
+        <div class="ldr-header-inner">
+            <div class="ldr-brand">ADHIKAR<span class="gold">'26</span><span class="tag">Leadership</span></div>
+            <a href="/" class="btn-back">← Back to Home</a>
         </div>
     </header>
 
-    <main class="leadership-container">
-        <section class="leadership-hero">
-            <p class="kicker kicker-gold">The Elected</p>
-            <h1>Parliamentary Leadership</h1>
-            <p class="hero-sub">The elected officials steering this session of India's Mock Parliament.</p>
-        </section>
+    <section class="ldr-hero">
+        <p class="ldr-eyebrow">The Elected</p>
+        <h1>Parliamentary Leadership</h1>
+        <p>The elected officials steering this session of India's Mock Parliament — from the Treasury Bench to the
+            Opposition and the Chair.</p>
+    </section>
 
-        <!-- Government Leadership -->
-        <h2 class="section-label"><span class="icon">🏛️</span> Government (Treasury Bench)</h2>
-        <div id="gov-grid" class="leader-grid">
+    <main class="ldr-content">
+        <!-- Speakers & House Officers -->
+        <div class="section-divider">
+            <span class="section-icon">⚖️</span>
+            <span class="section-title">The Chair & House Officers</span>
+        </div>
+        <div id="chair-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
         </div>
 
-        <!-- Opposition Leadership -->
-        <h2 class="section-label"><span class="icon">⚔️</span> Opposition Bench</h2>
-        <div id="opp-grid" class="leader-grid">
+        <!-- Government -->
+        <div class="section-divider">
+            <span class="section-icon">🏛️</span>
+            <span class="section-title">Government — Treasury Bench</span>
+        </div>
+        <div id="gov-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
         </div>
 
-        <!-- Neutral / Speaker / House Officers -->
-        <h2 class="section-label"><span class="icon">⚖️</span> House Officers</h2>
-        <div id="neutral-grid" class="leader-grid">
+        <!-- Opposition -->
+        <div class="section-divider">
+            <span class="section-icon">⚔️</span>
+            <span class="section-title">Opposition Bench</span>
+        </div>
+        <div id="opp-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
         </div>
     </main>
 
-    <footer class="footer">
-        <div class="container">
-            <p>&copy; 2026 Adhikar Mock Parliament. All rights reserved.</p>
-        </div>
+    <footer class="ldr-footer">
+        <p>&copy; 2026 Adhikar Mock Parliament. All rights reserved.</p>
     </footer>
 
     <script>
         const API_BASE = '/api';
 
+        const CHAIR_ROLES = ['Speaker of Lok Sabha', 'Deputy Speaker', 'Secretary General', 'Marshal of the House'];
         const GOV_ROLES = ['Prime Minister', 'Deputy Prime Minister', 'Cabinet Minister', 'Leader of the House'];
         const OPP_ROLES = ['Leader of Opposition', 'Deputy Leader of Opposition'];
+        const HIGHLIGHT_ROLES = ['Prime Minister', 'Speaker of Lok Sabha', 'Leader of Opposition'];
 
         function escapeHtml(s) {
-            return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+            return String(s ?? '').replace(/[&<>"']/g, m =>
+                ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
+        }
+
+        function getSideClass(role) {
+            if (GOV_ROLES.includes(role)) return 'ruling';
+            if (OPP_ROLES.includes(role)) return 'opposition';
+            return 'neutral';
         }
 
         function makeCard(leader) {
-            const isGov = GOV_ROLES.includes(leader.role);
-            const isOpp = OPP_ROLES.includes(leader.role);
-            const badgeClass = isGov ? 'badge-ruling' : isOpp ? 'badge-opposition' : 'badge-neutral';
-            const badgeText = isGov ? 'Ruling' : isOpp ? 'Opposition' : 'Neutral';
+            const side = getSideClass(leader.role);
+            const isHighlight = HIGHLIGHT_ROLES.includes(leader.role);
 
             return `
-                <div class="leader-card">
-                    <div class="leader-role">${escapeHtml(leader.role)}</div>
-                    <div class="leader-name">${escapeHtml(leader.name)}</div>
-                    <div class="leader-meta">
-                        ${leader.party ? `<span>Party: ${escapeHtml(leader.party)}</span>` : ''}
-                        ${leader.committee ? `<span>Committee: ${escapeHtml(leader.committee)}</span>` : ''}
-                        ${leader.portfolio ? `<span>Portfolio: ${escapeHtml(leader.portfolio)}</span>` : ''}
+                <div class="leader-card ${isHighlight ? 'card-highlight' : ''}">
+                    <div class="role-tag">
+                        <span class="role-dot dot-${side}"></span>
+                        ${escapeHtml(leader.role)}
                     </div>
-                    <span class="leader-badge ${badgeClass}">${badgeText}</span>
+                    <div class="name">${escapeHtml(leader.name)}</div>
+                    <div class="meta">
+                        ${leader.party ? `<span><span class="meta-label">Party:</span> ${escapeHtml(leader.party)}</span>` : ''}
+                        ${leader.committee ? `<span><span class="meta-label">Committee:</span> ${escapeHtml(leader.committee)}</span>` : ''}
+                        ${leader.portfolio ? `<span><span class="meta-label">Portfolio:</span> ${escapeHtml(leader.portfolio)}</span>` : ''}
+                    </div>
+                    <span class="side-badge side-${side}">${side}</span>
                 </div>
             `;
         }
@@ -225,13 +438,16 @@
                 const res = await fetch(`${API_BASE}/public/leadership`);
                 const leaders = await res.json();
 
+                const chairLeaders = leaders.filter(l => CHAIR_ROLES.includes(l.role));
                 const govLeaders = leaders.filter(l => GOV_ROLES.includes(l.role));
                 const oppLeaders = leaders.filter(l => OPP_ROLES.includes(l.role));
-                const neutralLeaders = leaders.filter(l => !GOV_ROLES.includes(l.role) && !OPP_ROLES.includes(l.role));
 
-                // Sort by role importance
-                const roleOrder = [...GOV_ROLES, ...OPP_ROLES, 'Speaker of Lok Sabha', 'Deputy Speaker', 'Secretary General', 'Marshal of the House'];
+                const roleOrder = [...CHAIR_ROLES, ...GOV_ROLES, ...OPP_ROLES];
                 const sortByRole = (a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
+
+                document.getElementById('chair-grid').innerHTML = chairLeaders.length
+                    ? chairLeaders.sort(sortByRole).map(makeCard).join('')
+                    : '<div class="empty-state">No house officers assigned yet.</div>';
 
                 document.getElementById('gov-grid').innerHTML = govLeaders.length
                     ? govLeaders.sort(sortByRole).map(makeCard).join('')
@@ -240,15 +456,11 @@
                 document.getElementById('opp-grid').innerHTML = oppLeaders.length
                     ? oppLeaders.sort(sortByRole).map(makeCard).join('')
                     : '<div class="empty-state">No opposition leadership assigned yet.</div>';
-
-                document.getElementById('neutral-grid').innerHTML = neutralLeaders.length
-                    ? neutralLeaders.sort(sortByRole).map(makeCard).join('')
-                    : '<div class="empty-state">No house officers assigned yet.</div>';
             } catch (err) {
                 console.error('Failed to load leadership', err);
-                document.getElementById('gov-grid').innerHTML = '<div class="empty-state">Could not load data.</div>';
-                document.getElementById('opp-grid').innerHTML = '<div class="empty-state">Could not load data.</div>';
-                document.getElementById('neutral-grid').innerHTML = '<div class="empty-state">Could not load data.</div>';
+                ['chair-grid', 'gov-grid', 'opp-grid'].forEach(id => {
+                    document.getElementById(id).innerHTML = '<div class="empty-state">Could not load data.</div>';
+                });
             }
         }
 

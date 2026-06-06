@@ -899,6 +899,25 @@ function renderRows() {
           <option value="">— Committee —</option>
           ${comms.map(c => `<option value="${escapeHtml(c.name)}" ${r.assigned_committee === c.name ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
         </select>
+        <select class="assign-select" id="role-sel-${r.id}" title="Elected Role" onchange="handleElectedRoleChange('${r.id}', this.value)">
+          <option value="">— Role —</option>
+          <optgroup label="Government">
+            <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
+            <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
+            <option ${r.elected_role === 'Cabinet Minister' ? 'selected' : ''}>Cabinet Minister</option>
+            <option ${r.elected_role === 'Leader of the House' ? 'selected' : ''}>Leader of the House</option>
+          </optgroup>
+          <optgroup label="Opposition">
+            <option ${r.elected_role === 'Leader of Opposition' ? 'selected' : ''}>Leader of Opposition</option>
+            <option ${r.elected_role === 'Deputy Leader of Opposition' ? 'selected' : ''}>Deputy Leader of Opposition</option>
+          </optgroup>
+          <optgroup label="House Officers">
+            <option ${r.elected_role === 'Speaker of Lok Sabha' ? 'selected' : ''}>Speaker of Lok Sabha</option>
+            <option ${r.elected_role === 'Deputy Speaker' ? 'selected' : ''}>Deputy Speaker</option>
+            <option ${r.elected_role === 'Secretary General' ? 'selected' : ''}>Secretary General</option>
+            <option ${r.elected_role === 'Marshal of the House' ? 'selected' : ''}>Marshal of the House</option>
+          </optgroup>
+        </select>
         ${alreadySent
         ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Resend</button>`
         : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Inform</button>`
@@ -1407,6 +1426,26 @@ async function handlePortfolioChange(id, value) {
     setTimeout(() => input?.classList.remove("saved"), 2000);
   } catch (err) {
     showToast("Portfolio save failed", "error");
+  }
+}
+
+async function handleElectedRoleChange(id, value) {
+  const input = document.getElementById(`role-sel-${id}`);
+  try {
+    const res = await fetch(`${API_BASE}/admin/registrations/${id}/elected_role`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ role: value }),
+    });
+    if (!res.ok) throw new Error("Role save failed");
+
+    const reg = lastRegistrations.find(r => r.id === id);
+    if (reg) reg.elected_role = value;
+
+    input?.classList.add("saved");
+    setTimeout(() => input?.classList.remove("saved"), 2000);
+  } catch (err) {
+    showToast("Role save failed", "error");
   }
 }
 
