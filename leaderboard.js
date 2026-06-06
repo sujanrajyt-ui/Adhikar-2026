@@ -65,10 +65,12 @@ function renderLeaderboard() {
         // Apply eligibility filter (Robust multi-keyword match)
         if (requiredSide || requiredRole) {
             data = data.filter(d => {
-                // Check Role first if specified
+                // Check Role first if specified (Supports comma-separated OR matching)
                 if (requiredRole) {
+                    const roles = requiredRole.split(',').map(r => r.trim().toLowerCase());
                     const er = (d.elected_role || "").toLowerCase();
-                    if (!er.includes(requiredRole.toLowerCase())) return false;
+                    const matched = roles.some(r => er.includes(r));
+                    if (!matched) return false;
                 }
 
                 // Check Side
