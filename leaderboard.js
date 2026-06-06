@@ -68,9 +68,20 @@ function renderLeaderboard() {
             data = data.filter(d => {
                 // Check Role first if specified (Supports comma-separated OR matching)
                 if (requiredRole) {
-                    const roles = requiredRole.split(',').map(r => r.trim().toLowerCase());
-                    const er = (d.elected_role || "").toLowerCase();
-                    const matched = roles.some(r => er.includes(r));
+                    const reqRoles = requiredRole.split(',').map(r => r.trim().toLowerCase());
+                    const userRole = (d.elected_role || "").trim().toLowerCase();
+
+                    if (!userRole) return false;
+
+                    const matched = reqRoles.some(r => {
+                        // Strict check for Speaker/Chair roles to avoid Deputy Speaker mismatch
+                        if (r === 'speaker') {
+                            return userRole === 'speaker' || userRole === 'chair' || userRole === 'the speaker';
+                        }
+                        // Partial match for everything else (e.g. "Minister" matches "Minister of Finance")
+                        return userRole.includes(r);
+                    });
+
                     if (!matched) return false;
                 }
 
@@ -96,7 +107,8 @@ function renderLeaderboard() {
             // Neutral award fallback: Exclude House Officers by default
             data = data.filter(d => {
                 const er = (d.elected_role || "").toLowerCase();
-                return !er.includes("speaker");
+                // Exclude Speaker and Deputy Speaker from general awards
+                return !er.includes("speaker") && !er.includes("chair");
             });
         }
 

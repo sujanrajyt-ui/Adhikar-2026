@@ -625,10 +625,137 @@ module.exports = {
   // ============ Awards ============
 
   async getAwards() {
-    // Always read from the local JSON file — awards are static config
-    // and the PG table may not have all columns (e.g. requires_role)
-    return JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
+    // Hardcoded for absolute reliability on Vercel serverless
+    return [
+      {
+        "id": "awd_speaker",
+        "name": "Best Student Speaker",
+        "criteria_ids": [
+          { "id": "crit_comm", "weight": 0.30 },
+          { "id": "crit_research", "weight": 0.25 },
+          { "id": "crit_rebuttal", "weight": 0.20 },
+          { "id": "crit_lead", "weight": 0.15 },
+          { "id": "crit_conduct", "weight": 0.10 }
+        ],
+        "requires_role": "Speaker",
+        "created_at": "2026-06-06T15:35:00Z"
+      },
+      {
+        "id": "awd_debater",
+        "name": "Exceptional Debater",
+        "criteria_ids": [
+          { "id": "crit_rebuttal", "weight": 0.40 },
+          { "id": "crit_comm", "weight": 0.25 },
+          { "id": "crit_research", "weight": 0.20 },
+          { "id": "crit_conduct", "weight": 0.10 },
+          { "id": "crit_lead", "weight": 0.05 }
+        ],
+        "created_at": "2026-06-06T15:35:01Z"
+      },
+      {
+        "id": "awd_ruling",
+        "name": "Asset of the Ruling Government",
+        "criteria_ids": [
+          { "id": "crit_research", "weight": 0.35 },
+          { "id": "crit_rebuttal", "weight": 0.25 },
+          { "id": "crit_lead", "weight": 0.20 },
+          { "id": "crit_comm", "weight": 0.15 },
+          { "id": "crit_conduct", "weight": 0.05 }
+        ],
+        "requires_side": "ruling",
+        "created_at": "2026-06-06T15:35:02Z"
+      },
+      {
+        "id": "awd_opposition",
+        "name": "Asset of the Opposition",
+        "criteria_ids": [
+          { "id": "crit_rebuttal", "weight": 0.35 },
+          { "id": "crit_research", "weight": 0.30 },
+          { "id": "crit_comm", "weight": 0.20 },
+          { "id": "crit_lead", "weight": 0.10 },
+          { "id": "crit_conduct", "weight": 0.05 }
+        ],
+        "requires_side": "opposition",
+        "created_at": "2026-06-06T15:35:03Z"
+      },
+      {
+        "id": "awd_leader",
+        "name": "Best Leader of the House",
+        "criteria_ids": [
+          { "id": "crit_lead", "weight": 0.40 },
+          { "id": "crit_comm", "weight": 0.20 },
+          { "id": "crit_research", "weight": 0.20 },
+          { "id": "crit_rebuttal", "weight": 0.10 },
+          { "id": "crit_conduct", "weight": 0.10 }
+        ],
+        "requires_role": "Prime Minister, Deputy Prime Minister, Leader of Opposition",
+        "created_at": "2026-06-06T15:35:04Z"
+      },
+      {
+        "id": "awd_minister",
+        "name": "Best Minister",
+        "criteria_ids": [
+          { "id": "crit_research", "weight": 0.45 },
+          { "id": "crit_comm", "weight": 0.20 },
+          { "id": "crit_lead", "weight": 0.15 },
+          { "id": "crit_rebuttal", "weight": 0.10 },
+          { "id": "crit_conduct", "weight": 0.10 }
+        ],
+        "requires_side": "ruling",
+        "requires_role": "Minister",
+        "created_at": "2026-06-06T15:35:05Z"
+      },
+      {
+        "id": "awd_creative",
+        "name": "Most Creative Mind",
+        "criteria_ids": [
+          { "id": "crit_innov", "weight": 0.40 },
+          { "id": "crit_research", "weight": 0.25 },
+          { "id": "crit_comm", "weight": 0.15 },
+          { "id": "crit_lead", "weight": 0.10 },
+          { "id": "crit_rebuttal", "weight": 0.10 }
+        ],
+        "created_at": "2026-06-06T15:35:06Z"
+      },
+      {
+        "id": "awd_orator",
+        "name": "Best Orator",
+        "criteria_ids": [
+          { "id": "crit_comm", "weight": 0.50 },
+          { "id": "crit_research", "weight": 0.20 },
+          { "id": "crit_conduct", "weight": 0.15 },
+          { "id": "crit_lead", "weight": 0.10 },
+          { "id": "crit_rebuttal", "weight": 0.05 }
+        ],
+        "created_at": "2026-06-06T15:35:07Z"
+      },
+      {
+        "id": "awd_policy",
+        "name": "Distinguished Policy Advocate",
+        "criteria_ids": [
+          { "id": "crit_research", "weight": 0.50 },
+          { "id": "crit_comm", "weight": 0.20 },
+          { "id": "crit_innov", "weight": 0.15 },
+          { "id": "crit_rebuttal", "weight": 0.10 },
+          { "id": "crit_conduct", "weight": 0.05 }
+        ],
+        "created_at": "2026-06-06T15:35:08Z"
+      },
+      {
+        "id": "awd_presence",
+        "name": "Most Impactful Presence",
+        "criteria_ids": [
+          { "id": "crit_comm", "weight": 0.35 },
+          { "id": "crit_lead", "weight": 0.25 },
+          { "id": "crit_rebuttal", "weight": 0.20 },
+          { "id": "crit_conduct", "weight": 0.10 },
+          { "id": "crit_research", "weight": 0.10 }
+        ],
+        "created_at": "2026-06-06T15:35:09Z"
+      }
+    ];
   },
+
 
   async createAward(data) {
     const id = data.id || ('awd_' + Math.random().toString(36).substr(2, 9));
