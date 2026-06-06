@@ -65,10 +65,32 @@ function renderLeaderboard() {
                 return sum + ((d.criteriaScores[cid] || 0) * weight);
             }, 0);
         });
-        data.sort((a, b) => b.awardScore - a.awardScore);
+
+        // Tie-breaking
+        data.sort((a, b) => {
+            // Main score
+            if (b.awardScore !== a.awardScore) return b.awardScore - a.awardScore;
+
+            // Rule 1: Primary Criterion (largest weight)
+            if (items.length > 0) {
+                const primaryItem = items.reduce((prev, current) => (prev.weight > current.weight) ? prev : current);
+                const pCid = primaryItem.id || primaryItem;
+                const scoreA = a.criteriaScores[pCid] || 0;
+                const scoreB = b.criteriaScores[pCid] || 0;
+                if (scoreB !== scoreA) return scoreB - scoreA;
+            }
+
+            // Rule 2: Overall Common Score
+            return b.totalScore - a.totalScore;
+        });
     } else {
         // Sort by specific criteria score
-        data.sort((a, b) => (b.criteriaScores[filter] || 0) - (a.criteriaScores[filter] || 0));
+        data.sort((a, b) => {
+            const scoreA = a.criteriaScores[filter] || 0;
+            const scoreB = b.criteriaScores[filter] || 0;
+            if (scoreB !== scoreA) return scoreB - scoreA;
+            return b.totalScore - a.totalScore; // Tier 2 tie-break
+        });
     }
 
     renderPodium(data);

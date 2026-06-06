@@ -525,8 +525,9 @@ module.exports = {
     }
   },
 
-  async createCriteria({ name, max_points, description }) {
-    const id = 'C-' + Date.now().toString(36).toUpperCase();
+  async createCriteria(data) {
+    const id = data.id || ('C-' + Date.now().toString(36).toUpperCase());
+    const { name, max_points, description } = data;
     const now = new Date().toISOString();
     const entry = { id, name, max_points: parseInt(max_points, 10), description: description || '', created_at: now };
     if (isPg) {
@@ -614,8 +615,9 @@ module.exports = {
     }
   },
 
-  async createAward({ name, criteria_ids }) {
-    const id = 'awd_' + Math.random().toString(36).substr(2, 9);
+  async createAward(data) {
+    const id = data.id || ('awd_' + Math.random().toString(36).substr(2, 9));
+    const { name, criteria_ids } = data;
     const now = new Date().toISOString();
     if (isPg) {
       await pool.query(`
