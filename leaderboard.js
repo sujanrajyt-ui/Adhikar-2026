@@ -30,21 +30,18 @@ async function fetchData() {
 }
 
 function renderCriteriaOptions() {
-    // 1. Add Single Criteria Awards
-    let options = allData.criteria.map(c =>
-        `<option value="${c.id}">Specific Metric: ${c.name}</option>`
-    ).join('');
+    // Highly simplified: Only show Overall and the Special Awards to reduce clutter
+    let options = `<option value="overall">🏆 Overall Excellence</option>`;
 
-    // 2. Add Composite Formula Awards
     if (allData.awards && allData.awards.length > 0) {
-        options += `<optgroup label="Custom Award Standings">`;
+        options += '<optgroup label="✨ Special Awards">';
         options += allData.awards.map(a =>
             `<option value="${a.id}">Award: ${a.name}</option>`
         ).join('');
-        options += `</optgroup>`;
+        options += '</optgroup>';
     }
 
-    awardSelector.innerHTML = `<option value="overall">Overall Excellence (All Metrics)</option>` + options;
+    awardSelector.innerHTML = options;
 }
 
 function renderLeaderboard() {
