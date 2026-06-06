@@ -3,7 +3,7 @@
  */
 
 const API_BASE = '/api';
-let allData = { leaderboard: [], criteria: [] };
+let allData = { leaderboard: [], criteria: [], awards: [] };
 
 // Elements
 const awardSelector = document.getElementById('award-selector');
@@ -20,7 +20,8 @@ async function init() {
 async function fetchData() {
     try {
         const res = await fetch(`${API_BASE}/public/leaderboard`);
-        allData = await res.json();
+        const data = await res.json();
+        allData = data;
         updateTime.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     } catch (err) {
         console.error("Failed to fetch leaderboard", err);
@@ -28,10 +29,21 @@ async function fetchData() {
 }
 
 function renderCriteriaOptions() {
-    const options = allData.criteria.map(c =>
-        `<option value="${c.id}">Specific Award: ${c.name}</option>`
+    // 1. Add Single Criteria Awards
+    let options = allData.criteria.map(c =>
+        `<option value="${c.id}">Specific Metric: ${c.name}</option>`
     ).join('');
-    awardSelector.innerHTML += options;
+
+    // 2. Add Composite Formula Awards
+    if (allData.awards && allData.awards.length > 0) {
+        options += `<optgroup label="Custom Award Standings">`;
+        options += allData.awards.map(a =>
+            `<option value="${a.id}">Award: ${a.name}</option>`
+        ).join('');
+        options += `</optgroup>`;
+    }
+
+    awardSelector.innerHTML = `<option value="overall">Overall Excellence (All Metrics)</option>` + options;
 }
 
 function renderLeaderboard() {
@@ -40,9 +52,19 @@ function renderLeaderboard() {
 
     if (filter === 'overall') {
         // Already sorted by totalScore from backend
+        data.sort((a, b) => b.totalScore - a.totalScore);
+    } else if (filter.startsWith('awd_')) {
+        // Dynamic Award Formula
+        const award = allData.awards.find(a => a.id === filter);
+        const criteriaIds = award ? award.criteria_ids : [];
+
+        data.forEach(d => {
+            d.awardScore = criteriaIds.reduce((sum, cid) => sum + (d.criteriaScores[cid] || 0), 0);
+        });
+        data.sort((a, b) => b.awardScore - a.awardScore);
     } else {
         // Sort by specific criteria score
-        data.sort((a, b) => b.criteriaScores[filter] - a.criteriaScores[filter]);
+        data.sort((a, b) => (b.criteriaScores[filter] || 0) - (a.criteriaScores[filter] || 0));
     }
 
     renderPodium(data);
@@ -106,6 +128,8 @@ function renderTable(data, filter) {
 function getDisplayScore(delegate, filter) {
     if (filter === 'overall') {
         return delegate.totalScore.toFixed(1);
+    } else if (filter.startsWith('awd_')) {
+        return (delegate.awardScore || 0).toFixed(1);
     } else {
         return (delegate.criteriaScores[filter] || 0).toFixed(1);
     }

@@ -973,6 +973,23 @@
               </form>
               <div id="criteria-admin-list" class="parties-admin-list"></div>
             </div>
+
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title" style="color: var(--gold-400);">Award Formula Editor</h3>
+              <p class="muted" style="font-size: 0.75rem; margin-bottom: 1rem;">Select criteria to define an award's
+                total score.</p>
+              <form id="award-form" class="party-form">
+                <input type="text" id="award-name" placeholder="Award Name (e.g. Best Speaker)" required />
+                <div id="award-criteria-selection" class="award-criteria-selection"
+                  style="max-height: 120px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 4px;">
+                  <!-- Checkboxes injected by JS -->
+                  <p class="muted" style="font-size: 0.7rem;">Load criteria to select...</p>
+                </div>
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
+                  Award</button>
+              </form>
+              <div id="awards-admin-list" class="parties-admin-list"></div>
+            </div>
           </div>
 
           <!-- Assignment Overview -->

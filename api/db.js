@@ -7,6 +7,7 @@ const PARTIES_FILE = path.join(__dirname, 'parties.json');
 const JUDGES_FILE = path.join(__dirname, 'judges.json');
 const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
 const SCORES_FILE = path.join(__dirname, 'scores.json');
+const AWARDS_FILE = path.join(__dirname, 'awards.json');
 const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
 
 
@@ -98,6 +99,16 @@ async function init() {
         );
       `);
 
+      // Awards table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS awards (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          criteria_ids TEXT NOT NULL, -- JSON array of criteria IDs
+          created_at VARCHAR(100) NOT NULL
+        );
+      `);
+
 
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
@@ -120,6 +131,9 @@ async function init() {
     }
     if (!fs.existsSync(SCORES_FILE)) {
       fs.writeFileSync(SCORES_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(AWARDS_FILE)) {
+      fs.writeFileSync(AWARDS_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
   }
 
@@ -586,6 +600,46 @@ module.exports = {
       return res.rows;
     } else {
       return JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
+    }
+  },
+
+  // ============ Awards ============
+
+  async getAwards() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM awards ORDER BY created_at DESC');
+      return res.rows.map(r => ({ ...r, criteria_ids: JSON.parse(r.criteria_ids) }));
+    } else {
+      return JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
+    }
+  },
+
+  async createAward({ name, criteria_ids }) {
+    const id = 'awd_' + Math.random().toString(36).substr(2, 9);
+    const now = new Date().toISOString();
+    if (isPg) {
+      await pool.query(`
+        INSERT INTO awards (id, name, criteria_ids, created_at)
+        VALUES ($1, $2, $3, $4)
+      `, [id, name, JSON.stringify(criteria_ids), now]);
+    } else {
+      const list = JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
+      list.push({ id, name, criteria_ids, created_at: now });
+      fs.writeFileSync(AWARDS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return { id, name, criteria_ids, created_at: now };
+  },
+
+  async deleteAward(id) {
+    if (isPg) {
+      const res = await pool.query('DELETE FROM awards WHERE id = $1', [id]);
+      return res.rowCount > 0;
+    } else {
+      const list = JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
+      const filtered = list.filter(a => a.id !== id);
+      if (filtered.length === list.length) return false;
+      fs.writeFileSync(AWARDS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return true;
     }
   }
 };

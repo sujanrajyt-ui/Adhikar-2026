@@ -1114,6 +1114,7 @@ function initAdmin() {
     initPartiesAdmin();
     initJudgesAdmin();
     initCriteriaAdmin();
+    initAwardsAdmin();
     initScoringDashboard();
   }
 }
@@ -1550,6 +1551,7 @@ async function loadCriteria() {
   try {
     _criteriaCache = await fetch(`${API_BASE}/admin/scoring-criteria`, { headers: adminHeaders() }).then(r => r.json());
     renderCriteria();
+    renderAwardCriteriaSelection(); // Sync award form
   } catch {
     _criteriaCache = [];
   }
@@ -1619,6 +1621,107 @@ async function handleDeleteCriteria(id) {
 function initCriteriaAdmin() {
   document.getElementById("criteria-form")?.addEventListener("submit", handleCreateCriteria);
   loadCriteria();
+}
+
+/* ============ Awards Admin ============ */
+let _awardsCache = [];
+
+async function loadAwards() {
+  try {
+    _awardsCache = await fetch(`${API_BASE}/admin/awards`, { headers: adminHeaders() }).then(r => r.json());
+    renderAwards();
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+function renderAwards() {
+  const el = document.getElementById("awards-admin-list");
+  if (!el) return;
+  el.innerHTML = _awardsCache.map(a => {
+    // Find names of associated criteria
+    const cNames = a.criteria_ids.map(cid => {
+      const match = _criteriaCache.find(c => c.id === cid);
+      return match ? (match.name || match.id) : cid;
+    }).join(", ");
+
+    return `
+      <div class="party-admin-row">
+        <div style="flex: 1;">
+          <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
+          <p class="muted" style="font-size: 0.7rem; margin-top: 0.2rem;">Formula: ${escapeHtml(cNames)}</p>
+        </div>
+        <button class="btn-danger-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
+      </div>
+    `;
+  }).join("");
+}
+
+function renderAwardCriteriaSelection() {
+  const container = document.getElementById("award-criteria-selection");
+  if (!container) return;
+  if (_criteriaCache.length === 0) {
+    container.innerHTML = '<p class="muted" style="font-size: 0.7rem;">No criteria created yet.</p>';
+    return;
+  }
+  container.innerHTML = _criteriaCache.map(c => `
+    <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);">
+      <input type="checkbox" name="award-crit" value="${c.id}" style="accent-color: var(--gold);" />
+      ${escapeHtml(c.name)}
+    </label>
+  `).join("");
+}
+
+async function handleCreateAward(e) {
+  e.preventDefault();
+  const nameEl = document.getElementById("award-name");
+  const checks = document.querySelectorAll('input[name="award-crit"]:checked');
+  const btn = e.target.querySelector('button');
+
+  const name = nameEl.value.trim();
+  const criteria_ids = Array.from(checks).map(c => c.value);
+
+  if (!name || criteria_ids.length === 0) {
+    showToast("Award name and at least one criteria required", "error");
+    return;
+  }
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/admin/awards`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ name, criteria_ids }),
+    });
+    if (!res.ok) throw new Error("Failed to create award");
+    nameEl.value = "";
+    showToast("Award created successfully!");
+    await loadAwards();
+  } catch (err) {
+    showToast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleDeleteAward(id) {
+  if (!confirm(`Delete award definition?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/awards/${id}`, {
+      method: "DELETE",
+      headers: adminHeaders(),
+    });
+    if (!res.ok) throw new Error("Delete failed");
+    showToast("Award deleted");
+    await loadAwards();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+function initAwardsAdmin() {
+  document.getElementById("award-form")?.addEventListener("submit", handleCreateAward);
+  loadAwards();
 }
 
 

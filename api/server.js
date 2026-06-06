@@ -416,6 +416,44 @@ app.delete('/api/admin/scoring-criteria/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: Manage Awards
+app.get('/api/admin/awards', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  res.json(await db.getAwards());
+});
+
+app.post('/api/admin/awards', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { name, criteria_ids } = req.body;
+  if (!name || !criteria_ids || !Array.isArray(criteria_ids)) {
+    return res.status(400).json({ detail: 'name and criteria_ids (array) required' });
+  }
+  try {
+    const entry = await db.createAward({ name, criteria_ids });
+    res.json(entry);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.delete('/api/admin/awards/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const deleted = await db.deleteAward(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Not found' });
+  res.json({ success: true });
+});
+
+// Public: Get awards definition
+app.get('/api/awards', async (req, res) => {
+  res.json(await db.getAwards());
+});
+
 // Public/Judge: Get all criteria
 app.get('/api/scores/criteria', async (req, res) => {
   res.json(await db.getCriteria());
@@ -475,10 +513,11 @@ app.post('/api/scores/submit', async (req, res) => {
 
 app.get('/api/public/leaderboard', async (req, res) => {
   try {
-    const [scores, registrations, criteria] = await Promise.all([
+    const [scores, registrations, criteria, awards] = await Promise.all([
       db.getAllScores(),
       db.getAll(),
-      db.getCriteria()
+      db.getCriteria(),
+      db.getAwards()
     ]);
 
     const verified = registrations.filter(r => r.status === 'verified');
@@ -504,7 +543,7 @@ app.get('/api/public/leaderboard', async (req, res) => {
     });
 
     leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
-    res.json({ leaderboard: leaderboardData, criteria });
+    res.json({ leaderboard: leaderboardData, criteria, awards });
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
