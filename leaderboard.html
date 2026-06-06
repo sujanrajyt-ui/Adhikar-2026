@@ -32,47 +32,38 @@
     </header>
 
     <main class="container leaderboard-container">
-        <section class="leaderboard-hero reveal">
-            <p class="kicker kicker-gold">Standing & Rankings</p>
-            <h1>Parliamentary Excellence</h1>
-            <p class="hero-sub">Tracking the top-performing delegates across all committees and metrics.</p>
-        </section>
+        <header class="leaderboard-hero reveal">
+            <span class="eyebrow eyebrow-gold">Parliamentary Standings</span>
+            <h1 class="h1 shimmer-text">Leaderboard</h1>
+            <p class="hero-sub">Real-time performance rankings based on official parliamentary metrics.</p>
 
-        <!-- Controls -->
-        <section class="leaderboard-controls reveal">
-            <div class="filter-group">
-                <label for="award-selector">View Rankings For:</label>
-                <select id="award-selector" class="award-select">
-                    <option value="overall">Overall Excellence (All Metrics)</option>
-                    <!-- Criteria-based awards dynamically added -->
-                </select>
+            <div class="leaderboard-controls glass-panel">
+                <div class="filter-group">
+                    <label for="award-selector">View Rankings for:</label>
+                    <select id="award-selector" class="award-select"></select>
+                </div>
+                <div id="award-info-box" class="award-info-box"></div>
+                <div id="update-time" class="update-time text-center">Last updated: Loading...</div>
             </div>
-        </section>
+        </header>
 
         <!-- Podium (Top 3) -->
-        <section id="podium-section" class="podium-wrap reveal">
-            <!-- Dynamically populated -->
-        </section>
+        <section id="podium-section" class="podium-section reveal-stagger"></section>
 
-        <!-- Full Rankings Table -->
-        <section class="rankings-table-wrap reveal">
-            <div class="table-header">
-                <h3>Detailed Standings</h3>
-                <span id="update-time" class="update-time">Last updated: Just now</span>
-            </div>
+        <!-- Detailed Rankings -->
+        <section class="rankings-table-wrap glass-panel reveal">
+            <h3 class="table-title">Full Standings</h3>
             <div class="table-responsive">
                 <table class="rankings-table">
                     <thead>
                         <tr>
-                            <th>Rank</th>
-                            <th>Delegate</th>
-                            <th>Committee & Party</th>
-                            <th class="text-right">Score</th>
+                            <th class="col-rank">Rank</th>
+                            <th class="col-delegate">Delegate</th>
+                            <th class="col-info">Committee & Side</th>
+                            <th class="col-score text-right">Points</th>
                         </tr>
                     </thead>
-                    <tbody id="rankings-body">
-                        <!-- Dynamically populated -->
-                    </tbody>
+                    <tbody id="rankings-body"></tbody>
                 </table>
             </div>
         </section>

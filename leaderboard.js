@@ -59,9 +59,14 @@ function renderLeaderboard() {
         const items = award ? award.criteria_ids : [];
         const requiredSide = award ? award.requires_side : null;
 
-        // Apply eligibility filter
+        // Apply eligibility filter (Robust case-insensitive substring match)
         if (requiredSide) {
-            data = data.filter(d => d.side && d.side.toLowerCase() === requiredSide.toLowerCase());
+            data = data.filter(d => {
+                if (!d.side) return false;
+                const s = d.side.toLowerCase();
+                const r = requiredSide.toLowerCase();
+                return s.includes(r) || r.includes(s);
+            });
         }
 
         data.forEach(d => {
@@ -101,6 +106,29 @@ function renderLeaderboard() {
 
     renderPodium(data);
     renderTable(data, filter);
+    renderAwardInfo(filter);
+}
+
+function renderAwardInfo(filter) {
+    const infoEl = document.getElementById('award-info-box');
+    if (!infoEl) return;
+
+    if (filter === 'overall') {
+        infoEl.innerHTML = `<strong>Overall Excellence:</strong> Based on the average of all 6 parliamentary metrics.`;
+    } else if (filter.startsWith('awd_')) {
+        const award = allData.awards.find(a => a.id === filter);
+        if (award) {
+            const formula = award.criteria_ids.map(c => {
+                const criteria = allData.criteria.find(cr => cr.id === (c.id || c));
+                const weight = (c.weight * 100).toFixed(0) + '%';
+                return `<span>${criteria ? criteria.name : c.id}: <b>${weight}</b></span>`;
+            }).join(' + ');
+            infoEl.innerHTML = `<div class="award-formula-tag">Formula:</div> ${formula}`;
+        }
+    } else {
+        const crit = allData.criteria.find(c => c.id === filter);
+        infoEl.innerHTML = `<strong>Metric Focus:</strong> Ranking solely by ${crit ? crit.name : filter}.`;
+    }
 }
 
 function renderPodium(data) {
