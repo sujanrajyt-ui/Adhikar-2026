@@ -34,16 +34,16 @@ const AWARDS = [
     desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference.",
     isGrand: true
   },
-  { title: "Best Student Speaker", desc: "Highest overall parliamentary performer. (Weights: 30% Comm, 25% Research, 20% Rebuttal, 15% Lead, 10% Conduct)" },
-  { title: "Exceptional Debater", desc: "Focuses on argumentation and rebuttal mastery. (Weights: 40% Rebuttal, 25% Comm, 20% Content, 10% Conduct, 05% Lead)" },
-  { title: "Asset of the Ruling Government", desc: "Best defender of government policies and strategy. (Weights: 35% Content, 25% Rebuttal, 20% Lead, 15% Comm, 05% Conduct)" },
-  { title: "Asset of the Opposition", desc: "Best critic of treasury benches and rigorous debater. (Weights: 35% Rebuttal, 30% Content, 20% Comm, 10% Lead, 05% Conduct)" },
-  { title: "Best Leader of the House", desc: "Measures organizational and strategic parliamentary leadership. (Weights: 40% Lead, 20% Comm, 20% Content, 10% Rebuttal, 10% Conduct)" },
-  { title: "Best Minister", desc: "Awarded for profound portfolio expertise and policy knowledge. (Weights: 45% Content, 20% Comm, 15% Lead, 10% Rebuttal, 10% Conduct)" },
-  { title: "Most Creative Mind", desc: "Innovative legislative thinker with out-of-the-box solutions. (Weights: 40% Innovation, 25% Content, 15% Comm, 10% Lead, 10% Rebuttal)" },
-  { title: "Best Orator", desc: "Pure speaking excellence and rhetorical command. (Weights: 50% Comm, 20% Content, 15% Conduct, 10% Lead, 05% Rebuttal)" },
-  { title: "Distinguished Policy Advocate", desc: "Research-driven contributor with detailed legislative depth. (Weights: 50% Content, 20% Comm, 15% Innovation, 10% Rebuttal, 05% Conduct)" },
-  { title: "Most Impactful Presence", desc: "The individual who commands the chamber with sheer conviction. (Weights: 35% Comm, 25% Lead, 20% Rebuttal, 10% Conduct, 10% Content)" },
+  { title: "Best Student Speaker", desc: "Highest overall parliamentary performer. (Weights: 30% Communication, 25% Content & Research, 20% Rebuttal, 15% Leadership, 10% Conduct)" },
+  { title: "Exceptional Debater", desc: "Focuses on argumentation and rebuttal mastery. (Weights: 40% Rebuttal, 25% Communication, 20% Content & Research, 10% Conduct, 05% Leadership)" },
+  { title: "Asset of the Ruling Government", desc: "Best defender of government policies and strategy. (Weights: 35% Content & Research, 25% Rebuttal, 20% Leadership, 15% Communication, 05% Conduct)" },
+  { title: "Asset of the Opposition", desc: "Best critic of treasury benches and rigorous debater. (Weights: 35% Rebuttal, 30% Content & Research, 20% Communication, 10% Leadership, 05% Conduct)" },
+  { title: "Best Leader of the House", desc: "Measures organizational and strategic parliamentary leadership. (Weights: 40% Leadership, 20% Communication, 20% Content & Research, 10% Rebuttal, 10% Conduct)" },
+  { title: "Best Minister", desc: "Awarded for profound portfolio expertise and policy knowledge. (Weights: 45% Content & Research, 20% Communication, 15% Leadership, 10% Rebuttal, 10% Conduct)" },
+  { title: "Most Creative Mind", desc: "Innovative legislative thinker with out-of-the-box solutions. (Weights: 40% Innovation, 25% Content & Research, 15% Communication, 10% Leadership, 10% Rebuttal)" },
+  { title: "Best Orator", desc: "Pure speaking excellence and rhetorical command. (Weights: 50% Communication, 20% Content & Research, 15% Conduct, 10% Leadership, 05% Rebuttal)" },
+  { title: "Distinguished Policy Advocate", desc: "Research-driven contributor with detailed legislative depth. (Weights: 50% Content & Research, 20% Communication, 15% Innovation, 10% Rebuttal, 05% Conduct)" },
+  { title: "Most Impactful Presence", desc: "The individual who commands the chamber with sheer conviction. (Weights: 35% Communication, 25% Leadership, 20% Rebuttal, 10% Conduct, 10% Content & Research)" },
 ];
 
 const TEAM = [
@@ -1682,14 +1682,14 @@ let _awardsCache = [];
 async function loadAwards() {
   try {
     _awardsCache = await fetch(`${API_BASE}/admin/awards`, { headers: adminHeaders() }).then(r => r.json());
-    renderAwards();
+    renderAwardsAdmin();
     renderScoringFramework(); // Sync framework overview
   } catch (err) {
     console.error(err);
   }
 }
 
-function renderAwards() {
+function renderAwardsAdmin() {
   const el = document.getElementById("awards-admin-list");
   if (!el) return;
   el.innerHTML = _awardsCache.map(a => {
