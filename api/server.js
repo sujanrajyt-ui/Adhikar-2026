@@ -555,6 +555,7 @@ app.post('/api/scores/submit', async (req, res) => {
 /* ============ Leaderboard API ============ */
 
 app.get('/api/public/leaderboard', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   try {
     const [scores, registrations, criteria, awards, parties] = await Promise.all([
       db.getAllScores(),

@@ -19,7 +19,8 @@ async function init() {
 
 async function fetchData() {
     try {
-        const res = await fetch(`${API_BASE}/public/leaderboard`);
+        // Cache busting to ensure latest awards/scores are fetched
+        const res = await fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`);
         const data = await res.json();
         allData = data;
         updateTime.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
@@ -88,7 +89,14 @@ function renderLeaderboard() {
                     }
                     if (!sideMatch) return false;
                 }
+
                 return true;
+            });
+        } else {
+            // Neutral award fallback: Exclude House Officers by default
+            data = data.filter(d => {
+                const er = (d.elected_role || "").toLowerCase();
+                return !er.includes("speaker");
             });
         }
 
