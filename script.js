@@ -1816,17 +1816,22 @@ function renderAwardsAdmin() {
             </div>
           </div>
           
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; align-items: end;">
-             <label class="field" style="margin:0;">
-                <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Restrict Side</span>
-                <select onchange="handleSideChange('${a.id}', this.value)"
-                        style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.4rem; border-radius: 4px; font-size: 0.75rem;">
-                  <option value="" ${!currentSide ? 'selected' : ''}>Any / Neutral</option>
-                  <option value="ruling" ${currentSide === 'ruling' ? 'selected' : ''}>Ruling Government</option>
-                  <option value="opposition" ${currentSide === 'opposition' ? 'selected' : ''}>Opposition</option>
-                </select>
-              </label>
-              <div style="font-size: 0.65rem; color: #666; font-style: italic;">ID: ${a.id}</div>
+          <div style="display: flex; align-items: center; gap: 1.5rem; margin-top: 0.5rem;">
+            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Restrict Side:</span>
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; cursor: pointer; color: ${currentSide === 'ruling' ? '#66bb6a' : '#888'};">
+              <input type="checkbox" ${currentSide === 'ruling' ? 'checked' : ''}
+                     onchange="handleSideChange('${a.id}', this.checked ? 'ruling' : '')" /> 
+              🏛️ Ruling Government
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; cursor: pointer; color: ${currentSide === 'opposition' ? '#ef5350' : '#888'};">
+              <input type="checkbox" ${currentSide === 'opposition' ? 'checked' : ''}
+                     onchange="handleSideChange('${a.id}', this.checked ? 'opposition' : '')" />
+              ⚔️ Opposition
+            </label>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.75rem; padding-top: 0.5rem; border-top: 1px solid rgba(255,255,255,0.05);">
+            <div style="font-size: 0.6rem; color: #666; font-style: italic;">ID: ${a.id}</div>
+            ${isDirty ? `<button onclick="handleSyncSingleAward('${a.id}')" style="background: linear-gradient(135deg, #6c5ce7, #a29bfe); color: #fff; border: none; padding: 0.4rem 1rem; border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">🚀 Send Update</button>` : ''}
           </div>
         </div>
       </div>
@@ -1919,6 +1924,28 @@ async function handleSyncLeaderboard() {
       btn.disabled = false;
       btn.textContent = "🚀 Push Update to Leaderboard";
     }
+  }
+}
+
+async function handleSyncSingleAward(id) {
+  const data = _pendingMappingChanges[id];
+  if (!data) { showToast("No changes for this award", "info"); return; }
+
+  const award = _awardsCache.find(a => a.id === id);
+  try {
+    const res = await fetch(`${API_BASE}/admin/awards/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ ...award, ...data }),
+    });
+    if (!res.ok) throw new Error(`Failed to update ${award.name}`);
+
+    Object.assign(award, data);
+    delete _pendingMappingChanges[id];
+    showToast(`"${award.name}" updated successfully ✓`);
+    renderAwardsAdmin();
+  } catch (err) {
+    showToast(err.message, "error");
   }
 }
 

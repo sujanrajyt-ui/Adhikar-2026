@@ -92,11 +92,14 @@ function renderLeaderboard() {
                     }
                 }
 
-                // inclusive for Team awards
-                if (award.id.includes('ruling') || award.id.includes('opposition')) {
-                    return roleMatch || sideMatch;
+                // Both role AND side must match when both are specified
+                if (reqSide && reqRole) {
+                    return roleMatch && sideMatch;
+                } else if (reqSide) {
+                    return sideMatch;
+                } else {
+                    return roleMatch;
                 }
-                return roleMatch;
             });
         } else {
             // Neutral Awards
