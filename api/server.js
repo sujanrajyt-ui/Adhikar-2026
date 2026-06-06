@@ -458,10 +458,56 @@ app.post('/api/scores/submit', async (req, res) => {
 });
 
 
+
+/* ============ Leaderboard API ============ */
+
+app.get('/api/public/leaderboard', async (req, res) => {
+  try {
+    const [scores, registrations, criteria] = await Promise.all([
+      db.getAllScores(),
+      db.getAll(),
+      db.getCriteria()
+    ]);
+
+    const verified = registrations.filter(r => r.status === 'verified');
+
+    const leaderboardData = verified.map(d => {
+      const dScores = scores.filter(s => s.delegate_id === d.id);
+      const criteriaScores = {};
+      criteria.forEach(c => {
+        const cMatches = dScores.filter(s => s.criteria_id === c.id);
+        const total = cMatches.reduce((sum, s) => sum + s.score, 0);
+        criteriaScores[c.id] = cMatches.length > 0 ? (total / cMatches.length) : 0;
+      });
+      const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
+      return {
+        id: d.id,
+        name: d.name,
+        party: d.assigned_party,
+        committee: d.assigned_committee,
+        portfolio: d.portfolio,
+        criteriaScores,
+        totalScore: parseFloat(totalScore.toFixed(2))
+      };
+    });
+
+    leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
+    res.json({ leaderboard: leaderboardData, criteria });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 /* ============ Fallback Web Route ============ */
+
 app.get('/scores', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'scores.html'));
 });
+
+app.get('/leaderboard', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'leaderboard.html'));
+});
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));

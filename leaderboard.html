@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaderboard | ADHIKAR'26</title>
+    <link rel="icon" type="image/x-icon" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="leaderboard.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div id="page-loader" class="page-loader">
+        <div class="loader-logo">
+            <img src="assets/logo.png" alt="Adhikar">
+        </div>
+    </div>
+
+    <header class="scores-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <img src="assets/logo.png" alt="Adhikar">
+                <span>ADHIKAR<span class="gold-text">'26</span> <span class="tabbing-badge">LEADERBOARD</span></span>
+            </div>
+            <a href="/" class="btn-ghost">Back to Home</a>
+        </div>
+    </header>
+
+    <main class="container leaderboard-container">
+        <section class="leaderboard-hero reveal">
+            <p class="kicker kicker-gold">Standing & Rankings</p>
+            <h1>Parliamentary Excellence</h1>
+            <p class="hero-sub">Tracking the top-performing delegates across all committees and metrics.</p>
+        </section>
+
+        <!-- Controls -->
+        <section class="leaderboard-controls reveal">
+            <div class="filter-group">
+                <label for="award-selector">View Rankings For:</label>
+                <select id="award-selector" class="award-select">
+                    <option value="overall">Overall Excellence (All Metrics)</option>
+                    <!-- Criteria-based awards dynamically added -->
+                </select>
+            </div>
+        </section>
+
+        <!-- Podium (Top 3) -->
+        <section id="podium-section" class="podium-wrap reveal">
+            <!-- Dynamically populated -->
+        </section>
+
+        <!-- Full Rankings Table -->
+        <section class="rankings-table-wrap reveal">
+            <div class="table-header">
+                <h3>Detailed Standings</h3>
+                <span id="update-time" class="update-time">Last updated: Just now</span>
+            </div>
+            <div class="table-responsive">
+                <table class="rankings-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Delegate</th>
+                            <th>Committee & Party</th>
+                            <th class="text-right">Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rankings-body">
+                        <!-- Dynamically populated -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Adhikar Mock Parliament. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="leaderboard.js"></script>
+</body>
+
+</html>

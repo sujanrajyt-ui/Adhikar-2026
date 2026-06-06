@@ -171,6 +171,20 @@ async function generateRegistrationId() {
   return code;
 }
 
+async function getAllScores() {
+  if (isPg) {
+    const res = await pool.query(`SELECT * FROM scores ORDER BY updated_at DESC`);
+    return res.rows;
+  } else {
+    try {
+      const data = fs.readFileSync(SCORES_FILE, 'utf8');
+      return JSON.parse(data);
+    } catch {
+      return [];
+    }
+  }
+}
+
 module.exports = {
   init,
 
@@ -530,6 +544,16 @@ module.exports = {
       fs.writeFileSync(SCORES_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
     return { delegate_id, judge_id, criteria_id, score, updated_at: now };
+  },
+
+  async getAllScores() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM scores ORDER BY updated_at DESC');
+      return res.rows;
+    } else {
+      return JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
+    }
   }
 };
+
 
