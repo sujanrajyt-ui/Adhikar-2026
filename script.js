@@ -901,6 +901,7 @@ function renderRows() {
         </select>
         <select class="assign-select" id="role-sel-${r.id}" title="Elected Role" onchange="handleElectedRoleChange('${r.id}', this.value)">
           <option value="">— Role —</option>
+          <option value="" ${!r.elected_role ? 'selected' : ''}>None / Remove Role</option>
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
             <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
