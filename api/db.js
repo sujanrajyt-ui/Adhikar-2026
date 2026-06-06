@@ -663,19 +663,20 @@ module.exports = {
 
   async createAward(data) {
     const id = data.id || ('awd_' + Math.random().toString(36).substr(2, 9));
-    const { name, criteria_ids, requires_side } = data;
+    const { name, criteria_ids, requires_side, requires_role } = data;
     const now = new Date().toISOString();
     if (isPg) {
       await pool.query(`
-        INSERT INTO awards (id, name, criteria_ids, requires_side, created_at)
-        VALUES ($1, $2, $3, $4, $5)
-      `, [id, name, JSON.stringify(criteria_ids), requires_side || null, now]);
+        INSERT INTO awards (id, name, criteria_ids, requires_side, requires_role, created_at)
+        VALUES ($1, $2, $3, $4, $5, $6)
+      `, [id, name, JSON.stringify(criteria_ids), requires_side || null, requires_role || "", now]);
     } else {
       const list = JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
-      list.push({ id, name, criteria_ids, requires_side: requires_side || null, created_at: now });
+      const entry = { id, name, criteria_ids, requires_side: requires_side || null, requires_role: requires_role || "", created_at: now };
+      list.push(entry);
       fs.writeFileSync(AWARDS_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
-    return { id, name, criteria_ids, requires_side: requires_side || null, created_at: now };
+    return { id, name, criteria_ids, requires_side: requires_side || null, requires_role: requires_role || "", created_at: now };
   },
 
   async deleteAward(id) {

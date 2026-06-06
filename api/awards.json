@@ -500,5 +500,237 @@
     ],
     "requires_side": "opposition",
     "created_at": "2026-06-06T20:02:12.426Z"
+  },
+  {
+    "id": "awd_14ofv31x7",
+    "name": "Best Student Speaker",
+    "criteria_ids": [
+      {
+        "id": "crit_comm",
+        "weight": 0.3
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.15
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.1
+      }
+    ],
+    "requires_side": null,
+    "requires_role": "Speaker, Deputy Speaker, Secretary General, Marshal",
+    "created_at": "2026-06-06T20:03:24.895Z"
+  },
+  {
+    "id": "awd_ypk2tm8na",
+    "name": "Best Student Speaker",
+    "criteria_ids": [
+      {
+        "id": "crit_comm",
+        "weight": 0.3
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.15
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.1
+      }
+    ],
+    "requires_side": null,
+    "requires_role": "Speaker, Deputy Speaker, Secretary General, Marshal",
+    "created_at": "2026-06-06T20:03:24.897Z"
+  },
+  {
+    "id": "awd_jbdmcijx3",
+    "name": "Exceptional Debater",
+    "criteria_ids": [
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.4
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.1
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": null,
+    "requires_role": "",
+    "created_at": "2026-06-06T20:03:24.898Z"
+  },
+  {
+    "id": "awd_cq4a2p93z",
+    "name": "Exceptional Debater",
+    "criteria_ids": [
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.4
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.1
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": null,
+    "requires_role": "",
+    "created_at": "2026-06-06T20:03:24.900Z"
+  },
+  {
+    "id": "awd_xpnradygd",
+    "name": "Asset of the Ruling Government",
+    "criteria_ids": [
+      {
+        "id": "crit_research",
+        "weight": 0.35
+      },
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.15
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": "ruling",
+    "requires_role": "Prime Minister, Deputy Prime Minister, Minister",
+    "created_at": "2026-06-06T20:03:24.901Z"
+  },
+  {
+    "id": "awd_i6ku99vyk",
+    "name": "Asset of the Ruling Government",
+    "criteria_ids": [
+      {
+        "id": "crit_research",
+        "weight": 0.35
+      },
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.25
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.15
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": "ruling",
+    "requires_role": "Prime Minister, Deputy Prime Minister, Minister",
+    "created_at": "2026-06-06T20:03:24.903Z"
+  },
+  {
+    "id": "awd_rtiav7ke7",
+    "name": "Asset of the Opposition",
+    "criteria_ids": [
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.35
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.3
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.1
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": "opposition",
+    "requires_role": "Leader of Opposition, Deputy Leader of Opposition, Whip",
+    "created_at": "2026-06-06T20:03:24.905Z"
+  },
+  {
+    "id": "awd_6xx3t1c92",
+    "name": "Asset of the Opposition",
+    "criteria_ids": [
+      {
+        "id": "crit_rebuttal",
+        "weight": 0.35
+      },
+      {
+        "id": "crit_research",
+        "weight": 0.3
+      },
+      {
+        "id": "crit_comm",
+        "weight": 0.2
+      },
+      {
+        "id": "crit_lead",
+        "weight": 0.1
+      },
+      {
+        "id": "crit_conduct",
+        "weight": 0.05
+      }
+    ],
+    "requires_side": "opposition",
+    "requires_role": "Leader of Opposition, Deputy Leader of Opposition, Whip",
+    "created_at": "2026-06-06T20:03:24.906Z"
   }
 ]
