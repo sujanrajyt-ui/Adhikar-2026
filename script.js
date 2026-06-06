@@ -1653,18 +1653,21 @@ function renderScoringFramework() {
     awdEl.innerHTML = `
       <ul style="list-style: decimal; padding-left: 1.2rem; margin: 0;">
         ${_awardsCache.map(a => {
-      // Find primary criterion (highest weight)
-      let primaryBreakdown = "";
+      let fullFormula = "No formula";
       if (a.criteria_ids && a.criteria_ids.length > 0) {
-        const sortedItems = [...a.criteria_ids].sort((x, y) => (y.weight || 0) - (x.weight || 0));
-        const primary = sortedItems[0];
-        const match = _criteriaCache.find(c => c.id === (primary.id || primary));
-        primaryBreakdown = ` (Lead: ${match ? match.name : (primary.id || primary)})`;
+        fullFormula = a.criteria_ids.map(c => {
+          const weightPercent = Math.round((c.weight || 1.0) * 100);
+          const match = _criteriaCache.find(crit => crit.id === (c.id || c));
+          const critName = match ? match.name : (c.id || c);
+          return `${weightPercent}% ${critName}`;
+        }).join(' + ');
       }
       return `
-            <li style="margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.3rem;">
-              <span style="color: #fff; font-weight: 500;">${escapeHtml(a.name)}</span>
-              <div style="font-size: 0.65rem; color: var(--gold-500); opacity: 0.7;">Formula active${primaryBreakdown}</div>
+            <li style="margin-bottom: 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.4rem;">
+              <span style="color: #fff; font-weight: 500; font-size: 0.8rem;">${escapeHtml(a.name)}</span>
+              <div style="font-size: 0.6rem; color: var(--gold-500); opacity: 0.8; margin-top: 0.2rem; line-height: 1.4;">
+                <strong>Formula:</strong> ${escapeHtml(fullFormula)}
+              </div>
             </li>
           `;
     }).join('')}
