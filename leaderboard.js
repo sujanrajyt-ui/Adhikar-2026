@@ -61,37 +61,45 @@ function renderLeaderboard() {
         const reqSide = award ? (award.requires_side || "").toLowerCase() : null;
         const reqRole = award ? (award.requires_role || "").toLowerCase() : null;
 
-        // Strict Requirement Filtering
+        // Resilient Requirement Filtering
         if (reqSide || reqRole) {
             data = data.filter(d => {
                 const userRole = (d.elected_role || "").toLowerCase();
                 const userSide = (d.side || "").toLowerCase();
+                const sideText = (userSide + " " + (d.party || "") + " " + userRole).toLowerCase();
 
-                // If role is required, must match at least one in comma-separated list
+                // 1. Role match check (if specified)
+                let roleMatch = true;
                 if (reqRole) {
                     const roles = reqRole.split(',').map(r => r.trim());
-                    const roleMatch = roles.some(r => userRole.includes(r));
-                    if (!roleMatch) return false;
+                    roleMatch = roles.some(r => userRole.includes(r));
                 }
 
-                // If side is required, must match
+                // 2. Side match check (if specified)
+                let sideMatch = true;
                 if (reqSide) {
                     if (reqSide === 'ruling') {
-                        const isRuling = userSide === 'ruling' || userSide.includes('gov') || userSide.includes('treasury');
-                        if (!isRuling) return false;
+                        sideMatch = sideText.includes('ruling') || sideText.includes('gov') || sideText.includes('treasury');
                     } else if (reqSide === 'opposition') {
-                        if (userSide !== 'opposition') return false;
-                    } else if (!userSide.includes(reqSide)) {
-                        return false;
+                        sideMatch = sideText.includes('opposition');
+                    } else {
+                        sideMatch = sideText.includes(reqSide);
                     }
                 }
-                return true;
+
+                // Use "OR" matching for Asset/Team awards to be more inclusive
+                if (award.id.includes('ruling') || award.id.includes('opposition')) {
+                    return roleMatch || sideMatch;
+                }
+
+                // Default: Role MUST match for specific titles (like Best Minister)
+                return roleMatch;
             });
         } else {
             // General Awards (Neutral): Exclude Chairs/Speakers by default to avoid confusion
             data = data.filter(d => {
                 const role = (d.elected_role || "").toLowerCase();
-                return !["speaker", "deputy speaker"].some(r => role.includes(r));
+                return !["speaker", "deputy speaker", "marshal"].some(r => role.includes(r));
             });
         }
 
@@ -107,7 +115,6 @@ function renderLeaderboard() {
         // Tie-breaking logic
         data.sort((a, b) => {
             if (b.awardScore !== a.awardScore) return b.awardScore - a.awardScore;
-            // Primary criteria tie-breaker
             if (formula.length > 0) {
                 const primary = formula.reduce((prev, curr) => (prev.weight > curr.weight) ? prev : curr);
                 const pId = primary.id || primary;
@@ -115,8 +122,7 @@ function renderLeaderboard() {
             }
             return b.totalScore - a.totalScore;
         });
-    }
-    else {
+    } else {
         // Specific criteria sorting
         data.sort((a, b) => {
             const scoreA = a.criteriaScores[filter] || 0;
@@ -136,7 +142,7 @@ function renderAwardInfo(filter) {
     if (!infoEl) return;
 
     if (filter === 'overall') {
-        infoEl.innerHTML = `<strong>Overall Excellence:</strong> Based on the average of all 6 parliamentary metrics.`;
+        infoEl.innerHTML = `<strong>Overall Excellence:</strong> Based on the average of all parliamentary metrics.`;
     } else if (filter.startsWith('awd_')) {
         const award = allData.awards.find(a => a.id === filter);
         if (award) {
@@ -184,10 +190,15 @@ function renderPodium(data) {
 }
 
 function renderTable(data, filter) {
+    if (data.length === 0) {
+        rankingsBody.innerHTML = '<tr><td colspan="4" class="muted text-center">No eligible delegates found in this category.</td></tr>';
+        return;
+    }
+
     const list = data.slice(3); // Everyone after top 3
     if (list.length === 0 && data.length <= 3) {
         rankingsBody.innerHTML = '<tr><td colspan="4" class="muted text-center">No additional rankings.</td></tr>';
-        return;
+        // But we still have podium, so this is fine.
     }
 
     rankingsBody.innerHTML = data.map((d, index) => `
