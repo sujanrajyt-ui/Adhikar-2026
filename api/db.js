@@ -54,6 +54,7 @@ async function init() {
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS portfolio VARCHAR(255);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS assigned_party VARCHAR(255);`);
       await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS assigned_committee VARCHAR(255);`);
+      await client.query(`ALTER TABLE registrations ADD COLUMN IF NOT EXISTS elected_role VARCHAR(255);`);
 
       // Parties & Committees table
       await client.query(`
@@ -104,10 +105,12 @@ async function init() {
         CREATE TABLE IF NOT EXISTS awards (
           id VARCHAR(50) PRIMARY KEY,
           name VARCHAR(255) NOT NULL,
-          criteria_ids TEXT NOT NULL, -- JSON array of criteria IDs
+          criteria_ids TEXT NOT NULL,
+          requires_side VARCHAR(50),
           created_at VARCHAR(100) NOT NULL
         );
       `);
+      await client.query(`ALTER TABLE awards ADD COLUMN IF NOT EXISTS requires_side VARCHAR(50);`);
 
 
       console.log("[Database] PostgreSQL table and columns verified.");
@@ -604,6 +607,20 @@ module.exports = {
     }
   },
 
+  async setElectedRole(id, role) {
+    if (isPg) {
+      await pool.query('UPDATE registrations SET elected_role = $1 WHERE id = $2', [role, id]);
+    } else {
+      const list = readData();
+      const idx = list.findIndex(r => r.id === id);
+      if (idx > -1) {
+        list[idx].elected_role = role;
+        writeData(list);
+      }
+    }
+    return true;
+  },
+
   // ============ Awards ============
 
   async getAwards() {
@@ -617,19 +634,19 @@ module.exports = {
 
   async createAward(data) {
     const id = data.id || ('awd_' + Math.random().toString(36).substr(2, 9));
-    const { name, criteria_ids } = data;
+    const { name, criteria_ids, requires_side } = data;
     const now = new Date().toISOString();
     if (isPg) {
       await pool.query(`
-        INSERT INTO awards (id, name, criteria_ids, created_at)
-        VALUES ($1, $2, $3, $4)
-      `, [id, name, JSON.stringify(criteria_ids), now]);
+        INSERT INTO awards (id, name, criteria_ids, requires_side, created_at)
+        VALUES ($1, $2, $3, $4, $5)
+      `, [id, name, JSON.stringify(criteria_ids), requires_side || null, now]);
     } else {
       const list = JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
-      list.push({ id, name, criteria_ids, created_at: now });
+      list.push({ id, name, criteria_ids, requires_side: requires_side || null, created_at: now });
       fs.writeFileSync(AWARDS_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
-    return { id, name, criteria_ids, created_at: now };
+    return { id, name, criteria_ids, requires_side: requires_side || null, created_at: now };
   },
 
   async deleteAward(id) {

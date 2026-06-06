@@ -1260,6 +1260,8 @@ function openEditModal(id) {
   if (idDisplay) idDisplay.textContent = id;
   if (nameInput) nameInput.value = reg.name;
   if (collegeInput) collegeInput.value = reg.college;
+  const roleInput = document.getElementById("edit-reg-elected-role");
+  if (roleInput) roleInput.value = reg.elected_role || "";
 
   document.getElementById("admin-edit-modal")?.classList.remove("hidden");
 }
@@ -1276,10 +1278,12 @@ async function handleSaveEdit(e) {
   btn.textContent = "Saving…";
 
   try {
+    const elected_role = document.getElementById("edit-reg-elected-role").value;
+
     const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...adminHeaders() },
-      body: JSON.stringify({ name, college }),
+      body: JSON.stringify({ name, college, elected_role }),
     });
     if (!res.ok) throw new Error("Edit failed");
     showToast("✓ Record updated");

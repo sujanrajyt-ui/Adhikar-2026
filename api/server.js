@@ -324,6 +324,27 @@ app.post('/api/admin/registrations/:id/status', async (req, res) => {
   res.json({ success: true });
 });
 
+// Edit delegate demographics (name, college, elected_role)
+app.patch('/api/admin/registrations/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { id } = req.params;
+  const { name, college, elected_role } = req.body;
+  const updates = {};
+  if (name !== undefined) updates.name = name;
+  if (college !== undefined) updates.college = college;
+  if (elected_role !== undefined) updates.elected_role = elected_role;
+
+  try {
+    const result = await db.update(id, updates);
+    if (!result) return res.status(404).json({ detail: 'Not found' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // Delete a registration
 app.delete('/api/admin/registrations/:id', async (req, res) => {
   const { id } = req.params;
@@ -513,11 +534,12 @@ app.post('/api/scores/submit', async (req, res) => {
 
 app.get('/api/public/leaderboard', async (req, res) => {
   try {
-    const [scores, registrations, criteria, awards] = await Promise.all([
+    const [scores, registrations, criteria, awards, parties] = await Promise.all([
       db.getAllScores(),
       db.getAll(),
       db.getCriteria(),
-      db.getAwards()
+      db.getAwards(),
+      db.getParties()
     ]);
 
     const verified = registrations.filter(r => r.status === 'verified');
@@ -531,10 +553,16 @@ app.get('/api/public/leaderboard', async (req, res) => {
         criteriaScores[c.id] = cMatches.length > 0 ? (total / cMatches.length) : 0;
       });
       const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
+
+      // Find individual side
+      const partyMatch = parties.find(p => p.name === d.assigned_party);
+      const side = partyMatch ? partyMatch.side : null;
+
       return {
         id: d.id,
         name: d.name,
         party: d.assigned_party,
+        side: side,
         committee: d.assigned_committee,
         portfolio: d.portfolio,
         criteriaScores,
@@ -544,6 +572,29 @@ app.get('/api/public/leaderboard', async (req, res) => {
 
     leaderboardData.sort((a, b) => b.totalScore - a.totalScore);
     res.json({ leaderboard: leaderboardData, criteria, awards });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.get('/api/public/leadership', async (req, res) => {
+  try {
+    const [all, parties] = await Promise.all([db.getAll(), db.getParties()]);
+    const leadership = all
+      .filter(r => r.status === 'verified' && r.elected_role && r.elected_role.trim() !== '')
+      .map(r => {
+        const p = parties.find(party => party.name === r.assigned_party);
+        return {
+          id: r.id,
+          name: r.name,
+          role: r.elected_role,
+          party: r.assigned_party,
+          side: p ? p.side : null,
+          committee: r.assigned_committee,
+          portfolio: r.portfolio
+        };
+      });
+    res.json(leadership);
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }

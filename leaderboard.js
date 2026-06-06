@@ -57,6 +57,12 @@ function renderLeaderboard() {
         // Dynamic Award Formula
         const award = allData.awards.find(a => a.id === filter);
         const items = award ? award.criteria_ids : [];
+        const requiredSide = award ? award.requires_side : null;
+
+        // Apply eligibility filter
+        if (requiredSide) {
+            data = data.filter(d => d.side && d.side.toLowerCase() === requiredSide.toLowerCase());
+        }
 
         data.forEach(d => {
             d.awardScore = items.reduce((sum, item) => {
