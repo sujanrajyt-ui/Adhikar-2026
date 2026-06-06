@@ -920,8 +920,8 @@ function renderRows() {
           </optgroup>
         </select>
         ${alreadySent
-        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Resend</button>`
-        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Inform</button>`
+        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Resend Mail</button>`
+        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Assign & Send Mail</button>`
       }
       </div>
     ` : `
