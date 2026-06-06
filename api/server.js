@@ -610,7 +610,10 @@ app.get('/api/public/leadership', async (req, res) => {
     const leadership = all
       .filter(r => r.status === 'verified' && r.elected_role && r.elected_role.trim() !== '')
       .map(r => {
-        const p = parties.find(party => party.name === r.assigned_party);
+        const p = parties.find(party =>
+          party.name && r.assigned_party &&
+          party.name.trim().toLowerCase() === r.assigned_party.trim().toLowerCase()
+        );
         return {
           id: r.id,
           name: r.name,

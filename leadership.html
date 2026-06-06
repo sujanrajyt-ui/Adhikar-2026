@@ -308,27 +308,177 @@
             border: 1px solid rgba(255, 193, 7, 0.2);
         }
 
-        /* === Empty State === */
-        .empty-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--cream-300);
-            opacity: 0.4;
-            font-size: 0.85rem;
-            font-style: italic;
+        /* === Admin Features === */
+        .admin-fab {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 56px;
+            height: 56px;
+            background: var(--gold-500);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            transition: all 0.3s;
         }
 
-        /* === Footer === */
-        .ldr-footer {
-            text-align: center;
-            padding: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        .admin-fab:hover {
+            transform: scale(1.1);
+            background: var(--gold-400);
+        }
+
+        .admin-fab.active {
+            background: #ef5350;
+            transform: rotate(45deg);
+        }
+
+        .admin-only {
+            display: none;
+        }
+
+        body.admin-mode .admin-only {
+            display: inline-flex;
+        }
+
+        .btn-assign {
+            background: rgba(212, 168, 83, 0.1);
+            color: var(--gold-400);
+            border: 1px dashed var(--gold-400);
+            padding: 0.3rem 0.8rem;
+            border-radius: 6px;
             font-size: 0.75rem;
-            color: var(--cream-300);
-            opacity: 0.5;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 1rem;
+            transition: all 0.2s;
+            align-items: center;
+            gap: 0.4rem;
         }
 
-        /* === Responsive === */
+        .btn-assign:hover {
+            background: rgba(212, 168, 83, 0.2);
+        }
+
+        /* === Modal === */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            background: var(--maroon-800);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            max-height: 80vh;
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--cream-300);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .search-box {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: #fff;
+            margin-bottom: 1rem;
+            font-family: inherit;
+        }
+
+        .delegate-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .delegate-item {
+            padding: 0.8rem;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .delegate-item:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--gold-400);
+        }
+
+        .delegate-item .d-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: block;
+        }
+
+        .delegate-item .d-meta {
+            font-size: 0.7rem;
+            color: var(--cream-300);
+            opacity: 0.6;
+        }
+
+        .role-selector {
+            display: none;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .btn-submit-assign {
+            background: var(--gold-500);
+            color: #fff;
+            border: none;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         @media (max-width: 640px) {
             .leaders-grid {
                 grid-template-columns: 1fr;
@@ -353,6 +503,36 @@
         </div>
     </header>
 
+    <button id="admin-fab" class="admin-fab" title="Admin Access">🔑</button>
+
+    <div id="assign-modal" class="modal-backdrop">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Assign Leadership Role</h2>
+                <button class="close-modal" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div id="step-search">
+                    <input type="text" id="delegate-search" class="search-box" placeholder="Search delegate name..."
+                        oninput="filterDelegates()">
+                    <div id="delegate-results" class="delegate-list">
+                        <!-- Results here -->
+                    </div>
+                </div>
+                <div id="step-role" class="role-selector">
+                    <p id="selected-delegate-name"
+                        style="margin-bottom: 1rem; color: var(--gold-400); font-weight: 600;"></p>
+                    <select id="role-pick" class="search-box">
+                        <!-- Options here -->
+                    </select>
+                    <button class="btn-submit-assign" onclick="submitAssignment()">Confirm Assignment</button>
+                    <button class="btn-back" style="width:100%; text-align:center; display:block"
+                        onclick="showStep('search')">Back to Search</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <section class="ldr-hero">
         <p class="ldr-eyebrow">The Elected</p>
         <h1>Parliamentary Leadership</h1>
@@ -365,6 +545,7 @@
         <div class="section-divider">
             <span class="section-icon">⚖️</span>
             <span class="section-title">The Chair & House Officers</span>
+            <button class="btn-assign admin-only" onclick="openAssignModal('chair')"><span>+</span> Assign</button>
         </div>
         <div id="chair-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
@@ -374,6 +555,7 @@
         <div class="section-divider">
             <span class="section-icon">🏛️</span>
             <span class="section-title">Government — Treasury Bench</span>
+            <button class="btn-assign admin-only" onclick="openAssignModal('gov')"><span>+</span> Assign</button>
         </div>
         <div id="gov-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
@@ -383,6 +565,7 @@
         <div class="section-divider">
             <span class="section-icon">⚔️</span>
             <span class="section-title">Opposition Bench</span>
+            <button class="btn-assign admin-only" onclick="openAssignModal('opp')"><span>+</span> Assign</button>
         </div>
         <div id="opp-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
@@ -396,26 +579,30 @@
     <script>
         const API_BASE = '/api';
 
-        const CHAIR_ROLES = ['Speaker of Lok Sabha', 'Deputy Speaker', 'Secretary General', 'Marshal of the House'];
-        const GOV_ROLES = ['Prime Minister', 'Deputy Prime Minister', 'Cabinet Minister', 'Leader of the House'];
-        const OPP_ROLES = ['Leader of Opposition', 'Deputy Leader of Opposition'];
-        const HIGHLIGHT_ROLES = ['Prime Minister', 'Speaker of Lok Sabha', 'Leader of Opposition'];
+        // Role lists matching admin configuration
+        const CHAIR_ROLES = ['Speaker', 'Deputy Speaker', 'Secretary General', 'Marshal'];
+        const GOV_ROLES = ['Prime Minister', 'Deputy Prime Minister', 'Minister', 'Leader of the House'];
+        const OPP_ROLES = ['Leader of Opposition', 'Deputy Leader of Opposition', 'Whip'];
+        const HIGHLIGHT_ROLES = ['Prime Minister', 'Speaker', 'Leader of Opposition'];
 
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, m =>
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
-        function getSideClass(role) {
-            if (GOV_ROLES.includes(role)) return 'ruling';
-            if (OPP_ROLES.includes(role)) return 'opposition';
+        function getSideClass(leader) {
+            const side = (leader.side || '').toLowerCase();
+            if (side.includes('ruling') || side.includes('government') || side.includes('treasury')) return 'ruling';
+            if (side.includes('opposition')) return 'opposition';
+            const role = (leader.role || '').toLowerCase();
+            if (GOV_ROLES.some(r => role.includes(r.toLowerCase()))) return 'ruling';
+            if (OPP_ROLES.some(r => role.includes(r.toLowerCase()))) return 'opposition';
             return 'neutral';
         }
 
         function makeCard(leader) {
-            const side = getSideClass(leader.role);
-            const isHighlight = HIGHLIGHT_ROLES.includes(leader.role);
-
+            const side = getSideClass(leader);
+            const isHighlight = HIGHLIGHT_ROLES.some(r => (leader.role || '').toLowerCase().includes(r.toLowerCase()));
             return `
                 <div class="leader-card ${isHighlight ? 'card-highlight' : ''}">
                     <div class="role-tag">
@@ -433,37 +620,127 @@
             `;
         }
 
-        async function init() {
-            try {
-                const res = await fetch(`${API_BASE}/public/leadership`);
-                const leaders = await res.json();
+        // Admin Management
+        let isAdmin = localStorage.getItem('ldr_admin') === 'true';
+        let allDelegates = [];
+        let currentSection = '';
+        let selectedDelegate = null;
+        const adminFab = document.getElementById('admin-fab');
 
-                const chairLeaders = leaders.filter(l => CHAIR_ROLES.includes(l.role));
-                const govLeaders = leaders.filter(l => GOV_ROLES.includes(l.role));
-                const oppLeaders = leaders.filter(l => OPP_ROLES.includes(l.role));
-
-                const roleOrder = [...CHAIR_ROLES, ...GOV_ROLES, ...OPP_ROLES];
-                const sortByRole = (a, b) => roleOrder.indexOf(a.role) - roleOrder.indexOf(b.role);
-
-                document.getElementById('chair-grid').innerHTML = chairLeaders.length
-                    ? chairLeaders.sort(sortByRole).map(makeCard).join('')
-                    : '<div class="empty-state">No house officers assigned yet.</div>';
-
-                document.getElementById('gov-grid').innerHTML = govLeaders.length
-                    ? govLeaders.sort(sortByRole).map(makeCard).join('')
-                    : '<div class="empty-state">No government leadership assigned yet.</div>';
-
-                document.getElementById('opp-grid').innerHTML = oppLeaders.length
-                    ? oppLeaders.sort(sortByRole).map(makeCard).join('')
-                    : '<div class="empty-state">No opposition leadership assigned yet.</div>';
-            } catch (err) {
-                console.error('Failed to load leadership', err);
-                ['chair-grid', 'gov-grid', 'opp-grid'].forEach(id => {
-                    document.getElementById(id).innerHTML = '<div class="empty-state">Could not load data.</div>';
-                });
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                const pw = prompt("Enter Admin Password:");
+                if (pw === 'secretariat2026') {
+                    isAdmin = true;
+                    localStorage.setItem('ldr_admin', 'true');
+                    applyAdminMode();
+                } else if (pw) alert("Invalid password.");
+            } else {
+                isAdmin = false;
+                localStorage.setItem('ldr_admin', 'false');
+                applyAdminMode();
             }
         }
 
+        function applyAdminMode() {
+            if (isAdmin) {
+                document.body.classList.add('admin-mode');
+                adminFab.classList.add('active');
+                adminFab.textContent = '×';
+            } else {
+                document.body.classList.remove('admin-mode');
+                adminFab.classList.remove('active');
+                adminFab.textContent = '🔑';
+            }
+        }
+
+        const modal = document.getElementById('assign-modal');
+        const resultsDiv = document.getElementById('delegate-results');
+
+        async function openAssignModal(section) {
+            currentSection = section;
+            document.getElementById('modal-title').textContent = `Assign to ${section === 'chair' ? 'The Chair' : section === 'gov' ? 'Government' : 'Opposition'}`;
+            showStep('search');
+            modal.style.display = 'flex';
+            if (allDelegates.length === 0) {
+                resultsDiv.innerHTML = '<div class="empty-state">Loading delegates...</div>';
+                try {
+                    const res = await fetch(`${API_BASE}/admin/registrations`, {
+                        headers: { 'x-admin-password': 'secretariat2026' }
+                    });
+                    allDelegates = await res.json();
+                    filterDelegates();
+                } catch (e) { resultsDiv.innerHTML = '<div class="empty-state">Error loading delegates.</div>'; }
+            } else filterDelegates();
+        }
+
+        function closeModal() { modal.style.display = 'none'; }
+        function showStep(step) {
+            document.getElementById('step-search').style.display = step === 'search' ? 'block' : 'none';
+            document.getElementById('step-role').style.display = step === 'role' ? 'flex' : 'none';
+        }
+
+        function filterDelegates() {
+            const q = document.getElementById('delegate-search').value.toLowerCase();
+            const filtered = allDelegates.filter(d =>
+                d.name.toLowerCase().includes(q) ||
+                (d.assigned_party || '').toLowerCase().includes(q)
+            ).slice(0, 15);
+
+            resultsDiv.innerHTML = filtered.map(d => `
+                <div class="delegate-item" onclick="selectDelegate('${d.id}')">
+                    <span class="d-name">${escapeHtml(d.name)}</span>
+                    <span class="d-meta">${escapeHtml(d.assigned_party || 'No Party')} | ${escapeHtml(d.assigned_committee || 'No Committee')}</span>
+                </div>
+            `).join('');
+            if (filtered.length === 0) resultsDiv.innerHTML = '<div class="empty-state">No delegates found.</div>';
+        }
+
+        function selectDelegate(id) {
+            selectedDelegate = allDelegates.find(d => d.id === id);
+            document.getElementById('selected-delegate-name').textContent = `Assigning: ${selectedDelegate.name}`;
+            const roles = currentSection === 'chair' ? CHAIR_ROLES : currentSection === 'gov' ? GOV_ROLES : OPP_ROLES;
+            const select = document.getElementById('role-pick');
+            select.innerHTML = roles.map(r => `<option value="${r}">${r}</option>`).join('') + '<option value="">(Remove Role)</option>';
+            showStep('role');
+        }
+
+        async function submitAssignment() {
+            const role = document.getElementById('role-pick').value;
+            const btn = document.querySelector('.btn-submit-assign');
+            btn.disabled = true; btn.textContent = 'Processing...';
+            try {
+                const res = await fetch(`${API_BASE}/admin/registrations/${selectedDelegate.id}/elected_role`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-password': 'secretariat2026' },
+                    body: JSON.stringify({ role })
+                });
+                if (res.ok) { closeModal(); init(); }
+                else alert("Assignment failed.");
+            } catch (e) { alert("Error: " + e.message); }
+            finally { btn.disabled = false; btn.textContent = 'Confirm Assignment'; }
+        }
+
+        async function init() {
+            applyAdminMode();
+            adminFab.onclick = toggleAdminMode;
+            try {
+                const res = await fetch(`${API_BASE}/public/leadership`);
+                const leaders = await res.json();
+                const chairLeaders = leaders.filter(l => CHAIR_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
+                const govLeaders = leaders.filter(l => GOV_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
+                const oppLeaders = leaders.filter(l => OPP_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
+                const roleOrder = [...CHAIR_ROLES, ...GOV_ROLES, ...OPP_ROLES];
+                const sortByRole = (a, b) => {
+                    const idxA = roleOrder.findIndex(r => (a.role || '').toLowerCase().includes(r.toLowerCase()));
+                    const idxB = roleOrder.findIndex(r => (b.role || '').toLowerCase().includes(r.toLowerCase()));
+                    return idxA - idxB;
+                };
+                document.getElementById('chair-grid').innerHTML = chairLeaders.length ? chairLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No house officers assigned yet.</div>';
+                document.getElementById('gov-grid').innerHTML = govLeaders.length ? govLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No government leadership assigned yet.</div>';
+                document.getElementById('opp-grid').innerHTML = oppLeaders.length ? oppLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No opposition leadership assigned yet.</div>';
+            } catch (err) { console.error('Failed to load leadership', err); }
+        }
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
