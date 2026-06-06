@@ -1061,6 +1061,7 @@ async function exportScoresRawLog() {
 
 
 function initAdmin() {
+  initAdminTabs();
   document.getElementById("admin-login-form")?.addEventListener("submit", adminLogin);
   document.getElementById("admin-logout")?.addEventListener("click", adminLogout);
   document.getElementById("admin-refresh")?.addEventListener("click", loadRegistrations);
@@ -1070,7 +1071,6 @@ function initAdmin() {
   document.getElementById("admin-export-scores-raw")?.addEventListener("click", exportScoresRawLog);
   document.getElementById("admin-rows")?.addEventListener("click", handleRowAction);
 
-  document.getElementById("admin-view-overview")?.addEventListener("click", toggleOverview);
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {
       document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
@@ -1109,26 +1109,32 @@ function initAdmin() {
   }
 }
 
+function initAdminTabs() {
+  const tabs = document.querySelectorAll(".tab-btn");
+  const panes = document.querySelectorAll(".admin-tab-content");
+  if (tabs.length === 0) return;
+
+  tabs.forEach(btn => {
+    btn.addEventListener("click", () => {
+      const target = btn.dataset.tab;
+      tabs.forEach(b => b.classList.remove("active"));
+      panes.forEach(p => p.classList.remove("active"));
+
+      btn.classList.add("active");
+      const activePane = document.getElementById(`tab-${target}`);
+      if (activePane) activePane.classList.add("active");
+
+      // Auto-trigger overview render if logic tab selected
+      if (target === 'logic') {
+        renderOverview();
+      }
+    });
+  });
+}
 
 function toggleOverview() {
-  showOverviewDashboard = !showOverviewDashboard;
-  const btn = document.getElementById("admin-view-overview");
-  const tableWrap = document.getElementById("admin-table-wrap");
-  const overviewSection = document.getElementById("admin-overview");
-  const controlsBar = document.querySelector(".admin-controls-bar");
-
-  if (showOverviewDashboard) {
-    btn.classList.add("admin-view-overview-active");
-    tableWrap.classList.add("hidden");
-    controlsBar.classList.add("hidden");
-    overviewSection.classList.remove("hidden");
-    renderOverview();
-  } else {
-    btn.classList.remove("admin-view-overview-active");
-    tableWrap.classList.remove("hidden");
-    controlsBar.classList.remove("hidden");
-    overviewSection.classList.add("hidden");
-  }
+  // Deprecated in favor of Tabbed Logic view
+  renderOverview();
 }
 
 function renderOverview() {

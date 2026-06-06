@@ -830,29 +830,8 @@
         <div class="admin-topbar">
           <div class="admin-stats-row">
             <div class="admin-stats" id="admin-stats"></div>
-            <div class="admin-analytics" id="admin-analytics">
-              <!-- Visual bars will be injected here -->
-            </div>
           </div>
           <div class="admin-tools">
-            <button class="btn-ghost admin-refresh" id="admin-refresh">Refresh</button>
-            <button class="btn-ghost admin-export" id="admin-export" data-testid="admin-export">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
-              </svg>
-              Export All CSV
-            </button>
-            <button class="btn-ghost admin-verified-sheet" id="admin-verified-sheet"
-              style="color:#c9a961;border-color:rgba(201,169,97,0.4);" title="Download CSV of verified delegates only">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-              Verified Sheet
-            </button>
             <button class="btn-ghost admin-refresh" id="admin-refresh" data-testid="admin-refresh">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -862,136 +841,203 @@
               </svg>
               Refresh
             </button>
-            <button class="btn-ghost admin-verified-sheet" id="admin-view-overview"
-              style="color:#d4af37;border-color:rgba(212,175,55,0.4);" title="View grouping of assigned delegates">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="3" y="3" width="7" height="9" />
-                <rect x="14" y="3" width="7" height="5" />
-                <rect x="14" y="12" width="7" height="9" />
-                <rect x="3" y="16" width="7" height="5" />
-              </svg>
-              Assignment Overview
-            </button>
-            <button class="btn-ghost admin-verified-sheet" id="admin-export-scores-summary"
-              style="color:#e5c07b;border-color:rgba(229,192,123,0.3);" title="Download summary of scores per criteria">
-              Score Summary
-            </button>
-            <button class="btn-ghost admin-verified-sheet" id="admin-export-scores-raw"
-              style="color:#d19a66;border-color:rgba(209,154,102,0.3);"
-              title="Download raw history of every submission">
-              Raw Score Log
-            </button>
             <button class="btn-ghost admin-logout" id="admin-logout" data-testid="admin-logout">
               Sign out
             </button>
           </div>
-
         </div>
 
-        <div class="admin-controls-bar">
-          <div class="admin-search-box">
+        <!-- Tab Navigation -->
+        <nav class="admin-tabs">
+          <button class="tab-btn active" data-tab="delegates">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
             </svg>
-            <input type="text" id="admin-search" placeholder="Search name, email, or phone..." />
-          </div>
-          <div class="admin-filter-chips">
-            <button class="filter-chip active" data-filter="all">All</button>
-            <button class="filter-chip" data-filter="pending">Pending</button>
-            <button class="filter-chip" data-filter="payment_claimed">Claimed</button>
-            <button class="filter-chip" data-filter="verified">Verified</button>
-            <button class="filter-chip" data-filter="rejected">Rejected</button>
-          </div>
-          <select id="admin-filter-college" class="admin-select">
-            <option value="all">All Institutions</option>
-          </select>
-        </div>
+            Delegates
+          </button>
+          <button class="tab-btn" data-tab="logic">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+              <line x1="8" y1="21" x2="16" y2="21"></line>
+              <line x1="12" y1="17" x2="12" y2="21"></line>
+            </svg>
+            Event Logic
+          </button>
+          <button class="tab-btn" data-tab="staff">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <polyline points="16 11 18 13 22 9"></polyline>
+            </svg>
+            Staff
+          </button>
+          <button class="tab-btn" data-tab="exports">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Center
+          </button>
+        </nav>
 
-        <div class="admin-table-wrap" id="admin-table-wrap">
-          <table class="admin-table" data-testid="admin-table">
-            <thead>
-              <tr>
-                <th>Delegate</th>
-                <th>Assignment</th>
-                <th>Parent/Guardian</th>
-                <th>Contact</th>
-                <th>Institution</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="admin-rows"></tbody>
-          </table>
-          <p class="admin-empty hidden" id="admin-empty">No registrations yet.</p>
-        </div>
-
-        <!-- Assignment Overview Section -->
-        <div class="admin-overview hidden" id="admin-overview">
-          <div class="overview-header">
-            <h3 class="overview-title">Assignment Dashboard</h3>
-            <p class="overview-subtitle">Grouped roster of verified delegates</p>
+        <!-- Tab: Delegates -->
+        <div class="admin-tab-content active" id="tab-delegates">
+          <div class="admin-analytics-wrap">
+            <div class="admin-analytics" id="admin-analytics"></div>
           </div>
-          <div class="overview-grid">
-            <div class="overview-col">
-              <h4 class="overview-col-title">Parties</h4>
-              <div id="overview-parties" class="overview-list"></div>
+
+          <div class="admin-controls-bar">
+            <div class="admin-search-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" id="admin-search" placeholder="Search name, email, or phone..." />
             </div>
-            <div class="overview-col">
-              <h4 class="overview-col-title">Committees</h4>
-              <div id="overview-committees" class="overview-list"></div>
+            <div class="admin-filter-chips">
+              <button class="filter-chip active" data-filter="all">All</button>
+              <button class="filter-chip" data-filter="pending">Pending</button>
+              <button class="filter-chip" data-filter="payment_claimed">Claimed</button>
+              <button class="filter-chip" data-filter="verified">Verified</button>
+              <button class="filter-chip" data-filter="rejected">Rejected</button>
+            </div>
+            <select id="admin-filter-college" class="admin-select">
+              <option value="all">All Institutions</option>
+            </select>
+          </div>
+
+          <div class="admin-table-wrap" id="admin-table-wrap">
+            <table class="admin-table" data-testid="admin-table">
+              <thead>
+                <tr>
+                  <th>Delegate</th>
+                  <th>Assignment</th>
+                  <th>Parent/Guardian</th>
+                  <th>Contact</th>
+                  <th>Institution</th>
+                  <th>Status</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="admin-rows"></tbody>
+            </table>
+            <p class="admin-empty hidden" id="admin-empty">No registrations yet.</p>
+          </div>
+        </div>
+
+        <!-- Tab: Event Logic -->
+        <div class="admin-tab-content" id="tab-logic">
+          <div class="logic-grid">
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title">Parties &amp; Committees</h3>
+              <form id="party-form" class="party-form">
+                <input type="text" id="party-name" placeholder="Name (e.g. BJP, Finance Committee)" required />
+                <select id="party-type">
+                  <option value="party">Party</option>
+                  <option value="committee">Committee</option>
+                </select>
+                <select id="party-side">
+                  <option value="ruling">Ruling</option>
+                  <option value="opposition">Opposition</option>
+                  <option value="">N/A (Committee)</option>
+                </select>
+                <input type="text" id="party-desc" placeholder="Short description (optional)" />
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add</button>
+              </form>
+              <div id="parties-admin-list" class="parties-admin-list"></div>
+            </div>
+
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title" style="color: #d4af37;">Scoring Criteria Editor</h3>
+              <form id="criteria-form" class="party-form">
+                <input type="text" id="criteria-name" placeholder="Criteria Name (e.g. Logic, Oratory)" required />
+                <input type="number" id="criteria-max" placeholder="Max Pts" required min="1" max="100" />
+                <input type="text" id="criteria-desc" placeholder="Brief description" />
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add
+                  Criteria</button>
+              </form>
+              <div id="criteria-admin-list" class="parties-admin-list"></div>
+            </div>
+          </div>
+
+          <!-- Assignment Overview -->
+          <div class="admin-overview" id="admin-overview" style="margin-top: 2rem;">
+            <div class="overview-header">
+              <h3 class="overview-title">Assignment Overview</h3>
+              <p class="overview-subtitle">Quick view of grouped demographics</p>
+            </div>
+            <div class="overview-grid">
+              <div class="overview-col">
+                <h4 class="overview-col-title">Parties</h4>
+                <div id="overview-parties" class="overview-list"></div>
+              </div>
+              <div class="overview-col">
+                <h4 class="overview-col-title">Committees</h4>
+                <div id="overview-committees" class="overview-list"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <!-- Parties & Committees sub-panel -->
-        <div class="parties-admin-panel">
-          <h3 class="parties-admin-title">Parties &amp; Committees</h3>
-          <form id="party-form" class="party-form">
-            <input type="text" id="party-name" placeholder="Name (e.g. BJP, Finance Committee)" required />
-            <select id="party-type">
-              <option value="party">Party</option>
-              <option value="committee">Committee</option>
-            </select>
-            <select id="party-side">
-              <option value="ruling">Ruling</option>
-              <option value="opposition">Opposition</option>
-              <option value="">N/A (Committee)</option>
-            </select>
-            <input type="text" id="party-desc" placeholder="Short description (optional)" />
-            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add</button>
-          </form>
-          <div id="parties-admin-list" class="parties-admin-list"></div>
+        <!-- Tab: Staff -->
+        <div class="admin-tab-content" id="tab-staff">
+          <div class="parties-admin-panel" style="max-width: 600px; margin: 0 auto;">
+            <h3 class="parties-admin-title" style="color: #c9a961;">Judges Management</h3>
+            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Assign unique IDs and passcodes for
+              evaluation access.</p>
+            <form id="judge-form" class="party-form">
+              <input type="text" id="judge-id" placeholder="Judge ID (e.g. J-101)" required />
+              <input type="password" id="judge-password" placeholder="Passcode" required />
+              <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
+                Judge</button>
+            </form>
+            <div id="judges-admin-list" class="parties-admin-list"></div>
+          </div>
         </div>
 
-        <!-- Judges management sub-panel -->
-        <div class="parties-admin-panel" style="margin-top: 2rem; border-color: rgba(201, 169, 97, 0.3);">
-          <h3 class="parties-admin-title" style="color: #c9a961;">Judges Management</h3>
-          <form id="judge-form" class="party-form">
-            <input type="text" id="judge-id" placeholder="Judge ID (e.g. J-101)" required />
-            <input type="password" id="judge-password" placeholder="Passcode" required />
-            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
-              Judge</button>
-          </form>
-          <div id="judges-admin-list" class="parties-admin-list"></div>
-        </div>
-
-        <!-- Scoring Criteria sub-panel -->
-        <div class="parties-admin-panel" style="margin-top: 2rem; border-color: rgba(212, 175, 55, 0.3);">
-          <h3 class="parties-admin-title" style="color: #d4af37;">Scoring Criteria Editor</h3>
-          <form id="criteria-form" class="party-form">
-            <input type="text" id="criteria-name" placeholder="Criteria Name (e.g. Logic, Oratory)" required />
-            <input type="number" id="criteria-max" placeholder="Max Pts" required min="1" max="100" />
-            <input type="text" id="criteria-desc" placeholder="Brief description" />
-            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add
-              Criteria</button>
-          </form>
-          <div id="criteria-admin-list" class="parties-admin-list"></div>
+        <!-- Tab: Exports -->
+        <div class="admin-tab-content" id="tab-exports">
+          <div class="export-console">
+            <div class="export-card">
+              <div class="export-card-icon">📁</div>
+              <h4>Master Database</h4>
+              <p>Download every registration record in the system.</p>
+              <button class="btn-primary" id="admin-export">Export All CSV</button>
+            </div>
+            <div class="export-card">
+              <div class="export-card-icon">✅</div>
+              <h4>Verified Roll</h4>
+              <p>Download a clean sheet of confirmed parliamentarians only.</p>
+              <button class="btn-primary" id="admin-verified-sheet" style="background:#c9a961;">Verified Sheet</button>
+            </div>
+            <div class="export-card">
+              <div class="export-card-icon">📝</div>
+              <h4>Scoring Summary</h4>
+              <p>Excel-ready spreadsheet of all criteria-wise scores.</p>
+              <button class="btn-primary" id="admin-export-scores-summary" style="background:#d4af37;">Score
+                Summary</button>
+            </div>
+            <div class="export-card">
+              <div class="export-card-icon">🛡️</div>
+              <h4>Safety Log</h4>
+              <p>Raw transaction history of every individual score submission.</p>
+              <button class="btn-primary" id="admin-export-scores-raw" style="background:#b85562;">Raw Score
+                Log</button>
+            </div>
+          </div>
         </div>
       </div>
+
 
     </div>
   </section>
