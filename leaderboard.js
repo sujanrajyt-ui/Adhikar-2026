@@ -12,9 +12,17 @@ const rankingsBody = document.getElementById('rankings-body');
 const updateTime = document.getElementById('update-time');
 
 async function init() {
-    await fetchData();
-    renderCriteriaOptions();
-    renderLeaderboard();
+    try {
+        await fetchData();
+        renderCriteriaOptions();
+        renderLeaderboard();
+
+        // Hide loader
+        const loader = document.getElementById('page-loader');
+        if (loader) loader.classList.add('hidden');
+    } catch (err) {
+        console.error("Initialization failed", err);
+    }
 }
 
 async function fetchData() {

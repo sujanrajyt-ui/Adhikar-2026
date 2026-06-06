@@ -785,7 +785,15 @@
                 document.getElementById('chair-grid').innerHTML = chairLeaders.length ? chairLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No house officers assigned yet.</div>';
                 document.getElementById('gov-grid').innerHTML = govLeaders.length ? govLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No government leadership assigned yet.</div>';
                 document.getElementById('opp-grid').innerHTML = oppLeaders.length ? oppLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No opposition leadership assigned yet.</div>';
-            } catch (err) { console.error('Failed to load leadership', err); }
+
+                // Hide loader
+                const loader = document.getElementById('page-loader');
+                if (loader) loader.classList.add('hidden');
+            } catch (err) {
+                console.error('Failed to load leadership', err);
+                const loader = document.getElementById('page-loader');
+                if (loader) loader.classList.add('hidden');
+            }
         }
         document.addEventListener('DOMContentLoaded', init);
     </script>
