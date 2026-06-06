@@ -166,6 +166,7 @@ function renderDelegates() {
               <span class="meta-pill">${escapeHtml(d.assigned_party || 'No Party')}</span>
               <span class="meta-pill">${escapeHtml(d.assigned_committee || 'No Committee')}</span>
               ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
+              ${d.elected_role ? `<span class="role-badge-mini">${escapeHtml(d.elected_role)}</span>` : ''}
             </div>
           </div>
           <div class="score-badge-wrap">
