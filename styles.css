@@ -4272,7 +4272,6 @@ body:hover #cursor-spotlight {
 }
 
 .inform-btn {
-  margin-top: 2px;
   padding: 5px 12px;
   font-size: 0.75rem;
   font-weight: 600;
@@ -4284,6 +4283,34 @@ body:hover #cursor-spotlight {
   transition: background 0.2s, border-color 0.2s, opacity 0.2s;
   letter-spacing: 0.04em;
   text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.split-buttons {
+  display: grid;
+  grid-template-columns: 0.8fr 1.2fr;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.assign-save-btn {
+  padding: 5px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #e8dfd8;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.assign-save-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--gold-400);
+  color: var(--gold-400);
 }
 
 .inform-btn:hover:not(:disabled) {

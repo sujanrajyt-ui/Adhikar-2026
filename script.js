@@ -919,10 +919,13 @@ function renderRows() {
             <option ${r.elected_role === 'Marshal of the House' ? 'selected' : ''}>Marshal of the House</option>
           </optgroup>
         </select>
-        ${alreadySent
-        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Resend Mail</button>`
-        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}">Assign & Send Mail</button>`
+        <div class="split-buttons">
+          <button class="action-btn assign-save-btn" onclick="handleSaveAssignment('${r.id}')" id="assign-btn-${r.id}" title="Save Party/Committee">Assign</button>
+          ${alreadySent
+        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}" title="Resend Notification">Resend Mail</button>`
+        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}" title="Send Assignment Mail">Send Mail</button>`
       }
+        </div>
       </div>
     ` : `
       <input type="text" value="${escapeHtml(r.portfolio || '')}"
@@ -1450,10 +1453,15 @@ async function handleElectedRoleChange(id, value) {
   }
 }
 
-async function handleInformDelegate(id) {
+async function handleSaveAssignment(id) {
+  // We reuse the saving logic from handleInformDelegate but skip the email
+  return handleInformDelegate(id, true);
+}
+
+async function handleInformDelegate(id, skipEmail = false) {
   const partySel = document.getElementById(`party-sel-${id}`);
   const commSel = document.getElementById(`comm-sel-${id}`);
-  const btn = document.getElementById(`inform-btn-${id}`);
+  const btn = document.getElementById(skipEmail ? `assign-btn-${id}` : `inform-btn-${id}`);
   if (!partySel || !commSel || !btn) return;
 
   const assigned_party = partySel.value;
@@ -1465,7 +1473,7 @@ async function handleInformDelegate(id) {
   }
 
   btn.disabled = true;
-  btn.textContent = 'Sending…';
+  btn.textContent = skipEmail ? 'Saving...' : 'Sending...';
 
   try {
     // 1. Persist assignment to DB
@@ -1481,6 +1489,16 @@ async function handleInformDelegate(id) {
     if (reg) {
       reg.assigned_party = assigned_party;
       reg.assigned_committee = assigned_committee;
+    }
+
+    if (skipEmail) {
+      btn.textContent = '✓ Saved';
+      showToast('Assignment saved successfully!');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.textContent = 'Assign';
+      }, 2000);
+      return;
     }
 
     // 2. Send single assignment email (party + committee combined)
