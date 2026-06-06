@@ -577,8 +577,11 @@ app.get('/api/public/leaderboard', async (req, res) => {
       });
       const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
 
-      // Find individual side
-      const partyMatch = parties.find(p => p.name === d.assigned_party);
+      // Find individual side - Robust matching
+      const partyMatch = parties.find(p =>
+        p.name && d.assigned_party &&
+        p.name.trim().toLowerCase() === d.assigned_party.trim().toLowerCase()
+      );
       const side = partyMatch ? partyMatch.side : null;
 
       return {

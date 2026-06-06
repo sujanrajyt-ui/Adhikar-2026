@@ -63,7 +63,14 @@ function renderLeaderboard() {
         const requiredSide = award ? award.requires_side : null;
         const requiredRole = award ? award.requires_role : null;
 
+        console.log(`[DEBUG] Selected Award ID: ${filter}`);
+        console.log(`[DEBUG] Required Role: ${requiredRole}`);
+        console.log(`[DEBUG] Required Side: ${requiredSide}`);
+        console.log(`[DEBUG] Award Criteria Items:`, items);
+
         // Apply eligibility filter (Robust multi-keyword match)
+        if (data.length > 0) console.log(`[DEBUG] First Delegate Sample:`, data[0]);
+
         if (requiredSide || requiredRole) {
             data = data.filter(d => {
                 // Check Role first if specified (Supports comma-separated OR matching)
