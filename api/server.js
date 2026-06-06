@@ -578,7 +578,7 @@ app.get('/api/public/leaderboard', async (req, res) => {
       db.getParties()
     ]);
 
-    const verified = registrations.filter(r => r.status === 'verified');
+    const verified = registrations.filter(r => (r.status || '').toLowerCase() === 'verified');
 
     const leaderboardData = verified.map(d => {
       const dScores = scores.filter(s => s.delegate_id === d.id);
@@ -621,7 +621,7 @@ app.get('/api/public/leadership', async (req, res) => {
   try {
     const [all, parties] = await Promise.all([db.getAll(), db.getParties()]);
     const leadership = all
-      .filter(r => r.status === 'verified' && r.elected_role && r.elected_role.trim() !== '')
+      .filter(r => (r.status || '').toLowerCase() === 'verified' && r.elected_role && r.elected_role.trim() !== '')
       .map(r => {
         const p = parties.find(party =>
           party.name && r.assigned_party &&
