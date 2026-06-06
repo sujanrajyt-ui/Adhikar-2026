@@ -868,14 +868,14 @@
             </svg>
             Event Logic
           </button>
-          <button class="tab-btn" data-tab="staff">
+          <button class="tab-btn" data-tab="scoring">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <polyline points="16 11 18 13 22 9"></polyline>
+              <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2">
+              </polygon>
             </svg>
-            Staff
+            Scoring
           </button>
           <button class="tab-btn" data-tab="exports">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -994,19 +994,31 @@
           </div>
         </div>
 
-        <!-- Tab: Staff -->
-        <div class="admin-tab-content" id="tab-staff">
-          <div class="parties-admin-panel" style="max-width: 600px; margin: 0 auto;">
-            <h3 class="parties-admin-title" style="color: #c9a961;">Judges Management</h3>
-            <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.9rem;">Assign unique IDs and passcodes for
-              evaluation access.</p>
-            <form id="judge-form" class="party-form">
-              <input type="text" id="judge-id" placeholder="Judge ID (e.g. J-101)" required />
-              <input type="password" id="judge-password" placeholder="Passcode" required />
-              <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
-                Judge</button>
-            </form>
-            <div id="judges-admin-list" class="parties-admin-list"></div>
+        <!-- Tab: Scoring Dashboard -->
+        <div class="admin-tab-content" id="tab-scoring">
+          <div class="scoring-dashboard-grid">
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title" style="color: var(--gold-400);">Judges & Staff</h3>
+              <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Credentials for scoring access.</p>
+              <form id="judge-form" class="party-form">
+                <input type="text" id="judge-id" placeholder="Judge ID (e.g. J-101)" required />
+                <input type="password" id="judge-password" placeholder="Passcode" required />
+                <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add
+                  Judge</button>
+              </form>
+              <div id="judges-admin-list" class="parties-admin-list" style="margin-top: 1.5rem;"></div>
+            </div>
+
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title" style="color: #b85562;">Live Safety Log</h3>
+              <p class="muted" style="margin-bottom: 1.5rem; font-size: 0.85rem;">Recent score submissions from the
+                floor.</p>
+              <div id="admin-scoring-log" class="parties-admin-list scoring-log-stream">
+                <p class="muted">Waiting for updates...</p>
+              </div>
+              <button class="btn-ghost" id="refresh-scoring-log"
+                style="width:100%; margin-top: 1rem; font-size: 0.8rem;">Refresh Log</button>
+            </div>
           </div>
         </div>
 

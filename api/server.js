@@ -618,6 +618,31 @@ app.get('/api/admin/scores/raw-log', async (req, res) => {
 
 
 
+// GET RECENT SCORES JSON (For Scoring Dashboard)
+app.get('/api/admin/scoring/recent', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
+  if (!fs.existsSync(LOG_FILE)) {
+    return res.json([]);
+  }
+  try {
+    const content = fs.readFileSync(LOG_FILE, 'utf-8');
+    const lines = content.trim().split('\n').filter(l => l.trim() !== "");
+    if (lines.length <= 1) return res.json([]); // just header
+
+    const recent = lines.slice(1).slice(-15).reverse().map(line => {
+      const [ts, delId, jId, critId, score] = line.split(',');
+      return { timestamp: ts, delegate_id: delId, judge_id: jId, criteria: critId, score: score };
+    });
+    res.json(recent);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+
 // OFFLINE REGISTRATION (Admin)
 app.post('/api/admin/registrations/offline', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {

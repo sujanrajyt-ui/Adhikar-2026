@@ -74,6 +74,7 @@ function escapeHtml(s) {
   return String(s ?? "").replace(/[&<>"']/g, m => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[m]));
 }
 function formatStatus(s) {
+  if (!s) return "Unknown";
   return s.replace("_", " ").replace(/\b\w/g, c => c.toUpperCase());
 }
 function formatDate(iso) {
@@ -913,8 +914,8 @@ function renderRows() {
     return `
     <tr data-id="${r.id}" data-testid="admin-row-${r.id}">
       <td class="td-delegate">
-        <strong>${escapeHtml(r.name)}</strong>
-        <p style="font-size:0.75rem; color:#bca0a0; margin:4px 0 0;">${escapeHtml(r.role_preference)} · ${escapeHtml(r.year)}</p>
+        <strong>${escapeHtml(r.name || "Unnamed Delegate")}</strong>
+        <p style="font-size:0.75rem; color:#bca0a0; margin:4px 0 0;">${escapeHtml(r.role_preference || "Delegate")} · ${escapeHtml(r.year || "-")}</p>
       </td>
       <td class="td-portfolio">${portfolioCell}</td>
       <td class="td-parent">
@@ -1113,6 +1114,7 @@ function initAdmin() {
     initPartiesAdmin();
     initJudgesAdmin();
     initCriteriaAdmin();
+    initScoringDashboard();
   }
 }
 
@@ -1245,6 +1247,42 @@ async function handleSaveEdit(e) {
   } finally {
     btn.disabled = false;
     btn.textContent = originalText;
+  }
+}
+
+/* ============ Scoring Dashboard ============ */
+function initScoringDashboard() {
+  const refreshBtn = document.getElementById("refresh-scoring-log");
+  refreshBtn?.addEventListener("click", loadRecentScores);
+}
+
+async function loadRecentScores() {
+  const container = document.getElementById("admin-scoring-log");
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/scoring/recent`, { headers: adminHeaders() });
+    if (!res.ok) throw new Error("Log fetch failed");
+    const scores = await res.json();
+
+    if (!scores.length) {
+      container.innerHTML = '<p class="muted">No recent scores recorded.</p>';
+      return;
+    }
+
+    container.innerHTML = scores.map(s => `
+      <div class="party-admin-row" style="font-size: 0.85rem; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="flex: 1;">
+          <span style="color: var(--gold-400); font-weight: 600;">Reg ID: ${escapeHtml(s.delegate_id)}</span>
+          <span class="muted" style="margin: 0 0.5rem;">scored</span>
+          <strong>${s.score}</strong>
+          <span class="muted" style="margin-left: 0.5rem;">by ${escapeHtml(s.judge_id)}</span>
+        </div>
+        <small class="muted">${new Date(s.timestamp).toLocaleTimeString()}</small>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<p class="error-text">Failed to load log: ${err.message}</p>`;
   }
 }
 
