@@ -467,6 +467,19 @@ app.get('/api/admin/awards', async (req, res) => {
   res.json(await db.getAwards());
 });
 
+app.post('/api/admin/awards/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { name, requires_role, requires_side } = req.body;
+  try {
+    await db.updateAward(req.params.id, { name, requires_role, requires_side });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 app.post('/api/admin/awards', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ detail: 'Forbidden' });

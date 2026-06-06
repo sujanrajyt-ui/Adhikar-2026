@@ -1168,6 +1168,12 @@
               <button class="btn-primary" id="admin-export-scores-raw" style="background:#b85562;">Raw Score
                 Log</button>
             </div>
+            <div class="export-card">
+              <div class="export-card-icon">🏆</div>
+              <h4>Award Eligibility</h4>
+              <p>Configure which roles/designations are eligible for each specialized award.</p>
+              <button class="btn-primary" id="admin-awards-config" style="background:#6c5ce7;">Award Settings</button>
+            </div>
           </div>
         </div>
 
@@ -1263,6 +1269,25 @@
           </div>
         </div>
 
+        <!-- Award Eligibility Modal -->
+        <div class="admin-modal hidden" id="admin-awards-modal">
+          <div class="admin-modal-overlay" id="admin-awards-overlay"></div>
+          <div class="admin-modal-content" style="max-width: 600px;">
+            <header class="admin-modal-header">
+              <h3>Award Eligibility Settings</h3>
+              <button class="admin-modal-close" id="admin-awards-close">&times;</button>
+            </header>
+            <div id="admin-awards-list" class="admin-modal-list"
+              style="max-height: 480px; overflow-y: auto; margin-top: 1.25rem;">
+              <p class="muted">Loading awards...</p>
+            </div>
+            <p class="muted"
+              style="font-size: 0.75rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+              <strong>Instructions:</strong> For each award, enter the roles that are eligible, separated by commas.
+              Leave empty if everyone is eligible. Specify the side (Ruling/Opposition) only where required.
+            </p>
+          </div>
+        </div>
       </div>
 
 

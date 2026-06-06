@@ -1744,36 +1744,66 @@ let _awardsCache = [];
 
 async function loadAwards() {
   try {
-    _awardsCache = await fetch(`${API_BASE}/admin/awards`, { headers: adminHeaders() }).then(r => r.json());
+    const res = await fetch(`${API_BASE}/admin/awards`, { headers: adminHeaders() });
+    _awardsCache = await res.json();
     renderAwardsAdmin();
-    renderScoringFramework(); // Sync framework overview
+    if (typeof renderScoringFramework === 'function') renderScoringFramework();
   } catch (err) {
-    console.error(err);
+    console.error("Failed to load awards", err);
   }
 }
 
 function renderAwardsAdmin() {
+  // Existing list in the secondary tab (if it exists)
   const el = document.getElementById("awards-admin-list");
-  if (!el) return;
-  el.innerHTML = _awardsCache.map(a => {
-    // Find names of associated criteria
-    const formulaStr = a.criteria_ids.map(c => {
-      const match = _criteriaCache.find(crit => crit.id === (c.id || c));
-      const name = match ? (match.name || match.id) : (c.id || c);
-      const weight = c.weight || 1.0;
-      return `(${name} × ${weight})`;
-    }).join(" + ");
-
-    return `
+  if (el) {
+    el.innerHTML = _awardsCache.map(a => `
       <div class="party-admin-row">
         <div style="flex: 1;">
           <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
-          <p class="muted" style="font-size: 0.7rem; margin-top: 0.2rem;">Formula: ${escapeHtml(formulaStr)}</p>
         </div>
         <button class="btn-danger-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
       </div>
-    `;
-  }).join("");
+    `).join("");
+  }
+
+  // New list in the main Award Eligibility modal
+  const container = document.getElementById("admin-awards-list");
+  if (container) {
+    if (_awardsCache.length === 0) {
+      container.innerHTML = '<p class="muted">No awards defined.</p>';
+      return;
+    }
+
+    container.innerHTML = _awardsCache.map(a => `
+      <div class="award-admin-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+          <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
+          <span style="font-size: 0.7rem; color: #bca0a0;">ID: ${a.id}</span>
+        </div>
+        
+        <div class="field-grid" style="display: grid; grid-template-columns: 1fr; gap: 0.8rem;">
+          <label class="field">
+            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Eligible Roles (Comma separated)</span>
+            <input type="text" value="${escapeHtml(a.requires_role || '')}" 
+                   placeholder="e.g. Minister, Prime Minister"
+                   onchange="handleUpdateAwardEligibility('${a.id}', this.value, '${a.requires_side || ''}')"
+                   style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px;" />
+          </label>
+          
+          <label class="field">
+            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Required Side (Optional)</span>
+            <select onchange="handleUpdateAwardEligibility('${a.id}', '${a.requires_role || ''}', this.value)"
+                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px;">
+              <option value="" ${!a.requires_side ? 'selected' : ''}>Any Side</option>
+              <option value="ruling" ${a.requires_side === 'ruling' ? 'selected' : ''}>Ruling Government</option>
+              <option value="opposition" ${a.requires_side === 'opposition' ? 'selected' : ''}>Opposition</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    `).join('');
+  }
 }
 
 function updateFormulaPreview() {
@@ -2027,4 +2057,5 @@ document.addEventListener("DOMContentLoaded", () => {
   initMagneticButtons();
   initOtp();
   renderParties();
+  initAwardsAdmin();
 });
