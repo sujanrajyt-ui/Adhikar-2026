@@ -431,8 +431,10 @@ app.get('/api/scores/delegates', async (req, res) => {
     db.getScoresForJudge(judgeId)
   ]);
 
-  // Filter for verified delegates
-  const verified = registrations.filter(r => r.status === 'verified');
+  // Filter for delegates who are either verified OR have been assigned a committee
+  const verified = registrations.filter(r =>
+    r.status === 'verified' || (r.assigned_committee && r.assigned_committee.trim() !== '')
+  );
 
   // Map scores to delegates
   const mapped = verified.map(v => {
@@ -443,6 +445,7 @@ app.get('/api/scores/delegates', async (req, res) => {
   res.json(mapped);
 });
 
+
 // Judge: Submit score
 app.post('/api/scores/submit', async (req, res) => {
   const { delegate_id, judge_id, criteria_id, score } = req.body;
@@ -450,12 +453,21 @@ app.post('/api/scores/submit', async (req, res) => {
     return res.status(400).json({ detail: 'Missing required fields' });
   }
   try {
-    const entry = await db.submitScore({ delegate_id, judge_id, criteria_id, score });
+    const scoreVal = parseInt(score, 10);
+    if (isNaN(scoreVal)) return res.status(400).json({ detail: 'Invalid score value' });
+
+    // Check if score is within reasonable bounds (0 to 100, though max_points is usually 10)
+    if (scoreVal < 0 || scoreVal > 100) {
+      return res.status(400).json({ detail: 'Score out of range (0-100)' });
+    }
+
+    const entry = await db.submitScore({ delegate_id, judge_id, criteria_id, score: scoreVal });
     res.json(entry);
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
 });
+
 
 
 

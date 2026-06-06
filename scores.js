@@ -3,8 +3,9 @@
  */
 
 const API_BASE = '/api';
-let currentJudge = null;
+let currentJudge = sessionStorage.getItem('adhikar_judge') || null;
 let allDelegates = [];
+
 let allCriteria = [];
 let selectedDelegate = null;
 
@@ -101,6 +102,7 @@ async function initDashboard() {
 async function loadCriteria() {
     try {
         const res = await fetch(`${API_BASE}/scores/criteria`);
+        if (!res.ok) throw new Error("Failed to load criteria");
         allCriteria = await res.json();
     } catch (err) {
         showToast("Failed to load criteria", "error");
@@ -110,6 +112,7 @@ async function loadCriteria() {
 async function loadDelegates() {
     try {
         const res = await fetch(`${API_BASE}/scores/delegates?judgeId=${currentJudge}`);
+        if (!res.ok) throw new Error("Failed to load delegates");
         allDelegates = await res.json();
     } catch (err) {
         showToast("Failed to load delegates", "error");
@@ -225,13 +228,22 @@ async function handleInlineSave(delegateId) {
             return;
         }
 
-        await Promise.all(submissions.map(s =>
+        const responses = await Promise.all(submissions.map(s =>
             fetch(`${API_BASE}/scores/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(s)
-            }).then(r => r.json())
+            })
         ));
+
+        for (const res of responses) {
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Server error: ${res.status} - ${errorText}`);
+            }
+        }
+
+
 
         showToast(`Scores saved for ${delegate.name}`);
         btn.classList.remove('dirty');
