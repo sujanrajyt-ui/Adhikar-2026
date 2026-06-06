@@ -111,6 +111,7 @@ async function init() {
         );
       `);
       await client.query(`ALTER TABLE awards ADD COLUMN IF NOT EXISTS requires_side VARCHAR(50);`);
+      await client.query(`ALTER TABLE awards ADD COLUMN IF NOT EXISTS requires_role VARCHAR(255);`);
 
 
       console.log("[Database] PostgreSQL table and columns verified.");
@@ -624,12 +625,9 @@ module.exports = {
   // ============ Awards ============
 
   async getAwards() {
-    if (isPg) {
-      const res = await pool.query('SELECT * FROM awards ORDER BY created_at DESC');
-      return res.rows.map(r => ({ ...r, criteria_ids: JSON.parse(r.criteria_ids) }));
-    } else {
-      return JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
-    }
+    // Always read from the local JSON file — awards are static config
+    // and the PG table may not have all columns (e.g. requires_role)
+    return JSON.parse(fs.existsSync(AWARDS_FILE) ? fs.readFileSync(AWARDS_FILE, 'utf-8') : '[]');
   },
 
   async createAward(data) {
