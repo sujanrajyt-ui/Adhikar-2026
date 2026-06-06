@@ -48,38 +48,45 @@ function renderCriteriaOptions() {
 
 function renderLeaderboard() {
     const filter = awardSelector.value;
-    let data = allData.leaderboard.filter(d => {
-        const role = (d.elected_role || "").toLowerCase();
-        // Exclude House Officers (Speaker, Deputy Speaker) from award competition
-        return !role.includes("speaker");
-    });
+    let data = [...allData.leaderboard];
 
     if (filter === 'overall') {
         // Already sorted by totalScore from backend
         data.sort((a, b) => b.totalScore - a.totalScore);
+        // exclude Chairs from overall excellence
+        data = data.filter(d => !(d.elected_role || "").toLowerCase().includes("speaker"));
     } else if (filter.startsWith('awd_')) {
         // Dynamic Award Formula
         const award = allData.awards.find(a => a.id === filter);
         const items = award ? award.criteria_ids : [];
         const requiredSide = award ? award.requires_side : null;
+        const requiredRole = award ? award.requires_role : null;
 
         // Apply eligibility filter (Robust multi-keyword match)
-        if (requiredSide) {
+        if (requiredSide || requiredRole) {
             data = data.filter(d => {
-                const s = (d.side || d.party || "").toLowerCase();
-                if (!s) return false;
-                const r = requiredSide.toLowerCase();
-
-                // Map "ruling" to "government" and "treasury"
-                if (r === 'ruling') {
-                    return s.includes('ruling') || s.includes('government') || s.includes('treasury');
-                }
-                // Map "opposition"
-                if (r === 'opposition') {
-                    return s.includes('opposition');
+                // Check Role first if specified
+                if (requiredRole) {
+                    const er = (d.elected_role || "").toLowerCase();
+                    if (!er.includes(requiredRole.toLowerCase())) return false;
                 }
 
-                return s.includes(r) || r.includes(s);
+                // Check Side
+                if (requiredSide) {
+                    const s = (d.side || d.party || "").toLowerCase();
+                    if (!s) return false;
+                    const r = requiredSide.toLowerCase();
+                    let sideMatch = false;
+                    if (r === 'ruling') {
+                        sideMatch = s.includes('ruling') || s.includes('government') || s.includes('treasury');
+                    } else if (r === 'opposition') {
+                        sideMatch = s.includes('opposition');
+                    } else {
+                        sideMatch = s.includes(r) || r.includes(s);
+                    }
+                    if (!sideMatch) return false;
+                }
+                return true;
             });
         }
 
@@ -93,10 +100,7 @@ function renderLeaderboard() {
 
         // Tie-breaking
         data.sort((a, b) => {
-            // Main score
             if (b.awardScore !== a.awardScore) return b.awardScore - a.awardScore;
-
-            // Rule 1: Primary Criterion (largest weight)
             if (items.length > 0) {
                 const primaryItem = items.reduce((prev, current) => (prev.weight > current.weight) ? prev : current);
                 const pCid = primaryItem.id || primaryItem;
@@ -104,17 +108,15 @@ function renderLeaderboard() {
                 const scoreB = b.criteriaScores[pCid] || 0;
                 if (scoreB !== scoreA) return scoreB - scoreA;
             }
-
-            // Rule 2: Overall Common Score
             return b.totalScore - a.totalScore;
         });
     } else {
-        // Sort by specific criteria score
+        // Specific criteria sorting
         data.sort((a, b) => {
             const scoreA = a.criteriaScores[filter] || 0;
             const scoreB = b.criteriaScores[filter] || 0;
             if (scoreB !== scoreA) return scoreB - scoreA;
-            return b.totalScore - a.totalScore; // Tier 2 tie-break
+            return b.totalScore - a.totalScore;
         });
     }
 
