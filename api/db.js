@@ -7,6 +7,7 @@ const PARTIES_FILE = path.join(__dirname, 'parties.json');
 const JUDGES_FILE = path.join(__dirname, 'judges.json');
 const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
 const SCORES_FILE = path.join(__dirname, 'scores.json');
+const LOG_FILE = path.join(__dirname, 'scores_log.csv');
 
 
 // Connect to pg if DATABASE_URL is set in environment
@@ -140,10 +141,25 @@ function readData() {
 function writeData(data) {
   try {
     fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2), 'utf-8');
-    return true;
   } catch (err) {
     console.error("Error writing database file:", err);
-    return false;
+  }
+}
+
+// Log a score entry to a separate CSV for safety
+function appendToLog(entry) {
+  try {
+    const isNew = !fs.existsSync(LOG_FILE);
+    const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score\n";
+    const line = `${new Date().toISOString()},${entry.delegate_id},${entry.judge_id},${entry.criteria_id},${entry.score}\n`;
+
+    if (isNew) {
+      fs.writeFileSync(LOG_FILE, header + line, 'utf-8');
+    } else {
+      fs.appendFileSync(LOG_FILE, line, 'utf-8');
+    }
+  } catch (err) {
+    console.error("Error appending to scores log:", err);
   }
 }
 
@@ -543,8 +559,13 @@ module.exports = {
       }
       fs.writeFileSync(SCORES_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
+
+    // Always append to safety log
+    appendToLog({ delegate_id, judge_id, criteria_id, score });
+
     return { delegate_id, judge_id, criteria_id, score, updated_at: now };
   },
+
 
   async getAllScores() {
     if (isPg) {

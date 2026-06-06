@@ -1019,13 +1019,57 @@ async function handleRowAction(e) {
   }
 }
 
+async function exportScoresSummary() {
+  if (!adminPassword) return;
+  try {
+    const res = await fetch("/api/admin/scores/export", {
+      headers: { "x-admin-password": adminPassword }
+    });
+    if (!res.ok) throw new Error("Failed to export scores");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `adhikar26_scores_summary_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (ex) {
+    showToast(ex.message, "error");
+  }
+}
+
+async function exportScoresRawLog() {
+  if (!adminPassword) return;
+  try {
+    const res = await fetch("/api/admin/scores/raw-log", {
+      headers: { "x-admin-password": adminPassword }
+    });
+    if (!res.ok) throw new Error("Log file not found or failed to export");
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "adhikar26_raw_score_log.csv";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  } catch (ex) {
+    showToast(ex.message, "error");
+  }
+}
+
+
 function initAdmin() {
   document.getElementById("admin-login-form")?.addEventListener("submit", adminLogin);
   document.getElementById("admin-logout")?.addEventListener("click", adminLogout);
   document.getElementById("admin-refresh")?.addEventListener("click", loadRegistrations);
   document.getElementById("admin-export")?.addEventListener("click", exportCsv);
   document.getElementById("admin-verified-sheet")?.addEventListener("click", exportVerifiedSheet);
+  document.getElementById("admin-export-scores-summary")?.addEventListener("click", exportScoresSummary);
+  document.getElementById("admin-export-scores-raw")?.addEventListener("click", exportScoresRawLog);
   document.getElementById("admin-rows")?.addEventListener("click", handleRowAction);
+
   document.getElementById("admin-view-overview")?.addEventListener("click", toggleOverview);
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {

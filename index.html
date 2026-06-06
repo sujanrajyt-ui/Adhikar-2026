@@ -873,10 +873,20 @@
               </svg>
               Assignment Overview
             </button>
+            <button class="btn-ghost admin-verified-sheet" id="admin-export-scores-summary"
+              style="color:#e5c07b;border-color:rgba(229,192,123,0.3);" title="Download summary of scores per criteria">
+              Score Summary
+            </button>
+            <button class="btn-ghost admin-verified-sheet" id="admin-export-scores-raw"
+              style="color:#d19a66;border-color:rgba(209,154,102,0.3);"
+              title="Download raw history of every submission">
+              Raw Score Log
+            </button>
             <button class="btn-ghost admin-logout" id="admin-logout" data-testid="admin-logout">
               Sign out
             </button>
           </div>
+
         </div>
 
         <div class="admin-controls-bar">
@@ -963,7 +973,8 @@
           <form id="judge-form" class="party-form">
             <input type="text" id="judge-id" placeholder="Judge ID (e.g. J-101)" required />
             <input type="password" id="judge-password" placeholder="Passcode" required />
-            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create Judge</button>
+            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
+              Judge</button>
           </form>
           <div id="judges-admin-list" class="parties-admin-list"></div>
         </div>
@@ -975,7 +986,8 @@
             <input type="text" id="criteria-name" placeholder="Criteria Name (e.g. Logic, Oratory)" required />
             <input type="number" id="criteria-max" placeholder="Max Pts" required min="1" max="100" />
             <input type="text" id="criteria-desc" placeholder="Brief description" />
-            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add Criteria</button>
+            <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Add
+              Criteria</button>
           </form>
           <div id="criteria-admin-list" class="parties-admin-list"></div>
         </div>

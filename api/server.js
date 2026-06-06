@@ -510,6 +510,113 @@ app.get('/api/public/leaderboard', async (req, res) => {
   }
 });
 
+/* ============ Scores Export (CSV / Excel) ============ */
+
+app.get('/api/admin/scores/export', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+
+  try {
+    const [scores, registrations, criteria, judges] = await Promise.all([
+      db.getAllScores(),
+      db.getAll(),
+      db.getCriteria(),
+      db.getJudges()
+    ]);
+
+    // Build CSV header
+    const criteriaNames = criteria.map(c => c.name);
+    const headerRow = ['Delegate Name', 'Party', 'Committee', 'Portfolio', 'Judge ID', ...criteriaNames, 'Total Score', 'Scored At'];
+
+    // Build rows: one row per delegate per judge
+    const rows = [];
+    const eligible = registrations.filter(r =>
+      r.status === 'verified' || (r.assigned_committee && r.assigned_committee.trim() !== '')
+    );
+
+    for (const delegate of eligible) {
+      // Group scores by judge
+      const delegateScores = scores.filter(s => s.delegate_id === delegate.id);
+      const judgeIds = [...new Set(delegateScores.map(s => s.judge_id))];
+
+      if (judgeIds.length === 0) {
+        // Delegate has no scores yet — single row with empty scores
+        const row = [
+          delegate.name,
+          delegate.assigned_party || '',
+          delegate.assigned_committee || '',
+          delegate.portfolio || '',
+          '—',
+          ...criteriaNames.map(() => ''),
+          '0',
+          ''
+        ];
+        rows.push(row);
+      } else {
+        for (const judgeId of judgeIds) {
+          const judgeScores = delegateScores.filter(s => s.judge_id === judgeId);
+          const criteriaValues = criteria.map(c => {
+            const match = judgeScores.find(s => s.criteria_id === c.id);
+            return match ? match.score : '';
+          });
+          const total = criteriaValues.reduce((sum, v) => sum + (Number(v) || 0), 0);
+          const lastUpdate = judgeScores.length > 0
+            ? judgeScores.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0].updated_at
+            : '';
+
+          const row = [
+            delegate.name,
+            delegate.assigned_party || '',
+            delegate.assigned_committee || '',
+            delegate.portfolio || '',
+            judgeId,
+            ...criteriaValues,
+            total,
+            lastUpdate
+          ];
+          rows.push(row);
+        }
+      }
+    }
+
+    // Generate CSV string
+    function csvEscape(val) {
+      const str = String(val ?? '');
+      if (str.includes(',') || str.includes('"') || str.includes('\n')) {
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+      return str;
+    }
+
+    const csvContent = [headerRow, ...rows].map(row => row.map(csvEscape).join(',')).join('\n');
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=adhikar26_scores_summary_${new Date().toISOString().slice(0, 10)}.csv`);
+    res.send(csvContent);
+  } catch (err) {
+    console.error('[Export] Error:', err);
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// RAW SCORE LOG EXPORT (Live append log)
+app.get('/api/admin/scores/raw-log', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const LOG_FILE = path.join(__dirname, 'scores_log.csv');
+  if (fs.existsSync(LOG_FILE)) {
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=adhikar26_raw_score_log.csv');
+    res.sendFile(LOG_FILE);
+  } else {
+    res.status(404).json({ detail: 'Log file not found yet (wait for first submission)' });
+  }
+});
+
+
+
 /* ============ Fallback Web Route ============ */
 
 app.get('/scores', (req, res) => {
