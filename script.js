@@ -933,6 +933,7 @@ function renderRows() {
       <td>${formatDate(r.created_at)}</td>
       <td>
         <div class="td-actions">
+          <button class="action-btn edit-btn" data-action="edit" title="Edit name/college">Edit</button>
           ${r.status !== "verified" ? `<button class="action-btn action-verify" data-action="verified">Verify</button>` : ""}
           ${r.status !== "rejected" ? `<button class="action-btn action-reject" data-action="rejected">Reject</button>` : ""}
           <button class="action-btn action-delete" data-action="delete">Delete</button>
@@ -949,6 +950,11 @@ async function handleRowAction(e) {
   const id = tr?.dataset.id;
   const action = btn.dataset.action;
   if (!id) return;
+
+  if (action === "edit") {
+    openEditModal(id);
+    return;
+  }
 
   if (action === "delete") {
     if (!confirm("Delete this registration permanently?")) return;
@@ -1070,6 +1076,7 @@ function initAdmin() {
   document.getElementById("admin-export-scores-summary")?.addEventListener("click", exportScoresSummary);
   document.getElementById("admin-export-scores-raw")?.addEventListener("click", exportScoresRawLog);
   document.getElementById("admin-rows")?.addEventListener("click", handleRowAction);
+  initAdminManualControl();
 
   document.querySelectorAll(".filter-chip").forEach(chip => {
     chip.addEventListener("click", () => {
@@ -1135,6 +1142,110 @@ function initAdminTabs() {
 function toggleOverview() {
   // Deprecated in favor of Tabbed Logic view
   renderOverview();
+}
+
+function initAdminManualControl() {
+  const addBtn = document.getElementById("admin-add-delegate");
+  const offlineModal = document.getElementById("admin-offline-modal");
+  const editModal = document.getElementById("admin-edit-modal");
+
+  // Open Add
+  addBtn?.addEventListener("click", () => {
+    offlineModal?.classList.remove("hidden");
+  });
+
+  // Close modals
+  [document.getElementById("admin-offline-close"), document.getElementById("admin-edit-close")].forEach(btn => {
+    btn?.addEventListener("click", closeAdminModals);
+  });
+
+  document.querySelectorAll(".admin-modal-overlay").forEach(ov => {
+    ov.addEventListener("click", closeAdminModals);
+  });
+
+  // Form Submissions
+  document.getElementById("admin-offline-form")?.addEventListener("submit", handleManualAdd);
+  document.getElementById("admin-edit-form")?.addEventListener("submit", handleSaveEdit);
+}
+
+function closeAdminModals() {
+  document.querySelectorAll(".admin-modal").forEach(m => m.classList.add("hidden"));
+}
+
+async function handleManualAdd(e) {
+  e.preventDefault();
+  const form = e.target;
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  const btn = form.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Processing…";
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/registrations/offline`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Manual add failed");
+    showToast("✓ Delegate added manually!");
+    closeAdminModals();
+    form.reset();
+    await loadRegistrations();
+  } catch (ex) {
+    showToast(ex.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+}
+
+function openEditModal(id) {
+  const reg = lastRegistrations.find(r => r.id === id);
+  if (!reg) return;
+
+  const idInput = document.getElementById("edit-reg-id");
+  const idDisplay = document.getElementById("edit-reg-id-display");
+  const nameInput = document.getElementById("edit-reg-name");
+  const collegeInput = document.getElementById("edit-reg-college");
+
+  if (idInput) idInput.value = id;
+  if (idDisplay) idDisplay.textContent = id;
+  if (nameInput) nameInput.value = reg.name;
+  if (collegeInput) collegeInput.value = reg.college;
+
+  document.getElementById("admin-edit-modal")?.classList.remove("hidden");
+}
+
+async function handleSaveEdit(e) {
+  e.preventDefault();
+  const id = document.getElementById("edit-reg-id").value;
+  const name = document.getElementById("edit-reg-name").value.trim();
+  const college = document.getElementById("edit-reg-college").value.trim();
+
+  const btn = e.target.querySelector('button[type="submit"]');
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = "Saving…";
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ name, college }),
+    });
+    if (!res.ok) throw new Error("Edit failed");
+    showToast("✓ Record updated");
+    closeAdminModals();
+    await loadRegistrations();
+  } catch (ex) {
+    showToast(ex.message, "error");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
 }
 
 function renderOverview() {

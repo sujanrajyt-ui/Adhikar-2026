@@ -913,7 +913,12 @@
             <select id="admin-filter-college" class="admin-select">
               <option value="all">All Institutions</option>
             </select>
+            <button class="btn-primary" id="admin-add-delegate"
+              style="padding: 0.5rem 1rem; font-size: 0.85rem; background: var(--maroon-600); border: 1px solid var(--maroon-400);">
+              + Manual Add
+            </button>
           </div>
+
 
           <div class="admin-table-wrap" id="admin-table-wrap">
             <table class="admin-table" data-testid="admin-table">
@@ -1036,7 +1041,77 @@
             </div>
           </div>
         </div>
+
+        <!-- ============ Admin Modals ============ -->
+        <!-- Offline Add Modal -->
+        <div class="admin-modal hidden" id="admin-offline-modal">
+          <div class="admin-modal-overlay"></div>
+          <div class="admin-modal-content">
+            <header class="admin-modal-header">
+              <h3>Manual Registration</h3>
+              <button class="admin-modal-close" id="admin-offline-close">&times;</button>
+            </header>
+            <form id="admin-offline-form" class="admin-modal-form">
+              <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Record on-the-spot registrations without
+                OTP verification.</p>
+              <div class="field-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                <input type="text" name="name" placeholder="Full Name *" required />
+                <input type="email" name="email" placeholder="Email (Unique) *" required />
+                <input type="tel" name="phone" placeholder="Phone *" required />
+                <input type="text" name="parent_name" placeholder="Parent Name" />
+                <input type="tel" name="parent_phone" placeholder="Parent Phone" />
+                <input type="text" name="college" placeholder="College / Institution *" required />
+                <select name="year" required>
+                  <option value="">Year of Study…</option>
+                  <option>9th Standard</option>
+                  <option>10th Standard</option>
+                  <option>11th Standard</option>
+                  <option>12th Standard</option>
+                  <option>Other</option>
+                </select>
+                <select name="status">
+                  <option value="verified">Auto-Verify (Paid)</option>
+                  <option value="pending">Mark Pending</option>
+                </select>
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Create
+                Delegate</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Edit Delegate Modal -->
+        <div class="admin-modal hidden" id="admin-edit-modal">
+          <div class="admin-modal-overlay"></div>
+          <div class="admin-modal-content">
+            <header class="admin-modal-header">
+              <h3>Edit Delegate Details</h3>
+              <button class="admin-modal-close" id="admin-edit-close">&times;</button>
+            </header>
+            <form id="admin-edit-form" class="admin-modal-form">
+              <input type="hidden" id="edit-reg-id" />
+              <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Modify basic demographics for <span
+                  id="edit-reg-id-display" style="color:var(--gold-400); font-weight: 700;"></span></p>
+              <div class="field-grid" style="grid-template-columns: 1fr; gap: 1rem;">
+                <label class="field">
+                  <span class="field-label"
+                    style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.25rem;">Full Name</span>
+                  <input type="text" id="edit-reg-name" required style="width: 100%;" />
+                </label>
+                <label class="field">
+                  <span class="field-label"
+                    style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.25rem;">Institution /
+                    College</span>
+                  <input type="text" id="edit-reg-college" required style="width: 100%;" />
+                </label>
+              </div>
+              <button type="submit" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>
+            </form>
+          </div>
+        </div>
+
       </div>
+
 
 
     </div>

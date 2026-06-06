@@ -618,7 +618,43 @@ app.get('/api/admin/scores/raw-log', async (req, res) => {
 
 
 
+// OFFLINE REGISTRATION (Admin)
+app.post('/api/admin/registrations/offline', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const reg = await db.create({
+      ...req.body,
+      status: req.body.status || 'verified',
+      utr: req.body.utr || 'OFFLINE'
+    });
+    res.json(reg);
+  } catch (err) {
+    console.error('[Offline Reg] Error:', err);
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// UPDATE REGISTRATION (Admin)
+app.patch('/api/admin/registrations/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { id } = req.params;
+  try {
+    const updated = await db.update(id, req.body);
+    if (!updated) return res.status(404).json({ detail: 'Registration not found' });
+    res.json(updated);
+  } catch (err) {
+    console.error('[Update Reg] Error:', err);
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+
 /* ============ Fallback Web Route ============ */
+
 
 app.get('/scores', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'scores.html'));
