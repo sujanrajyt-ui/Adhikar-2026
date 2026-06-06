@@ -1146,6 +1146,43 @@ function toggleOverview() {
   renderOverview();
 }
 
+function initScoringDashboard() {
+  const refreshBtn = document.getElementById("refresh-scoring-log");
+  refreshBtn?.addEventListener("click", loadRecentScores);
+  // Initial load
+  loadRecentScores();
+}
+
+async function loadRecentScores() {
+  const container = document.getElementById("admin-scoring-log");
+  if (!container) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/admin/scoring/recent`, { headers: adminHeaders() });
+    if (!res.ok) throw new Error("Log fetch failed");
+    const scores = await res.json();
+
+    if (!scores.length) {
+      container.innerHTML = '<p class="muted">No recent scores recorded.</p>';
+      return;
+    }
+
+    container.innerHTML = scores.map(s => `
+      <div class="party-admin-row" style="font-size: 0.85rem; padding: 0.6rem 0.8rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+        <div style="flex: 1;">
+          <span style="color: var(--gold-400); font-weight: 600;">Reg ID: ${escapeHtml(s.delegate_id)}</span>
+          <span class="muted" style="margin: 0 0.5rem;">scored</span>
+          <strong>${s.score}</strong>
+          <span class="muted" style="margin-left: 0.5rem;">by ${escapeHtml(s.judge_id)}</span>
+        </div>
+        <small class="muted">${new Date(s.timestamp).toLocaleTimeString()}</small>
+      </div>
+    `).join('');
+  } catch (err) {
+    container.innerHTML = `<p class="error-text">Failed to load log: ${err.message}</p>`;
+  }
+}
+
 function initAdminManualControl() {
   const addBtn = document.getElementById("admin-add-delegate");
   const offlineModal = document.getElementById("admin-offline-modal");
