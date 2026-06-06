@@ -330,16 +330,38 @@ app.patch('/api/admin/registrations/:id', async (req, res) => {
     return res.status(403).json({ detail: 'Forbidden' });
   }
   const { id } = req.params;
-  const { name, college, elected_role } = req.body;
-  const updates = {};
-  if (name !== undefined) updates.name = name;
-  if (college !== undefined) updates.college = college;
-  if (elected_role !== undefined) updates.elected_role = elected_role;
-
   try {
-    const result = await db.update(id, updates);
+    const result = await db.update(id, req.body);
     if (!result) return res.status(404).json({ detail: 'Not found' });
-    res.json({ success: true });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Update specifically the elected role (used by inline assignment)
+app.post('/api/admin/registrations/:id/elected_role', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const { role } = req.body;
+    await db.setElectedRole(req.params.id, role);
+    res.json({ success: true, role });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Update award status
+app.post('/api/admin/registrations/:id/award_status', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const { status } = req.body;
+    const result = await db.setAwardStatus(req.params.id, status);
+    res.json({ success: result });
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
@@ -756,21 +778,7 @@ app.post('/api/admin/registrations/offline', async (req, res) => {
   }
 });
 
-// UPDATE REGISTRATION (Admin)
-app.patch('/api/admin/registrations/:id', async (req, res) => {
-  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
-    return res.status(403).json({ detail: 'Forbidden' });
-  }
-  const { id } = req.params;
-  try {
-    const updated = await db.update(id, req.body);
-    if (!updated) return res.status(404).json({ detail: 'Registration not found' });
-    res.json(updated);
-  } catch (err) {
-    console.error('[Update Reg] Error:', err);
-    res.status(500).json({ detail: err.message });
-  }
-});
+// End of Admin Routes
 
 
 // API 404 Handler (Prevents HTML leakage to API consumers)
