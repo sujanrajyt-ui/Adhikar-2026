@@ -648,9 +648,9 @@ module.exports = {
     if (isPg) {
       await pool.query(`
         UPDATE awards 
-        SET requires_role = $1, requires_side = $2, name = $3
-        WHERE id = $4
-      `, [data.requires_role, data.requires_side, data.name, id]);
+        SET requires_role = $1, requires_side = $2, name = $3, criteria_ids = $4
+        WHERE id = $5
+      `, [data.requires_role, data.requires_side, data.name, JSON.stringify(data.criteria_ids), id]);
     } else {
       const list = JSON.parse(fs.readFileSync(AWARDS_FILE, 'utf8'));
       const idx = list.findIndex(a => a.id === id);

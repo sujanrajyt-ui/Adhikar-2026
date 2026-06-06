@@ -1753,56 +1753,100 @@ async function loadAwards() {
   }
 }
 
+const PARLIAMENTARY_ROLES = [
+  "Speaker", "Deputy Speaker", "Secretary General", "Marshal",
+  "Prime Minister", "Deputy Prime Minister", "Leader of the House",
+  "Minister", "Leader of Opposition", "Deputy Leader of Opposition", "Whip"
+];
+
 function renderAwardsAdmin() {
-  // Existing list in the secondary tab (if it exists)
-  const el = document.getElementById("awards-admin-list");
-  if (el) {
-    el.innerHTML = _awardsCache.map(a => `
-      <div class="party-admin-row">
-        <div style="flex: 1;">
-          <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
-        </div>
-        <button class="btn-danger-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
-      </div>
-    `).join("");
+  const container = document.getElementById("admin-awards-list");
+  if (!container) return;
+
+  if (_awardsCache.length === 0) {
+    container.innerHTML = '<p class="muted">No awards defined.</p>';
+    return;
   }
 
-  // New list in the main Award Eligibility modal
-  const container = document.getElementById("admin-awards-list");
-  if (container) {
-    if (_awardsCache.length === 0) {
-      container.innerHTML = '<p class="muted">No awards defined.</p>';
-      return;
-    }
+  container.innerHTML = _awardsCache.map(a => {
+    const currentRoles = (a.requires_role || "").split(',').map(r => r.trim().toLowerCase());
 
-    container.innerHTML = _awardsCache.map(a => `
-      <div class="award-admin-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
-          <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
+    return `
+      <div class="award-admin-box" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); padding: 1.25rem; border-radius: 8px; margin-bottom: 1.25rem;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+          <strong style="color: var(--gold-400); font-size: 1rem;">${escapeHtml(a.name)}</strong>
           <span style="font-size: 0.7rem; color: #bca0a0;">ID: ${a.id}</span>
         </div>
         
-        <div class="field-grid" style="display: grid; grid-template-columns: 1fr; gap: 0.8rem;">
-          <label class="field">
-            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Eligible Roles (Comma separated)</span>
-            <input type="text" value="${escapeHtml(a.requires_role || '')}" 
-                   placeholder="e.g. Minister, Prime Minister"
-                   onchange="handleUpdateAwardEligibility('${a.id}', this.value, '${a.requires_side || ''}')"
-                   style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px;" />
-          </label>
+        <div class="field-grid" style="display: grid; grid-template-columns: 1fr; gap: 1rem;">
+          <div class="checkbox-group">
+            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.5rem;">Eligible Designations (Assignment)</span>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; background: rgba(0,0,0,0.2); padding: 0.8rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05);">
+              ${PARLIAMENTARY_ROLES.map(role => `
+                <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.75rem; cursor: pointer; color: ${currentRoles.includes(role.toLowerCase()) ? '#fff' : '#bca0a0'};">
+                  <input type="checkbox" value="${role}" 
+                         ${currentRoles.includes(role.toLowerCase()) ? 'checked' : ''}
+                         onchange="handleUpdateAwardEligibilityClick('${a.id}', this)" />
+                  ${role}
+                </label>
+              `).join('')}
+            </div>
+          </div>
           
           <label class="field">
-            <span class="field-label" style="font-size: 0.7rem; color: #bca0a0;">Required Side (Optional)</span>
-            <select onchange="handleUpdateAwardEligibility('${a.id}', '${a.requires_role || ''}', this.value)"
-                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px;">
-              <option value="" ${!a.requires_side ? 'selected' : ''}>Any Side</option>
+            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0;">Required Side (Restrict to specific bench)</span>
+            <select onchange="handleUpdateAwardSide('${a.id}', this.value)"
+                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.6rem; border-radius: 4px; font-family: inherit;">
+              <option value="" ${!a.requires_side ? 'selected' : ''}>Any / Neutral</option>
               <option value="ruling" ${a.requires_side === 'ruling' ? 'selected' : ''}>Ruling Government</option>
               <option value="opposition" ${a.requires_side === 'opposition' ? 'selected' : ''}>Opposition</option>
             </select>
           </label>
         </div>
       </div>
-    `).join('');
+    `;
+  }).join('');
+}
+
+async function handleUpdateAwardEligibilityClick(id, checkbox) {
+  const award = _awardsCache.find(a => a.id === id);
+  if (!award) return;
+
+  let currentRoles = (award.requires_role || "").split(',').map(r => r.trim()).filter(x => x);
+  const roleName = checkbox.value;
+
+  if (checkbox.checked) {
+    if (!currentRoles.includes(roleName)) currentRoles.push(roleName);
+  } else {
+    currentRoles = currentRoles.filter(r => r !== roleName);
+  }
+
+  const roleStr = currentRoles.join(', ');
+  await saveAwardUpdate(id, { ...award, requires_role: roleStr });
+}
+
+async function handleUpdateAwardSide(id, side) {
+  const award = _awardsCache.find(a => a.id === id);
+  if (!award) return;
+  await saveAwardUpdate(id, { ...award, requires_side: side });
+}
+
+async function saveAwardUpdate(id, updatedData) {
+  try {
+    const res = await fetch(`${API_BASE}/admin/awards/${id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify(updatedData),
+    });
+    if (!res.ok) throw new Error("Failed to update award");
+
+    const award = _awardsCache.find(a => a.id === id);
+    Object.assign(award, updatedData);
+
+    showToast(`Eligibility updated for ${award.name}`);
+    renderAwardsAdmin();
+  } catch (err) {
+    showToast(err.message, "error");
   }
 }
 

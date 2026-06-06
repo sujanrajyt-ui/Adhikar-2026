@@ -1043,6 +1043,15 @@
               </form>
               <div id="awards-admin-list" class="parties-admin-list"
                 style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;"></div>
+
+              <div
+                style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; background: rgba(108, 92, 231, 0.1); border: 1px dashed #6c5ce7;">
+                <h4 style="color: #a29bfe; font-size: 0.9rem; margin-bottom: 0.5rem;">Award Eligibility Mapping</h4>
+                <p class="muted" style="font-size: 0.75rem; margin-bottom: 1rem;">Map specific designations/roles to
+                  awards to automatically filter the leaderboard.</p>
+                <button class="btn-primary" id="admin-awards-config" style="background:#6c5ce7; width: 100%;">Configure
+                  Eligibility & Roles</button>
+              </div>
             </div>
 
             <!-- Mock Parliament Scoring Framework Overview -->
@@ -1169,10 +1178,11 @@
                 Log</button>
             </div>
             <div class="export-card">
-              <div class="export-card-icon">🏆</div>
-              <h4>Award Eligibility</h4>
-              <p>Configure which roles/designations are eligible for each specialized award.</p>
-              <button class="btn-primary" id="admin-awards-config" style="background:#6c5ce7;">Award Settings</button>
+              <div class="export-card-icon">🛡️</div>
+              <h4>Safety Log</h4>
+              <p>Raw transaction history of every individual score submission.</p>
+              <button class="btn-primary" id="admin-export-scores-raw" style="background:#b85562;">Raw Score
+                Log</button>
             </div>
           </div>
         </div>
@@ -1283,8 +1293,9 @@
             </div>
             <p class="muted"
               style="font-size: 0.75rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-              <strong>Instructions:</strong> For each award, enter the roles that are eligible, separated by commas.
-              Leave empty if everyone is eligible. Specify the side (Ruling/Opposition) only where required.
+              <strong>Instructions:</strong> Select the designations (assignments) that qualify for each award. Any
+              delegate holding one of the checked roles will automatically be ranked in that award category on the
+              public leaderboard.
             </p>
           </div>
         </div>
