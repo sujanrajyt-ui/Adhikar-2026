@@ -56,10 +56,14 @@ function renderLeaderboard() {
     } else if (filter.startsWith('awd_')) {
         // Dynamic Award Formula
         const award = allData.awards.find(a => a.id === filter);
-        const criteriaIds = award ? award.criteria_ids : [];
+        const items = award ? award.criteria_ids : [];
 
         data.forEach(d => {
-            d.awardScore = criteriaIds.reduce((sum, cid) => sum + (d.criteriaScores[cid] || 0), 0);
+            d.awardScore = items.reduce((sum, item) => {
+                const cid = item.id || item;
+                const weight = item.weight || 1.0;
+                return sum + ((d.criteriaScores[cid] || 0) * weight);
+            }, 0);
         });
         data.sort((a, b) => b.awardScore - a.awardScore);
     } else {

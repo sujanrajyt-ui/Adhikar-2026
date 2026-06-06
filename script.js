@@ -1640,21 +1640,46 @@ function renderAwards() {
   if (!el) return;
   el.innerHTML = _awardsCache.map(a => {
     // Find names of associated criteria
-    const cNames = a.criteria_ids.map(cid => {
-      const match = _criteriaCache.find(c => c.id === cid);
-      return match ? (match.name || match.id) : cid;
-    }).join(", ");
+    const formulaStr = a.criteria_ids.map(c => {
+      const match = _criteriaCache.find(crit => crit.id === (c.id || c));
+      const name = match ? (match.name || match.id) : (c.id || c);
+      const weight = c.weight || 1.0;
+      return `(${name} × ${weight})`;
+    }).join(" + ");
 
     return `
       <div class="party-admin-row">
         <div style="flex: 1;">
           <strong style="color: var(--gold-400);">${escapeHtml(a.name)}</strong>
-          <p class="muted" style="font-size: 0.7rem; margin-top: 0.2rem;">Formula: ${escapeHtml(cNames)}</p>
+          <p class="muted" style="font-size: 0.7rem; margin-top: 0.2rem;">Formula: ${escapeHtml(formulaStr)}</p>
         </div>
         <button class="btn-danger-outline" style="padding: 0.25rem 0.5rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
       </div>
     `;
   }).join("");
+}
+
+function updateFormulaPreview() {
+  const name = document.getElementById("award-name").value.trim() || "...";
+  const checks = document.querySelectorAll('input[name="award-crit"]:checked');
+  const previewEl = document.getElementById("formula-preview");
+  if (!previewEl) return;
+
+  if (checks.length === 0) {
+    previewEl.innerHTML = "Select criteria to begin...";
+    return;
+  }
+
+  const parts = Array.from(checks).map(chk => {
+    const cid = chk.value;
+    const match = _criteriaCache.find(c => c.id === cid);
+    const cName = match ? match.name : cid;
+    const weightInput = chk.closest('div').querySelector('.award-weight-input');
+    const weight = weightInput ? weightInput.value : 1.0;
+    return `<span style="color: var(--gold-300)">(${escapeHtml(cName)} × ${weight})</span>`;
+  });
+
+  previewEl.innerHTML = `<strong>${escapeHtml(name)}</strong><br/><span style="font-size: 1rem; opacity: 0.8;">= ${parts.join(' + ')}</span>`;
 }
 
 function renderAwardCriteriaSelection() {
@@ -1665,10 +1690,16 @@ function renderAwardCriteriaSelection() {
     return;
   }
   container.innerHTML = _criteriaCache.map(c => `
-    <label style="display: flex; align-items: center; gap: 0.5rem; padding: 0.3rem 0; font-size: 0.8rem; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.03);">
-      <input type="checkbox" name="award-crit" value="${c.id}" style="accent-color: var(--gold);" />
-      ${escapeHtml(c.name)}
-    </label>
+    <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.05);">
+      <input type="checkbox" name="award-crit" value="${c.id}" onchange="updateFormulaPreview()" style="accent-color: var(--gold); transform: scale(1.1);" />
+      <span style="flex: 1; font-size: 0.85rem;">${escapeHtml(c.name)}</span>
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span class="muted" style="font-size: 0.65rem;">Weight:</span>
+        <input type="number" class="award-weight-input" value="1.0" step="0.1" min="0.1" max="10.0" 
+               oninput="updateFormulaPreview()" 
+               style="width: 50px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); color: #fff; font-size: 0.75rem; border-radius: 4px; padding: 2px 4px;" />
+      </div>
+    </div>
   `).join("");
 }
 
@@ -1679,7 +1710,13 @@ async function handleCreateAward(e) {
   const btn = e.target.querySelector('button');
 
   const name = nameEl.value.trim();
-  const criteria_ids = Array.from(checks).map(c => c.value);
+  const criteria_ids = Array.from(checks).map(chk => {
+    const weightInput = chk.closest('div').querySelector('.award-weight-input');
+    return {
+      id: chk.value,
+      weight: parseFloat(weightInput ? weightInput.value : 1.0)
+    };
+  });
 
   if (!name || criteria_ids.length === 0) {
     showToast("Award name and at least one criteria required", "error");
@@ -1694,7 +1731,13 @@ async function handleCreateAward(e) {
       body: JSON.stringify({ name, criteria_ids }),
     });
     if (!res.ok) throw new Error("Failed to create award");
+
+    // Reset Form
     nameEl.value = "";
+    document.querySelectorAll('input[name="award-crit"]').forEach(chk => chk.checked = false);
+    document.querySelectorAll('.award-weight-input').forEach(inp => inp.value = "1.0");
+    updateFormulaPreview();
+
     showToast("Award created successfully!");
     await loadAwards();
   } catch (err) {
@@ -1721,6 +1764,7 @@ async function handleDeleteAward(id) {
 
 function initAwardsAdmin() {
   document.getElementById("award-form")?.addEventListener("submit", handleCreateAward);
+  document.getElementById("award-name")?.addEventListener("input", updateFormulaPreview);
   loadAwards();
 }
 

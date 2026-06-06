@@ -974,21 +974,44 @@
               <div id="criteria-admin-list" class="parties-admin-list"></div>
             </div>
 
-            <div class="parties-admin-panel">
-              <h3 class="parties-admin-title" style="color: var(--gold-400);">Award Formula Editor</h3>
-              <p class="muted" style="font-size: 0.75rem; margin-bottom: 1rem;">Select criteria to define an award's
-                total score.</p>
-              <form id="award-form" class="party-form">
-                <input type="text" id="award-name" placeholder="Award Name (e.g. Best Speaker)" required />
-                <div id="award-criteria-selection" class="award-criteria-selection"
-                  style="max-height: 120px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 4px;">
-                  <!-- Checkboxes injected by JS -->
-                  <p class="muted" style="font-size: 0.7rem;">Load criteria to select...</p>
+            <div class="parties-admin-panel" style="grid-column: span 2;">
+              <h3 class="parties-admin-title" style="color: var(--gold-400);">Weighted Award Formula Editor</h3>
+              <div class="logic-info-card"
+                style="margin-bottom: 1.5rem; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
+                <p><strong>How it works:</strong> Select criteria and assign multipliers. A weight of 1.0 is standard.
+                  Use higher values (e.g., 2.0) for metrics that should carry more weight in the final award score.</p>
+              </div>
+              <form id="award-form" class="party-form"
+                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
+                <div class="award-form-left">
+                  <label class="muted" style="font-size: 0.75rem; display: block; margin-bottom: 0.5rem;">Award
+                    Name</label>
+                  <input type="text" id="award-name" placeholder="e.g. Best Student Speaker" required
+                    style="margin-bottom: 1.5rem;" />
+
+                  <label class="muted" style="font-size: 0.75rem; display: block; margin-bottom: 0.5rem;">Select
+                    Criteria & Weights</label>
+                  <div id="award-criteria-selection" class="award-criteria-selection"
+                    style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 8px; background: rgba(0,0,0,0.2);">
+                    <!-- Checkboxes + Weight Inputs injected by JS -->
+                  </div>
                 </div>
-                <button type="submit" class="btn-primary" style="padding:0.5rem 1.2rem;font-size:0.85rem;">Create
-                  Award</button>
+
+                <div class="award-form-right">
+                  <div class="formula-preview-container"
+                    style="background: rgba(0,0,0,0.3); border: 1px dashed var(--gold-600); border-radius: 12px; padding: 1.5rem; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 200px;">
+                    <span class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Active Formula Preview:</span>
+                    <div id="formula-preview"
+                      style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold-400); line-height: 1.4; word-break: break-word;">
+                      Select criteria to begin...
+                    </div>
+                    <button type="submit" class="btn-primary"
+                      style="margin-top: 2rem; width: 100%; padding: 1rem;">Create & Publish Award</button>
+                  </div>
+                </div>
               </form>
-              <div id="awards-admin-list" class="parties-admin-list"></div>
+              <div id="awards-admin-list" class="parties-admin-list"
+                style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;"></div>
             </div>
           </div>
 
