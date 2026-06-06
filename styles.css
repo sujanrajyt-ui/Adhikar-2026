@@ -3514,8 +3514,8 @@ a.contact-value:hover {
 
 
 .qr-box {
-  width: 168px;
-  height: 168px;
+  width: 220px;
+  height: 220px;
   background: white;
   padding: 8px;
   border-radius: 12px;
@@ -4197,8 +4197,25 @@ body:hover #cursor-spotlight {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--cream-100);
-  font-size: 0.875rem;
 }
+
+.party-admin-row .btn-ghost {
+  padding: 0.3rem 0.6rem;
+  font-size: 0.75rem;
+  color: #ff6b6b;
+  border-color: rgba(255, 107, 107, 0.3);
+}
+
+.party-admin-row .btn-ghost:hover {
+  background: rgba(255, 107, 107, 0.1);
+}
+
+.parties-admin-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
 
 .party-admin-label {
   flex: 1;

@@ -340,10 +340,133 @@ app.delete('/api/admin/registrations/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+/* ============ Scoring & Judges APIs ============ */
+
+// Judge login
+app.post('/api/scores/login', async (req, res) => {
+  const { id, password } = req.body;
+  if (!id || !password) return res.status(400).json({ detail: 'ID and password required' });
+  const judge = await db.verifyJudge(id, password);
+  if (judge) {
+    res.json({ success: true, judgeId: judge.id });
+  } else {
+    res.status(401).json({ detail: 'Invalid ID or password' });
+  }
+});
+
+// Admin: Manage Judges
+app.get('/api/admin/judges', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  res.json(await db.getJudges());
+});
+
+app.post('/api/admin/judges', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { id, password } = req.body;
+  if (!id || !password) return res.status(400).json({ detail: 'ID and password required' });
+  try {
+    const judge = await db.createJudge({ id, password });
+    res.json(judge);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.delete('/api/admin/judges/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const deleted = await db.deleteJudge(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Not found' });
+  res.json({ success: true });
+});
+
+// Admin: Manage Scoring Criteria
+app.get('/api/admin/scoring-criteria', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  res.json(await db.getCriteria());
+});
+
+app.post('/api/admin/scoring-criteria', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { name, max_points, description } = req.body;
+  if (!name || !max_points) return res.status(400).json({ detail: 'name and max_points required' });
+  try {
+    const entry = await db.createCriteria({ name, max_points, description });
+    res.json(entry);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.delete('/api/admin/scoring-criteria/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const deleted = await db.deleteCriteria(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Not found' });
+  res.json({ success: true });
+});
+
+// Public/Judge: Get all criteria
+app.get('/api/scores/criteria', async (req, res) => {
+  res.json(await db.getCriteria());
+});
+
+// Judge: Get all verified delegates with their scores
+app.get('/api/scores/delegates', async (req, res) => {
+  const judgeId = req.query.judgeId;
+  if (!judgeId) return res.status(400).json({ detail: 'judgeId required' });
+
+  const [registrations, scores] = await Promise.all([
+    db.getAll(),
+    db.getScoresForJudge(judgeId)
+  ]);
+
+  // Filter for verified delegates
+  const verified = registrations.filter(r => r.status === 'verified');
+
+  // Map scores to delegates
+  const mapped = verified.map(v => {
+    const delegateScores = scores.filter(s => s.delegate_id === v.id);
+    return { ...v, scores: delegateScores };
+  });
+
+  res.json(mapped);
+});
+
+// Judge: Submit score
+app.post('/api/scores/submit', async (req, res) => {
+  const { delegate_id, judge_id, criteria_id, score } = req.body;
+  if (!delegate_id || !judge_id || !criteria_id || score === undefined) {
+    return res.status(400).json({ detail: 'Missing required fields' });
+  }
+  try {
+    const entry = await db.submitScore({ delegate_id, judge_id, criteria_id, score });
+    res.json(entry);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+
 /* ============ Fallback Web Route ============ */
+app.get('/scores', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'scores.html'));
+});
+
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));
 });
+
 
 // Start Server - listen on 0.0.0.0 for accessibility
 if (require.main === module) {

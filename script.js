@@ -696,6 +696,9 @@ async function adminLogin(e) {
     await loadRegistrations();
     if (showOverviewDashboard) renderOverview();
     initPartiesAdmin();
+    initJudgesAdmin();
+    initCriteriaAdmin();
+
   } catch (ex) {
     err.textContent = ex.message || "Login failed";
     err.classList.add("visible");
@@ -1057,8 +1060,11 @@ function initAdmin() {
       });
     });
     initPartiesAdmin();
+    initJudgesAdmin();
+    initCriteriaAdmin();
   }
 }
+
 
 function toggleOverview() {
   showOverviewDashboard = !showOverviewDashboard;
@@ -1222,6 +1228,157 @@ async function handleInformDelegate(id) {
     btn.textContent = 'Inform';
   }
 }
+
+/* ============ Judges Admin ============ */
+let _judgesCache = [];
+
+async function loadJudges() {
+  try {
+    _judgesCache = await fetch(`${API_BASE}/admin/judges`, { headers: adminHeaders() }).then(r => r.json());
+    renderJudges();
+  } catch {
+    _judgesCache = [];
+  }
+}
+
+function renderJudges() {
+  const container = document.getElementById("judges-admin-list");
+  if (!container) return;
+  container.innerHTML = _judgesCache.map(j => `
+    <div class="party-admin-row">
+      <span class="party-admin-label"><strong>${escapeHtml(j.id)}</strong> <small>(Added ${formatDate(j.created_at)})</small></span>
+      <button class="btn-ghost" onclick="handleDeleteJudge('${j.id}')">Delete</button>
+    </div>
+  `).join('');
+}
+
+async function handleCreateJudge(e) {
+  e.preventDefault();
+  const idEl = document.getElementById("judge-id");
+  const pwEl = document.getElementById("judge-password");
+  const btn = e.target.querySelector('button');
+
+  const id = idEl.value.trim();
+  const password = pwEl.value.trim();
+  if (!id || !password) return;
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/admin/judges`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ id, password }),
+    });
+    if (!res.ok) throw new Error("Failed to create judge");
+    idEl.value = "";
+    pwEl.value = "";
+    showToast("Judge created");
+    await loadJudges();
+  } catch (err) {
+    showToast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleDeleteJudge(id) {
+  if (!confirm(`Delete judge ${id}?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/judges/${id}`, {
+      method: "DELETE",
+      headers: adminHeaders(),
+    });
+    if (!res.ok) throw new Error("Delete failed");
+    showToast("Judge deleted");
+    await loadJudges();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+function initJudgesAdmin() {
+  document.getElementById("judge-form")?.addEventListener("submit", handleCreateJudge);
+  loadJudges();
+}
+
+/* ============ Scoring Criteria Admin ============ */
+let _criteriaCache = [];
+
+async function loadCriteria() {
+  try {
+    _criteriaCache = await fetch(`${API_BASE}/admin/scoring-criteria`, { headers: adminHeaders() }).then(r => r.json());
+    renderCriteria();
+  } catch {
+    _criteriaCache = [];
+  }
+}
+
+function renderCriteria() {
+  const container = document.getElementById("criteria-admin-list");
+  if (!container) return;
+  container.innerHTML = _criteriaCache.map(c => `
+    <div class="party-admin-row">
+      <div class="party-admin-label">
+        <strong>${escapeHtml(c.name)}</strong> (Max: ${c.max_points})
+        <p style="font-size: 0.75rem; color: #bca0a0; margin: 2px 0 0;">${escapeHtml(c.description || 'No description')}</p>
+      </div>
+      <button class="btn-ghost" onclick="handleDeleteCriteria('${c.id}')">Delete</button>
+    </div>
+  `).join('');
+}
+
+async function handleCreateCriteria(e) {
+  e.preventDefault();
+  const nameEl = document.getElementById("criteria-name");
+  const maxEl = document.getElementById("criteria-max");
+  const descEl = document.getElementById("criteria-desc");
+  const btn = e.target.querySelector('button');
+
+  const name = nameEl.value.trim();
+  const max_points = maxEl.value;
+  const description = descEl.value.trim();
+  if (!name || !max_points) return;
+
+  btn.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/admin/scoring-criteria`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...adminHeaders() },
+      body: JSON.stringify({ name, max_points, description }),
+    });
+    if (!res.ok) throw new Error("Failed to create criteria");
+    nameEl.value = "";
+    maxEl.value = "";
+    descEl.value = "";
+    showToast("Criteria added");
+    await loadCriteria();
+  } catch (err) {
+    showToast(err.message, "error");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function handleDeleteCriteria(id) {
+  if (!confirm(`Delete this criteria?`)) return;
+  try {
+    const res = await fetch(`${API_BASE}/admin/scoring-criteria/${id}`, {
+      method: "DELETE",
+      headers: adminHeaders(),
+    });
+    if (!res.ok) throw new Error("Delete failed");
+    showToast("Criteria deleted");
+    await loadCriteria();
+  } catch (err) {
+    showToast(err.message, "error");
+  }
+}
+
+function initCriteriaAdmin() {
+  document.getElementById("criteria-form")?.addEventListener("submit", handleCreateCriteria);
+  loadCriteria();
+}
+
 
 /* ============ Portrait Bio Toggle ============ */
 function initPortraitBio() {

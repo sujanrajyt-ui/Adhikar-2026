@@ -4,6 +4,10 @@ const { Pool } = require('pg');
 
 const DB_FILE = path.join(__dirname, 'data.json');
 const PARTIES_FILE = path.join(__dirname, 'parties.json');
+const JUDGES_FILE = path.join(__dirname, 'judges.json');
+const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
+const SCORES_FILE = path.join(__dirname, 'scores.json');
+
 
 // Connect to pg if DATABASE_URL is set in environment
 const isPg = !!process.env.DATABASE_URL;
@@ -60,6 +64,39 @@ async function init() {
         );
       `);
 
+      // Judges table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS judges (
+          id VARCHAR(50) PRIMARY KEY,
+          password VARCHAR(255) NOT NULL,
+          created_at VARCHAR(100) NOT NULL
+        );
+      `);
+
+      // Scoring Criteria table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS scoring_criteria (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          max_points INTEGER DEFAULT 10,
+          description TEXT,
+          created_at VARCHAR(100) NOT NULL
+        );
+      `);
+
+      // Scores table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS scores (
+          delegate_id VARCHAR(50) NOT NULL,
+          judge_id VARCHAR(50) NOT NULL,
+          criteria_id VARCHAR(50) NOT NULL,
+          score INTEGER NOT NULL,
+          updated_at VARCHAR(100) NOT NULL,
+          PRIMARY KEY (delegate_id, judge_id, criteria_id)
+        );
+      `);
+
+
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
@@ -72,6 +109,15 @@ async function init() {
     }
     if (!fs.existsSync(PARTIES_FILE)) {
       fs.writeFileSync(PARTIES_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(JUDGES_FILE)) {
+      fs.writeFileSync(JUDGES_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(CRITERIA_FILE)) {
+      fs.writeFileSync(CRITERIA_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(SCORES_FILE)) {
+      fs.writeFileSync(SCORES_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
   }
 }
@@ -361,5 +407,129 @@ module.exports = {
       fs.writeFileSync(PARTIES_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
       return true;
     }
+  },
+
+  // ============ Judges ============
+
+  async getJudges() {
+    if (isPg) {
+      const res = await pool.query('SELECT id, created_at FROM judges ORDER BY created_at');
+      return res.rows;
+    } else {
+      const raw = fs.existsSync(JUDGES_FILE) ? fs.readFileSync(JUDGES_FILE, 'utf-8') : '[]';
+      return JSON.parse(raw).map(j => ({ id: j.id, created_at: j.created_at }));
+    }
+  },
+
+  async createJudge({ id, password }) {
+    const now = new Date().toISOString();
+    if (isPg) {
+      await pool.query('INSERT INTO judges (id, password, created_at) VALUES ($1,$2,$3)', [id, password, now]);
+    } else {
+      const list = JSON.parse(fs.existsSync(JUDGES_FILE) ? fs.readFileSync(JUDGES_FILE, 'utf-8') : '[]');
+      list.push({ id, password, created_at: now });
+      fs.writeFileSync(JUDGES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return { id, created_at: now };
+  },
+
+  async deleteJudge(id) {
+    if (isPg) {
+      const res = await pool.query('DELETE FROM judges WHERE id = $1', [id]);
+      return (res.rowCount || 0) > 0;
+    } else {
+      const list = JSON.parse(fs.existsSync(JUDGES_FILE) ? fs.readFileSync(JUDGES_FILE, 'utf-8') : '[]');
+      const filtered = list.filter(j => j.id !== id);
+      if (filtered.length === list.length) return false;
+      fs.writeFileSync(JUDGES_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return true;
+    }
+  },
+
+  async verifyJudge(id, password) {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM judges WHERE id = $1 AND password = $2', [id, password]);
+      return res.rows[0] || null;
+    } else {
+      const list = JSON.parse(fs.existsSync(JUDGES_FILE) ? fs.readFileSync(JUDGES_FILE, 'utf-8') : '[]');
+      return list.find(j => j.id === id && j.password === password) || null;
+    }
+  },
+
+  // ============ Scoring Criteria ============
+
+  async getCriteria() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM scoring_criteria ORDER BY created_at');
+      return res.rows;
+    } else {
+      const raw = fs.existsSync(CRITERIA_FILE) ? fs.readFileSync(CRITERIA_FILE, 'utf-8') : '[]';
+      return JSON.parse(raw);
+    }
+  },
+
+  async createCriteria({ name, max_points, description }) {
+    const id = 'C-' + Date.now().toString(36).toUpperCase();
+    const now = new Date().toISOString();
+    const entry = { id, name, max_points: parseInt(max_points, 10), description: description || '', created_at: now };
+    if (isPg) {
+      await pool.query(
+        'INSERT INTO scoring_criteria (id, name, max_points, description, created_at) VALUES ($1,$2,$3,$4,$5)',
+        [id, name, entry.max_points, description || '', now]
+      );
+    } else {
+      const list = JSON.parse(fs.existsSync(CRITERIA_FILE) ? fs.readFileSync(CRITERIA_FILE, 'utf-8') : '[]');
+      list.push(entry);
+      fs.writeFileSync(CRITERIA_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return entry;
+  },
+
+  async deleteCriteria(id) {
+    if (isPg) {
+      const res = await pool.query('DELETE FROM scoring_criteria WHERE id = $1', [id]);
+      return (res.rowCount || 0) > 0;
+    } else {
+      const list = JSON.parse(fs.existsSync(CRITERIA_FILE) ? fs.readFileSync(CRITERIA_FILE, 'utf-8') : '[]');
+      const filtered = list.filter(c => c.id !== id);
+      if (filtered.length === list.length) return false;
+      fs.writeFileSync(CRITERIA_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return true;
+    }
+  },
+
+  // ============ Scores ============
+
+  async getScoresForJudge(judgeId) {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM scores WHERE judge_id = $1', [judgeId]);
+      return res.rows;
+    } else {
+      const list = JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
+      return list.filter(s => s.judge_id === judgeId);
+    }
+  },
+
+  async submitScore({ delegate_id, judge_id, criteria_id, score }) {
+    const now = new Date().toISOString();
+    if (isPg) {
+      await pool.query(`
+        INSERT INTO scores (delegate_id, judge_id, criteria_id, score, updated_at)
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (delegate_id, judge_id, criteria_id)
+        DO UPDATE SET score = EXCLUDED.score, updated_at = EXCLUDED.updated_at
+      `, [delegate_id, judge_id, criteria_id, score, now]);
+    } else {
+      const list = JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
+      const idx = list.findIndex(s => s.delegate_id === delegate_id && s.judge_id === judge_id && s.criteria_id === criteria_id);
+      if (idx > -1) {
+        list[idx] = { ...list[idx], score, updated_at: now };
+      } else {
+        list.push({ delegate_id, judge_id, criteria_id, score, updated_at: now });
+      }
+      fs.writeFileSync(SCORES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return { delegate_id, judge_id, criteria_id, score, updated_at: now };
   }
 };
+
