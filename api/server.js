@@ -587,6 +587,7 @@ app.get('/api/public/leaderboard', async (req, res) => {
         side: side,
         committee: d.assigned_committee,
         portfolio: d.portfolio,
+        elected_role: d.elected_role,
         criteriaScores,
         totalScore: parseFloat(totalScore.toFixed(2))
       };

@@ -48,7 +48,11 @@ function renderCriteriaOptions() {
 
 function renderLeaderboard() {
     const filter = awardSelector.value;
-    let data = [...allData.leaderboard];
+    let data = allData.leaderboard.filter(d => {
+        const role = (d.elected_role || "").toLowerCase();
+        // Exclude House Officers (Speaker, Deputy Speaker) from award competition
+        return !role.includes("speaker");
+    });
 
     if (filter === 'overall') {
         // Already sorted by totalScore from backend
