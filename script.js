@@ -1158,8 +1158,9 @@ async function loadRecentScores() {
   if (!container) return;
 
   try {
-    console.log(`[Admin Log] Fetching from: ${API_BASE}/admin/scores/recent`);
-    const res = await fetch(`${API_BASE}/admin/scores/recent`, { headers: adminHeaders() });
+    const t = new Date().getTime();
+    console.log(`[Admin Log] Fetching from: ${API_BASE}/admin/live-log?t=${t}`);
+    const res = await fetch(`${API_BASE}/admin/live-log?t=${t}`, { headers: adminHeaders() });
     if (!res.ok) {
       const errText = await res.text().catch(() => "No response text");
       console.error(`[Admin Log] Fetch failed: ${res.status} ${res.statusText}`, errText);

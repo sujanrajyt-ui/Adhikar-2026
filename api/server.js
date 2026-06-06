@@ -619,7 +619,7 @@ app.get('/api/admin/scores/raw-log', async (req, res) => {
 
 
 // GET RECENT SCORES JSON (For Scoring Dashboard)
-app.get('/api/admin/scores/recent', async (req, res) => {
+app.get('/api/admin/live-log', async (req, res) => {
   const incomingPw = req.headers['x-admin-password'];
   console.log('[Recent Scores Audit] Incoming Header:', incomingPw);
   console.log('[Recent Scores Audit] Server Env PW exists:', !!process.env.ADMIN_PASSWORD);
@@ -680,6 +680,12 @@ app.patch('/api/admin/registrations/:id', async (req, res) => {
     console.error('[Update Reg] Error:', err);
     res.status(500).json({ detail: err.message });
   }
+});
+
+
+// API 404 Handler (Prevents HTML leakage to API consumers)
+app.use('/api/*', (req, res) => {
+  res.status(404).json({ detail: 'API route not found' });
 });
 
 
