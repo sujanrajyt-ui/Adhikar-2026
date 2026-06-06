@@ -1552,6 +1552,7 @@ async function loadCriteria() {
     _criteriaCache = await fetch(`${API_BASE}/admin/scoring-criteria`, { headers: adminHeaders() }).then(r => r.json());
     renderCriteria();
     renderAwardCriteriaSelection(); // Sync award form
+    renderScoringFramework(); // Sync framework overview
   } catch {
     _criteriaCache = [];
   }
@@ -1623,6 +1624,55 @@ function initCriteriaAdmin() {
   loadCriteria();
 }
 
+function renderScoringFramework() {
+  const rubEl = document.getElementById("framework-rubric");
+  const awdEl = document.getElementById("framework-awards");
+  if (!rubEl || !awdEl) return;
+
+  // 1. Populate Rubric
+  if (_criteriaCache.length > 0) {
+    const totalMax = _criteriaCache.reduce((sum, c) => sum + (c.max_points || 0), 0);
+    rubEl.innerHTML = `
+      <ul style="list-style: none; padding: 0; margin: 0;">
+        ${_criteriaCache.map(c => `
+          <li style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.2rem;">
+            <span>${escapeHtml(c.name)}</span>
+            <strong style="color: var(--gold-400);">${c.max_points}m</strong>
+          </li>
+        `).join('')}
+        <li style="display: flex; justify-content: space-between; margin-top: 1rem; font-weight: bold; color: #fff; background: rgba(255,255,255,0.05); padding: 0.4rem; border-radius: 4px;">
+          <span>Total Common Rubric</span>
+          <span>${totalMax} Marks</span>
+        </li>
+      </ul>
+    `;
+  }
+
+  // 2. Populate Awards
+  if (_awardsCache.length > 0) {
+    awdEl.innerHTML = `
+      <ul style="list-style: decimal; padding-left: 1.2rem; margin: 0;">
+        ${_awardsCache.map(a => {
+      // Find primary criterion (highest weight)
+      let primaryBreakdown = "";
+      if (a.criteria_ids && a.criteria_ids.length > 0) {
+        const sortedItems = [...a.criteria_ids].sort((x, y) => (y.weight || 0) - (x.weight || 0));
+        const primary = sortedItems[0];
+        const match = _criteriaCache.find(c => c.id === (primary.id || primary));
+        primaryBreakdown = ` (Lead: ${match ? match.name : (primary.id || primary)})`;
+      }
+      return `
+            <li style="margin-bottom: 0.6rem; border-bottom: 1px solid rgba(255,255,255,0.03); padding-bottom: 0.3rem;">
+              <span style="color: #fff; font-weight: 500;">${escapeHtml(a.name)}</span>
+              <div style="font-size: 0.65rem; color: var(--gold-500); opacity: 0.7;">Formula active${primaryBreakdown}</div>
+            </li>
+          `;
+    }).join('')}
+      </ul>
+    `;
+  }
+}
+
 /* ============ Awards Admin ============ */
 let _awardsCache = [];
 
@@ -1630,6 +1680,7 @@ async function loadAwards() {
   try {
     _awardsCache = await fetch(`${API_BASE}/admin/awards`, { headers: adminHeaders() }).then(r => r.json());
     renderAwards();
+    renderScoringFramework(); // Sync framework overview
   } catch (err) {
     console.error(err);
   }
