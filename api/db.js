@@ -120,8 +120,13 @@ async function init() {
     if (!fs.existsSync(SCORES_FILE)) {
       fs.writeFileSync(SCORES_FILE, JSON.stringify([], null, 2), 'utf-8');
     }
+    if (!fs.existsSync(LOG_FILE)) {
+      const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score\n";
+      fs.writeFileSync(LOG_FILE, header, 'utf-8');
+    }
   }
 }
+
 
 // Helper to read registrations from file
 function readData() {
