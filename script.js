@@ -1162,6 +1162,10 @@ function initAdminTabs() {
       if (target === 'logic') {
         renderOverview();
       }
+      // Trigger Awards render if awards tab selected
+      if (target === 'awards') {
+        loadAwards();
+      }
     });
   });
 }
@@ -1760,15 +1764,29 @@ const PARLIAMENTARY_ROLES = [
 ];
 
 function renderAwardsAdmin() {
-  const container = document.getElementById("admin-awards-list");
-  if (!container) return;
+  // 1. Render Deletion List (Left Pane)
+  const listEl = document.getElementById("awards-admin-list");
+  if (listEl) {
+    listEl.innerHTML = _awardsCache.map(a => `
+      <div class="party-admin-row" style="background: rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; padding: 0.75rem 1rem; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+        <div style="flex: 1;">
+          <strong style="color: var(--gold-400); font-size: 0.9rem;">${escapeHtml(a.name)}</strong>
+        </div>
+        <button class="btn-danger-outline" style="padding: 0.3rem 0.6rem; font-size: 0.7rem;" onclick="handleDeleteAward('${a.id}')">Delete</button>
+      </div>
+    `).join("");
+  }
+
+  // 2. Render Eligibility Mapping (Right Pane)
+  const gridEl = document.getElementById("awards-eligibility-grid");
+  if (!gridEl) return;
 
   if (_awardsCache.length === 0) {
-    container.innerHTML = '<p class="muted">No awards defined.</p>';
+    gridEl.innerHTML = '<p class="muted">No awards defined.</p>';
     return;
   }
 
-  container.innerHTML = _awardsCache.map(a => {
+  gridEl.innerHTML = _awardsCache.map(a => {
     const currentRoles = (a.requires_role || "").split(',').map(r => r.trim().toLowerCase());
 
     return `
@@ -1793,10 +1811,10 @@ function renderAwardsAdmin() {
             </div>
           </div>
           
-          <label class="field">
-            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0;">Required Side (Restrict to specific bench)</span>
+          <label class="field" style="margin-top: 0.5rem;">
+            <span class="field-label" style="font-size: 0.75rem; color: #bca0a0;">Required Side (Restrict to bench)</span>
             <select onchange="handleUpdateAwardSide('${a.id}', this.value)"
-                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.6rem; border-radius: 4px; font-family: inherit;">
+                    style="width: 100%; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); color: white; padding: 0.5rem; border-radius: 4px; font-family: inherit; font-size: 0.8rem;">
               <option value="" ${!a.requires_side ? 'selected' : ''}>Any / Neutral</option>
               <option value="ruling" ${a.requires_side === 'ruling' ? 'selected' : ''}>Ruling Government</option>
               <option value="opposition" ${a.requires_side === 'opposition' ? 'selected' : ''}>Opposition</option>

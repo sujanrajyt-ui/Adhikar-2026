@@ -908,6 +908,14 @@
             </svg>
             Scoring
           </button>
+          <button class="tab-btn" data-tab="awards">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="6"></circle>
+              <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"></path>
+            </svg>
+            Awards
+          </button>
           <button class="tab-btn" data-tab="exports">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1005,55 +1013,6 @@
               <div id="criteria-admin-list" class="parties-admin-list"></div>
             </div>
 
-            <div class="parties-admin-panel" style="grid-column: span 2;">
-              <h3 class="parties-admin-title" style="color: var(--gold-400);">Weighted Award Formula Editor</h3>
-              <div class="logic-info-card"
-                style="margin-bottom: 1.5rem; background: rgba(212, 175, 55, 0.05); border: 1px solid rgba(212, 175, 55, 0.1); padding: 1rem; border-radius: 8px; font-size: 0.85rem;">
-                <p><strong>How it works:</strong> Select criteria and assign multipliers. A weight of 1.0 is standard.
-                  Use higher values (e.g., 2.0) for metrics that should carry more weight in the final award score.</p>
-              </div>
-              <form id="award-form" class="party-form"
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem;">
-                <div class="award-form-left">
-                  <label class="muted" style="font-size: 0.75rem; display: block; margin-bottom: 0.5rem;">Award
-                    Name</label>
-                  <input type="text" id="award-name" placeholder="e.g. Best Student Speaker" required
-                    style="margin-bottom: 1.5rem;" />
-
-                  <label class="muted" style="font-size: 0.75rem; display: block; margin-bottom: 0.5rem;">Select
-                    Criteria & Weights</label>
-                  <div id="award-criteria-selection" class="award-criteria-selection"
-                    style="max-height: 250px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 8px; background: rgba(0,0,0,0.2);">
-                    <!-- Checkboxes + Weight Inputs injected by JS -->
-                  </div>
-                </div>
-
-                <div class="award-form-right">
-                  <div class="formula-preview-container"
-                    style="background: rgba(0,0,0,0.3); border: 1px dashed var(--gold-600); border-radius: 12px; padding: 1.5rem; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; min-height: 200px;">
-                    <span class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Active Formula Preview:</span>
-                    <div id="formula-preview"
-                      style="font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--gold-400); line-height: 1.4; word-break: break-word;">
-                      Select criteria to begin...
-                    </div>
-                    <button type="submit" class="btn-primary"
-                      style="margin-top: 2rem; width: 100%; padding: 1rem;">Create & Publish Award</button>
-                  </div>
-                </div>
-              </form>
-              <div id="awards-admin-list" class="parties-admin-list"
-                style="margin-top: 2rem; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 1.5rem;"></div>
-
-              <div
-                style="margin-top: 1.5rem; padding: 1rem; border-radius: 8px; background: rgba(108, 92, 231, 0.1); border: 1px dashed #6c5ce7;">
-                <h4 style="color: #a29bfe; font-size: 0.9rem; margin-bottom: 0.5rem;">Award Eligibility Mapping</h4>
-                <p class="muted" style="font-size: 0.75rem; margin-bottom: 1rem;">Map specific designations/roles to
-                  awards to automatically filter the leaderboard.</p>
-                <button class="btn-primary" id="admin-awards-config" style="background:#6c5ce7; width: 100%;">Configure
-                  Eligibility & Roles</button>
-              </div>
-            </div>
-
             <!-- Mock Parliament Scoring Framework Overview -->
             <div class="parties-admin-panel"
               style="grid-column: span 2; background: rgba(0,0,0,0.2); border: 1px solid rgba(212, 175, 55, 0.1);">
@@ -1145,6 +1104,65 @@
               <button class="btn-ghost" id="refresh-scoring-log"
                 style="width:100%; margin-top: 1rem; font-size: 0.8rem;">Refresh Log</button>
             </div>
+          </div>
+        </div>
+
+        <!-- Tab: Awards -->
+        <div class="admin-tab-content" id="tab-awards">
+          <div style="max-width: 1000px; margin: 0 auto; display: grid; grid-template-columns: 1.2fr 1fr; gap: 2rem;">
+
+            <div class="awards-config-left">
+              <h3
+                style="font-family: 'Playfair Display', serif; color: var(--gold-400); font-size: 1.4rem; margin-bottom: 1.5rem;">
+                🏆 Award Discovery & Config</h3>
+
+              <!-- Formula Editor (Moved from Scoring) -->
+              <div class="parties-admin-panel"
+                style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h4 style="color: var(--gold-300); margin-bottom: 1rem; font-size: 1rem;">Create New Award</h4>
+                <form id="award-form" class="party-form">
+                  <input type="text" id="award-name" placeholder="e.g. Best Student Speaker" required
+                    style="margin-bottom: 1rem;" />
+                  <label class="muted" style="font-size: 0.7rem; display: block; margin-bottom: 0.5rem;">Criteria &
+                    Multipliers</label>
+                  <div id="award-criteria-selection" class="award-criteria-selection"
+                    style="max-height: 200px; overflow-y: auto; border: 1px solid rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 8px; background: rgba(0,0,0,0.2); margin-bottom: 1rem;">
+                  </div>
+
+                  <div id="formula-preview"
+                    style="background: rgba(0,0,0,0.2); padding: 1rem; border-radius: 8px; font-size: 0.85rem; border: 1px dashed var(--gold-600); text-align: center; margin-bottom: 1rem;">
+                    Select criteria to begin...
+                  </div>
+
+                  <button type="submit" class="btn-primary" style="width: 100%; padding: 0.75rem;">Create & Publish
+                    Award</button>
+                </form>
+              </div>
+
+              <!-- List of existing awards (Deletion) -->
+              <h4 style="color: var(--gold-300); margin-bottom: 1rem; font-size: 0.9rem;">Existing Definitions</h4>
+              <div id="awards-admin-list" class="parties-admin-list"></div>
+            </div>
+
+            <div class="awards-config-right">
+              <h3
+                style="font-family: 'Playfair Display', serif; color: var(--gold-400); font-size: 1.4rem; margin-bottom: 1.5rem;">
+                ⚙️ Eligibility Mapping</h3>
+              <p class="muted" style="font-size: 0.75rem; margin-bottom: 1.5rem;">Assign specific designations to each
+                award. Delegates with matching roles automatically enter the standings.</p>
+
+              <div id="awards-eligibility-grid" style="display: flex; flex-direction: column; gap: 1rem;">
+                <p class="muted">Loading eligibility settings...</p>
+              </div>
+
+              <div
+                style="margin-top: 2rem; padding: 1.25rem; background: rgba(212,175,55,0.05); border-left: 4px solid var(--gold-600); border-radius: 8px;">
+                <h5 style="color: var(--gold-300); margin-bottom: 0.5rem; font-size: 0.85rem;">Pro Tip</h5>
+                <p class="muted" style="font-size: 0.75rem; line-height: 1.5;">Checkboxes update in real-time. The
+                  leaderboard uses these role mappings to filter contestants instantly.</p>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -1276,27 +1294,6 @@
               </div>
               <button type="submit" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>
             </form>
-          </div>
-        </div>
-
-        <!-- Award Eligibility Modal -->
-        <div class="admin-modal hidden" id="admin-awards-modal">
-          <div class="admin-modal-overlay" id="admin-awards-overlay"></div>
-          <div class="admin-modal-content" style="max-width: 600px;">
-            <header class="admin-modal-header">
-              <h3>Award Eligibility Settings</h3>
-              <button class="admin-modal-close" id="admin-awards-close">&times;</button>
-            </header>
-            <div id="admin-awards-list" class="admin-modal-list"
-              style="max-height: 480px; overflow-y: auto; margin-top: 1.25rem;">
-              <p class="muted">Loading awards...</p>
-            </div>
-            <p class="muted"
-              style="font-size: 0.75rem; margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
-              <strong>Instructions:</strong> Select the designations (assignments) that qualify for each award. Any
-              delegate holding one of the checked roles will automatically be ranked in that award category on the
-              public leaderboard.
-            </p>
           </div>
         </div>
       </div>
