@@ -886,7 +886,7 @@ function renderRows() {
     const comms = (_partiesCache || []).filter(p => p.type === 'committee');
     const alreadySent = isVerified && r.assigned_party && r.assigned_committee;
 
-    const showAssign = r.status !== 'rejected';
+    const showAssign = r.status === 'verified';
     const portfolioCell = showAssign ? `
       <div class="assign-cell">
         <input type="text" value="${escapeHtml(r.portfolio || '')}"
