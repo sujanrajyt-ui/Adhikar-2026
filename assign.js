@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }</td>
                 <td>
                     <button class="action-btn assign-btn" onclick="window.assignConstituency('${d.id}')" ${assigned ? 'data-assigned="true"' : ''}>
-                        ${assigned ? 'Re-assign' : 'Assign Constituency'}
+                        ${assigned ? 'Update' : 'Assign'}
                     </button>
                 </td>
             </tr>`;
@@ -245,7 +245,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button) {
                 button.disabled = false;
                 const reg = delegates.find(d => d.id === id);
-                button.textContent = (reg && reg.assigned_constituency) ? 'Re-assign' : 'Assign Constituency';
+                button.textContent = (reg && reg.assigned_constituency) ? 'Update' : 'Assign';
             }
         }
     };
@@ -276,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderTable();
         assignAllBtn.disabled = false;
-        assignAllBtn.textContent = 'Assign All Unassigned';
+        assignAllBtn.textContent = 'Assign All';
         showToast(`Assigned ${success} delegate${success > 1 ? 's' : ''}`, 'success');
     }
 
