@@ -117,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Mumbai South', 'Mumbai South Central', 'Muzaffarpur', 'Mysore',
     'Nagpur', 'Nalgonda', 'Nanded', 'Nashik', 'Navsari',
     'Nellore', 'New Delhi', 'Nizamabad', 'North Goa',
-    'North West Delhi', 'Ongole', 'Palakkad', 'Pathanamthitta',
+    'North West Delhi', 'Ongole', 'Palakkad', 'Udupi',
     'Patiala', 'Patna Sahib', 'Peddapalle', 'Perambalur',
     'Phulpur', 'Pilibhit', 'Pondicherry', 'Porbandar',
     'Pratapgarh', 'Pune', 'Puri', 'Purnia', 'Raebareli',
