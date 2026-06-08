@@ -179,11 +179,14 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = filtered.map((d, i) => {
             const constituency = d.assigned_constituency || '';
             const assigned = !!constituency;
-            return `<tr style="animation-delay: ${i * 0.03}s">
-                <td>${i + 1}</td>
-                <td><strong>${escapeHtml(d.name)}</strong><br><span class="delegate-id">${d.id}</span></td>
-                <td>${escapeHtml(d.college)}</td>
-                <td>${assigned ? `<span class="constituency-name">${escapeHtml(constituency)}</span>` : '<span class="unassigned-badge">—</span>'}</td>
+            return `<tr>
+                <td style="color:rgba(255,255,255,0.25); font-size:0.78rem;">${i + 1}</td>
+                <td>
+                    <div class="delegate-name">${escapeHtml(d.name)}</div>
+                    <div class="delegate-id">${d.id}</div>
+                </td>
+                <td><span class="college-cell">${escapeHtml(d.college)}</span></td>
+                <td>${assigned ? `<span class="constituency-name">${escapeHtml(constituency)}</span>` : '<span class="constituency-empty">—</span>'}</td>
                 <td>${assigned
                     ? '<span class="status-badge status-assigned">Assigned</span>'
                     : '<span class="status-badge status-unassigned">Unassigned</span>'

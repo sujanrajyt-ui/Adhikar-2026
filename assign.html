@@ -31,36 +31,55 @@
         </div>
     </header>
 
-    <main class="container">
-        <section id="login-section" class="login-card">
-            <div class="login-head">
-                <p class="kicker kicker-gold">Admin Authentication</p>
-                <h2>Constituency Assignment</h2>
-                <p class="login-sub">Enter the admin password to assign constituencies to delegates.</p>
-            </div>
-            <form id="login-form" class="login-form">
-                <div class="field">
-                    <label for="admin-password">Admin Password</label>
-                    <input type="password" id="admin-password" placeholder="Enter admin password" required autocomplete="off">
+    <main class="container" id="assign-section">
+        <section id="login-section" class="login-section">
+            <div class="login-card">
+                <div class="login-head">
+                    <p class="kicker kicker-gold">Admin Authentication</p>
+                    <h2>Constituency Assignment</h2>
+                    <p class="login-sub">Enter the admin password to assign constituencies to delegates.</p>
                 </div>
-                <p id="login-error" class="field-error hidden"></p>
-                <button type="submit" class="btn-primary">Unlock Panel</button>
-            </form>
+                <form id="login-form" class="login-form">
+                    <div class="field">
+                        <label for="admin-password">Admin Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter admin password" required autocomplete="off">
+                    </div>
+                    <p id="login-error" class="field-error hidden"></p>
+                    <button type="submit" class="btn-primary">Unlock Panel</button>
+                </form>
+            </div>
         </section>
 
         <section id="assign-panel" class="hidden">
-            <div class="assign-info-bar">
-                <p class="assign-desc">Select a delegate and click <strong>"Assign Constituency"</strong> to randomly assign a constituency from the available list. Already assigned delegates can be <strong>re-assigned</strong>.</p>
+            <div class="assign-panel-header">
+                <div>
+                    <h1 class="assign-panel-title">Constituency Assignment</h1>
+                    <small>Randomly assign Indian parliamentary constituencies to verified delegates</small>
+                </div>
+            </div>
+
+            <div class="assign-info-card">
+                <span class="assign-info-icon">&#9432;</span>
+                <p class="assign-info-text">Click <strong>Assign Constituency</strong> to randomly assign a constituency from 200 Indian parliamentary seats. Already assigned delegates can be <strong>re-assigned</strong> anytime.</p>
             </div>
 
             <div class="assign-toolbar">
-                <div class="assign-stats">
-                    <span id="total-delegates">0</span> Delegates |
-                    <span id="assigned-count">0</span> Assigned |
-                    <span id="unassigned-count">0</span> Unassigned
+                <div class="assign-stats-bar">
+                    <div class="assign-stat-item">
+                        <span class="assign-stat-num" id="total-delegates">0</span>
+                        <span class="assign-stat-label">Delegates</span>
+                    </div>
+                    <div class="assign-stat-item">
+                        <span class="assign-stat-num gold" id="assigned-count">0</span>
+                        <span class="assign-stat-label">Assigned</span>
+                    </div>
+                    <div class="assign-stat-item">
+                        <span class="assign-stat-num red" id="unassigned-count">0</span>
+                        <span class="assign-stat-label">Unassigned</span>
+                    </div>
                 </div>
-                <div class="assign-filters">
-                    <button id="assign-all-btn" class="action-btn assign-all-btn" title="Assign all unassigned delegates">Assign All Unassigned</button>
+                <div class="assign-toolbar-right">
+                    <button id="assign-all-btn" class="btn-assign-all" title="Assign all unassigned delegates">Assign All Unassigned</button>
                     <select id="filter-status" class="filter-select">
                         <option value="all">All</option>
                         <option value="assigned">Assigned</option>
