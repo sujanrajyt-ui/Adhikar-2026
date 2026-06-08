@@ -815,7 +815,7 @@ ol {
 
 .central-label {
   font-family: "Outfit", sans-serif;
-  font-size: clamp(0.65rem, 1vw, 0.75rem);
+  font-size: clamp(0.85rem, 1.2vw, 1rem);
   text-transform: uppercase;
   letter-spacing: 0.25em;
   color: var(--gold-500);
@@ -824,11 +824,11 @@ ol {
 
 .central-theme {
   font-family: "Playfair Display", serif;
-  font-size: clamp(1.6rem, 4.5vw, 2.5rem);
+  font-size: clamp(2rem, 5.5vw, 3rem);
   color: var(--maroon-800);
   font-weight: 700;
   line-height: 1.25;
-  max-width: 600px;
+  max-width: 720px;
   background: linear-gradient(135deg, var(--maroon-800), var(--gold-600));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
