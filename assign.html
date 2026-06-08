@@ -72,14 +72,13 @@
                             <th>#</th>
                             <th>Delegate</th>
                             <th>College</th>
-                            <th>Party</th>
-                            <th>Committee</th>
+                            <th>Constituency</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="assign-tbody">
-                        <tr><td colspan="7" class="empty-row">Loading...</td></tr>
+                        <tr><td colspan="6" class="empty-row">Loading...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -90,8 +89,7 @@
         const API_BASE = '/api';
         let adminPassword = '';
         let delegates = [];
-        let parties = [];
-        let committees = [];
+        let constituencies = [];
 
         function adminHeaders() {
             return { 'x-admin-password': adminPassword };

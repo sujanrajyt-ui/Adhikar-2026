@@ -62,21 +62,19 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', renderTable);
 
     async function init() {
-        await loadParties();
+        await loadConstituencies();
         await loadDelegates();
     }
 
-    async function loadParties() {
+    async function loadConstituencies() {
         try {
             const data = await fetch(`${API_BASE}/parties`).then(r => r.json());
-            parties = data.filter(p => p.type === 'party');
-            committees = data.filter(p => p.type === 'committee');
-            if (committees.length === 0) {
-                committees = [{ id: 'loksabha', name: 'Lok Sabha', type: 'committee' }];
+            constituencies = data.map(p => p.name);
+            if (!constituencies.length) {
+                constituencies = ['Lok Sabha'];
             }
         } catch {
-            parties = [];
-            committees = [{ id: 'loksabha', name: 'Lok Sabha', type: 'committee' }];
+            constituencies = ['Lok Sabha'];
         }
     }
 
@@ -93,7 +91,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderTable();
             updateStats();
         } catch {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Failed to load delegates</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Failed to load delegates</td></tr>';
         }
     }
 
@@ -101,25 +99,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const filter = filterStatus.value;
         const search = searchInput.value.toLowerCase().trim();
         const filtered = delegates.filter(d => {
-            if (filter === 'assigned' && !d.assigned_party) return false;
-            if (filter === 'unassigned' && d.assigned_party) return false;
+            if (filter === 'assigned' && !d.assigned_party && !d.portfolio) return false;
+            if (filter === 'unassigned' && (d.assigned_party || d.portfolio)) return false;
             if (search && !d.name.toLowerCase().includes(search) && !d.college.toLowerCase().includes(search)) return false;
             return true;
         });
 
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="empty-row">No delegates found</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No delegates found</td></tr>';
             return;
         }
 
         tbody.innerHTML = filtered.map((d, i) => {
-            const assigned = !!(d.assigned_party && d.assigned_committee);
+            const constituency = d.assigned_party || d.portfolio || '';
+            const assigned = !!constituency;
             return `<tr>
                 <td>${i + 1}</td>
                 <td><strong>${escapeHtml(d.name)}</strong><br><span class="delegate-id">${d.id}</span></td>
                 <td>${escapeHtml(d.college)}</td>
-                <td>${assigned ? escapeHtml(d.assigned_party) : '<span class="unassigned-badge">—</span>'}</td>
-                <td>${assigned ? escapeHtml(d.assigned_committee) : '<span class="unassigned-badge">—</span>'}</td>
+                <td>${assigned ? escapeHtml(constituency) : '<span class="unassigned-badge">—</span>'}</td>
                 <td>${assigned
                     ? '<span class="status-badge status-assigned">Assigned</span>'
                     : '<span class="status-badge status-unassigned">Unassigned</span>'
@@ -137,8 +135,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.assignConstituency = async function (id) {
         if (!adminPassword) return;
-        if (!parties.length || !committees.length) {
-            showToast('No parties or committees available', 'error');
+        if (!constituencies.length) {
+            showToast('No constituencies available', 'error');
             return;
         }
         const button = document.querySelector(`button[onclick="window.assignConstituency('${id}')"]`);
@@ -147,8 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             button.textContent = 'Assigning...';
         }
 
-        const party = parties[Math.floor(Math.random() * parties.length)];
-        const committee = committees[Math.floor(Math.random() * committees.length)];
+        const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
 
         try {
             const res = await fetch(`${API_BASE}/admin/registrations/${id}/status`, {
@@ -158,8 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     'x-admin-password': adminPassword,
                 },
                 body: JSON.stringify({
-                    assigned_party: party.name,
-                    assigned_committee: committee.name,
+                    assigned_party: constituency,
                 }),
             });
             if (res.status === 403) {
@@ -170,25 +166,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const reg = delegates.find(d => d.id === id);
             if (reg) {
-                reg.assigned_party = party.name;
-                reg.assigned_committee = committee.name;
+                reg.assigned_party = constituency;
             }
             renderTable();
-            showToast(`Assigned ${party.name} / ${committee.name}`, 'success');
+            showToast(`Assigned ${constituency}`, 'success');
         } catch (ex) {
             showToast(ex.message || 'Error assigning constituency', 'error');
         } finally {
             if (button) {
                 button.disabled = false;
-                const assigned = delegates.find(d => d.id === id);
-                button.textContent = (assigned && assigned.assigned_party) ? 'Re-assign' : 'Assign Constituency';
+                const reg = delegates.find(d => d.id === id);
+                button.textContent = (reg && (reg.assigned_party || reg.portfolio)) ? 'Re-assign' : 'Assign Constituency';
             }
         }
     };
 
     function updateStats() {
         totalEl.textContent = delegates.length;
-        const assigned = delegates.filter(d => d.assigned_party && d.assigned_committee).length;
+        const assigned = delegates.filter(d => d.assigned_party || d.portfolio).length;
         assignedEl.textContent = assigned;
         unassignedEl.textContent = delegates.length - assigned;
     }
