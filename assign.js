@@ -4,13 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
         loader.classList.add('fade-out');
         setTimeout(() => { if (loader.parentNode) loader.remove(); }, 400);
     }
+
     const loginForm = document.getElementById('login-form');
     const loginSection = document.getElementById('login-section');
     const assignPanel = document.getElementById('assign-panel');
     const loginError = document.getElementById('login-error');
     const adminInfo = document.getElementById('admin-info');
     const logoutBtn = document.getElementById('assign-logout');
-    const tbody = document.getElementById('assign-tbody');
+    const listEl = document.getElementById('assign-list');
     const filterStatus = document.getElementById('filter-status');
     const searchInput = document.getElementById('search-delegate');
     const totalEl = document.getElementById('total-delegates');
@@ -18,6 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const unassignedEl = document.getElementById('unassigned-count');
 
     const assignAllBtn = document.getElementById('assign-all-btn');
+    const reassignAllBtn = document.getElementById('reassign-all-btn');
+    const exportBtn = document.getElementById('export-excel-btn');
 
     const saved = sessionStorage.getItem('adhikar_admin');
     if (saved) {
@@ -65,10 +68,11 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('admin-password').value = '';
     });
 
-    filterStatus.addEventListener('change', renderTable);
-    searchInput.addEventListener('input', renderTable);
-
+    filterStatus.addEventListener('change', renderCards);
+    searchInput.addEventListener('input', renderCards);
     assignAllBtn.addEventListener('click', assignAllUnassigned);
+    reassignAllBtn.addEventListener('click', reassignAll);
+    exportBtn.addEventListener('click', exportExcel);
 
     async function init() {
         await loadConstituencies();
@@ -144,14 +148,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const all = await res.json();
             delegates = all.filter(d => d.status === 'verified');
-            renderTable();
+            renderCards();
             updateStats();
         } catch {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">Failed to load delegates</td></tr>';
+            listEl.innerHTML = '<div class="empty-state">Failed to load delegates</div>';
         }
     }
 
-    function renderTable() {
+    function renderCards() {
         const filter = filterStatus.value;
         const search = searchInput.value.toLowerCase().trim();
         const filtered = delegates.filter(d => {
@@ -162,34 +166,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (!filtered.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No delegates found</td></tr>';
+            listEl.innerHTML = '<div class="empty-state">No delegates found</div>';
             return;
         }
 
-        tbody.innerHTML = filtered.map((d, i) => {
+        listEl.innerHTML = filtered.map((d, i) => {
             const constituency = d.assigned_constituency || '';
             const assigned = !!constituency;
-            return `<tr>
-                <td style="color:rgba(255,255,255,0.25); font-size:0.78rem;">${i + 1}</td>
-                <td>
-                    <div class="delegate-name">${escapeHtml(d.name)}</div>
-                    <div class="delegate-id">${d.id}</div>
-                </td>
-                <td><span class="college-cell">${escapeHtml(d.college)}</span></td>
-                <td>${assigned ? `<span class="constituency-name">${escapeHtml(constituency)}</span>` : '<span class="constituency-empty">—</span>'}</td>
-                <td>${assigned
-                    ? '<span class="status-badge status-assigned">Assigned</span>'
-                    : '<span class="status-badge status-unassigned">Unassigned</span>'
-                }</td>
-                <td>
-                    <button class="action-btn assign-btn" onclick="window.assignConstituency('${d.id}')" ${assigned ? 'data-assigned="true"' : ''}>
-                        ${assigned ? 'Update' : 'Assign'}
-                    </button>
-                </td>
-            </tr>`;
+            const idAttr = `assign_${d.id}`;
+            return `
+            <div class="delegate-card" style="animation-delay: ${i * 0.03}s">
+                <div class="card-head">
+                    <div class="delegate-info">
+                        <h3>${escapeHtml(d.name)}</h3>
+                        <div class="delegate-sub">#${d.id}</div>
+                        <div class="delegate-meta">
+                            <span class="meta-pill college-pill">${escapeHtml(d.college)}</span>
+                            ${assigned
+                                ? `<span class="meta-pill constituency-pill">${escapeHtml(constituency)}</span>`
+                                : `<span class="meta-pill unassigned-pill">Unassigned</span>`
+                            }
+                        </div>
+                    </div>
+                    <div class="card-action">
+                        <span class="status-badge ${assigned ? 'status-assigned' : 'status-unassigned'}">${assigned ? 'Assigned' : 'Unassigned'}</span>
+                        <button class="action-btn assign-btn" id="${idAttr}" onclick="window.assignConstituency('${d.id}')" ${assigned ? 'data-assigned="true"' : ''}>
+                            ${assigned ? 'Update' : 'Assign'}
+                        </button>
+                    </div>
+                </div>
+            </div>`;
         }).join('');
-
-        updateStats();
     }
 
     window.assignConstituency = async function (id) {
@@ -198,10 +205,10 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('No constituencies available', 'error');
             return;
         }
-        const button = document.querySelector(`button[onclick="window.assignConstituency('${id}')"]`);
-        if (button) {
-            button.disabled = true;
-            button.textContent = 'Assigning...';
+        const btn = document.getElementById(`assign_${id}`);
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = 'Assigning...';
         }
 
         const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
@@ -227,15 +234,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (reg) {
                 reg.assigned_constituency = constituency;
             }
-            renderTable();
+            renderCards();
             showToast(`Assigned ${constituency}`, 'success');
         } catch (ex) {
             showToast(ex.message || 'Error assigning constituency', 'error');
         } finally {
-            if (button) {
-                button.disabled = false;
+            if (btn) {
+                btn.disabled = false;
                 const reg = delegates.find(d => d.id === id);
-                button.textContent = (reg && reg.assigned_constituency) ? 'Update' : 'Assign';
+                btn.textContent = (reg && reg.assigned_constituency) ? 'Update' : 'Assign';
             }
         }
     };
@@ -246,10 +253,22 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('All delegates already assigned', 'error');
             return;
         }
+        await runBatchAssign(unassigned, 'Assign All');
+    }
+
+    async function reassignAll() {
+        if (!delegates.length) return;
+        if (!confirm('This will reassign ALL delegates with new random constituencies. Continue?')) return;
+        await runBatchAssign(delegates, 'Reassign All');
+        showToast(`Reassigned all ${delegates.length} delegate${delegates.length > 1 ? 's' : ''}`, 'success');
+    }
+
+    async function runBatchAssign(targets, buttonText) {
         assignAllBtn.disabled = true;
-        assignAllBtn.textContent = `Assigning ${unassigned.length}...`;
-        let success = 0;
-        for (const d of unassigned) {
+        reassignAllBtn.disabled = true;
+        assignAllBtn.textContent = `Processing ${targets.length}...`;
+
+        for (const d of targets) {
             if (!constituencies.length) break;
             const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
             try {
@@ -260,14 +279,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (res.ok) {
                     d.assigned_constituency = constituency;
-                    success++;
                 }
             } catch {}
         }
-        renderTable();
+
+        renderCards();
         assignAllBtn.disabled = false;
+        reassignAllBtn.disabled = false;
         assignAllBtn.textContent = 'Assign All';
-        showToast(`Assigned ${success} delegate${success > 1 ? 's' : ''}`, 'success');
+    }
+
+    function exportExcel() {
+        if (!delegates.length) {
+            showToast('No delegates to export', 'error');
+            return;
+        }
+        const rows = [['#', 'Delegate ID', 'Name', 'College', 'Constituency', 'Status']];
+        delegates.forEach((d, i) => {
+            rows.push([
+                i + 1,
+                d.id,
+                d.name || '',
+                d.college || '',
+                d.assigned_constituency || '',
+                d.assigned_constituency ? 'Assigned' : 'Unassigned',
+            ]);
+        });
+        const csv = rows.map(row =>
+            row.map(cell => {
+                const s = String(cell);
+                return s.includes(',') || s.includes('"') || s.includes('\n')
+                    ? `"${s.replace(/"/g, '""')}"`
+                    : s;
+            }).join(',')
+        ).join('\n');
+
+        const BOM = '\uFEFF';
+        const blob = new Blob([BOM + csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `adhikar_constituency_assignments_${new Date().toISOString().slice(0, 10)}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Exported successfully', 'success');
     }
 
     function updateStats() {
