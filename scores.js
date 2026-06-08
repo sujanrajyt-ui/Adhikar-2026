@@ -163,7 +163,8 @@ function renderDelegates() {
           <div class="delegate-info">
             <h3>${escapeHtml(d.name)}</h3>
             <div class="delegate-meta">
-              ${d.assigned_party ? `<span class="meta-pill meta-constituency">${escapeHtml(d.assigned_party)}</span>` : '<span class="meta-pill meta-unassigned">Unassigned</span>'}
+              ${d.assigned_constituency ? `<span class="meta-pill meta-constituency">${escapeHtml(d.assigned_constituency)}</span>` : ''}
+              ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(d.assigned_party)}</span>` : ''}
               ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
               ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
               ${d.elected_role ? `<span class="role-badge-mini">${escapeHtml(d.elected_role)}</span>` : ''}

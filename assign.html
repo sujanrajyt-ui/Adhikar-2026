@@ -99,6 +99,13 @@
         function adminHeaders() {
             return { 'x-admin-password': adminPassword };
         }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
     </script>
     <script src="assign.js"></script>
 </body>

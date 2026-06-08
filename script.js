@@ -889,6 +889,7 @@ function renderRows() {
     const showAssign = r.status === 'verified';
     const portfolioCell = showAssign ? `
       <div class="assign-cell">
+        ${r.assigned_constituency ? `<div class="constituency-display"><span class="constituency-label">Constituency:</span> ${escapeHtml(r.assigned_constituency)}</div>` : ''}
         <input type="text" value="${escapeHtml(r.portfolio || '')}"
           placeholder="Assign Portfolio..."
           onchange="handlePortfolioChange('${r.id}', this.value)" />
@@ -930,6 +931,7 @@ function renderRows() {
         </div>
       </div>
     ` : `
+      ${r.assigned_constituency ? `<div class="constituency-display"><span class="constituency-label">Constituency:</span> ${escapeHtml(r.assigned_constituency)}</div>` : ''}
       <input type="text" value="${escapeHtml(r.portfolio || '')}"
         placeholder="Assign Portfolio..."
         onchange="handlePortfolioChange('${r.id}', this.value)" />

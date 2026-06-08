@@ -75,16 +75,72 @@ document.addEventListener('DOMContentLoaded', () => {
         await loadDelegates();
     }
 
-    async function loadConstituencies() {
-        try {
-            const data = await fetch(`${API_BASE}/parties`).then(r => r.json());
-            constituencies = data.map(p => p.name);
-            if (!constituencies.length) {
-                constituencies = ['Lok Sabha'];
-            }
-        } catch {
-            constituencies = ['Lok Sabha'];
-        }
+    function loadConstituencies() {
+        constituencies = [
+            'Agra', 'Ahmedabad East', 'Ahmedabad West', 'Ajmer', 'Akola', 'Alappuzha', 'Aligarh',
+            'Allahabad', 'Almora', 'Alwar', 'Ambedkar Nagar', 'Amravati', 'Amreli', 'Amritsar',
+            'Anand', 'Anantapur', 'Anantnag', 'Angul', 'Araria', 'Aravakkurichi', 'Ariyalur',
+            'Arrah', 'Asansol', 'Aurangabad', 'Azamgarh',
+            'Badaun', 'Bagalkot', 'Bahadurgarh', 'Bahraich', 'Baldota', 'Ballia', 'Balurghat',
+            'Banda', 'Bangalore Central', 'Bangalore North', 'Bangalore Rural', 'Bangalore South',
+            'Bankura', 'Banswara', 'Barabanki', 'Baramati', 'Barasat', 'Bardhaman', 'Bardhaman Purba',
+            'Barmer', 'Barnala', 'Barrackpore', 'Basti', 'Bathinda', 'Begusarai', 'Belgaum',
+            'Bellary', 'Berhampur', 'Bettiah', 'Bhagalpur', 'Bharatpur', 'Bharuch', 'Bhavnagar',
+            'Bhilwara', 'Bhiwani', 'Bhojpur', 'Bhopal', 'Bhubaneswar', 'Bhuj', 'Bidar', 'Bijapur',
+            'Bikaner', 'Bilaspur', 'Bokaro', 'Bulandshahr', 'Burdwan',
+            'Calicut', 'Chalakudy', 'Chamarajanagar', 'Chandigarh', 'Chandni Chowk', 'Chatra',
+            'Chennai Central', 'Chennai North', 'Chennai South', 'Chhindwara', 'Chikkballapur',
+            'Chitradurga', 'Chittoor', 'Chittorgarh', 'Cuddalore',
+            'Dadra and Nagar Haveli', 'Dahod', 'Dakshina Kannada', 'Darbhanga', 'Darjeeling',
+            'Dausa', 'Dehradun', 'Delhi Sadar', 'Dhanbad', 'Dharamshala', 'Dharwad', 'Dhule',
+            'Dibrugarh', 'Dindigul', 'Dindori', 'Dumka', 'Durg', 'Durgapur',
+            'Eluru', 'Ernakulam',
+            'Faridabad', 'Farrukhabad', 'Fatehpur', 'Fatehpur Sikri', 'Firozabad', 'Firozpur',
+            'Gandhinagar', 'Ganganagar', 'Gaya', 'Ghaziabad', 'Ghazipur', 'Giridih', 'Godda',
+            'Gonda', 'Gorakhpur', 'Gulbarga', 'Guna', 'Guntur', 'Gurdaspur', 'Guwahati',
+            'Gwalior', 'Hajipur', 'Haldwani', 'Hardoi', 'Haridwar', 'Hassan', 'Hathras',
+            'Haveri', 'Hazaribagh', 'Hissar', 'Hooghly', 'Hoshiarpur', 'Hyderabad',
+            'Idukki', 'Indore', 'Jabalpur', 'Jadavpur', 'Jaipur', 'Jaipur Rural', 'Jalandhar',
+            'Jalaun', 'Jalgaon', 'Jalna', 'Jalore', 'Jalpaiguri', 'Jammu', 'Jamnagar',
+            'Jamshedpur', 'Jaunpur', 'Jehanabad', 'Jhansi', 'Jhargram', 'Jhunjhunu', 'Jodhpur',
+            'Junagadh', 'Kachchh', 'Kairana', 'Kaiserganj', 'Kakinada', 'Kalahandi', 'Kannauj',
+            'Kannur', 'Kanpur', 'Kanyakumari', 'Kapurthala', 'Karaikal', 'Karauli', 'Kargil',
+            'Karnal', 'Karur', 'Kasaragod', 'Kathua', 'Katihar', 'Kendrapara', 'Keonjhar',
+            'Khadoor Sahib', 'Khajuraho', 'Khandwa', 'Khargone', 'Kheda', 'Kheri', 'Kolkata Dakshin',
+            'Kolkata Uttar', 'Kollam', 'Koppal', 'Kota', 'Kottayam', 'Kozhikode', 'Kullu',
+            'Kumbakonam', 'Kurnool', 'Kurukshetra', 'Ladakh', 'Lakhimpur', 'Lalganj', 'Latur',
+            'Leh', 'Lucknow', 'Ludhiana', 'Machilipatnam', 'Madha', 'Madhubani', 'Madurai',
+            'Mahabubabad', 'Mahabubnagar', 'Maharajganj', 'Mahesana', 'Mahoba', 'Mainpuri',
+            'Malappuram', 'Maldah Dakshin', 'Maldah Uttar', 'Mathura', 'Mavelikkara', 'Mayiladuthurai',
+            'Medak', 'Meerut', 'Mira Bhayandar', 'Mirzapur', 'Mohanlalganj', 'Monghyr', 'Mumbai North',
+            'Mumbai North Central', 'Mumbai North East', 'Mumbai North West', 'Mumbai South',
+            'Mumbai South Central', 'Murshidabad', 'Muzaffarnagar', 'Muzaffarpur', 'Mysore',
+            'Nabadwip', 'Nagaland', 'Nagarkurnool', 'Nagpur', 'Nainital', 'Nalgonda', 'Nanded',
+            'Nandyal', 'Narsapuram', 'Nashik', 'Natham', 'Navsari', 'Nawada', 'Nellore',
+            'New Delhi', 'Nizamabad', 'North Goa', 'North West Delhi', 'Ongole', 'Osmanabad',
+            'Palakkad', 'Palali', 'Palamau', 'Pali', 'Palladam', 'Panchmahal', 'Panihati',
+            'Pannipat', 'Parbhani', 'Patan', 'Pathanamthitta', 'Patiala', 'Patna', 'Patna Sahib',
+            'Pattukkottai', 'Pawayan', 'Peddapalle', 'Perambalur', 'Phulpur', 'Pilibhit', 'Pondicherry',
+            'Porbandar', 'Pratapgarh', 'Pulwama', 'Pune', 'Purba Medinipur', 'Puri', 'Purnia',
+            'Purulia', 'Raebareli', 'Raichur', 'Raigarh', 'Raipur', 'Rajahmundry', 'Rajkot',
+            'Rajmahal', 'Rajnandgaon', 'Rajouri', 'Ramanathapuram', 'Ramgarh', 'Rampur',
+            'Ranaghat', 'Ranchi', 'Ranikhet', 'Ratlam', 'Ratnagiri', 'Raver', 'Rewa', 'Rewari',
+            'Rohtak', 'Rohtas', 'Ropar', 'Sabar Kantha', 'Sagar', 'Saharanpur', 'Salem',
+            'Samastipur', 'Sambhal', 'Sambalpur', 'Sangli', 'Sangrur', 'Sant Kabir Nagar',
+            'Saran', 'Sasaram', 'Satara', 'Satna', 'Sawai Madhopur', 'Secunderabad', 'Sehore',
+            'Sheohar', 'Shillong', 'Shimla', 'Shimoga', 'Shirur', 'Shivaji Nagar', 'Shrawasti',
+            'Sikar', 'Silchar', 'Siliguri', 'Sindhudurg', 'Singrauli', 'Sironj', 'Sitapur',
+            'Siwan', 'Solapur', 'Sonipat', 'South Goa', 'South Mumbai', 'Srikakulam', 'Srinagar',
+            'Sultanpur', 'Sultanpur Lodhi', 'Supaul', 'Surat', 'Surendranagar', 'Suryapet',
+            'Tamluk', 'Tankara', 'Tapi', 'Tarn Taran', 'Tavistock', 'Tehri Garhwal', 'Tenkasi',
+            'Thane', 'Thanjavur', 'Thiruvananthapuram', 'Thoothukudi', 'Thrissur', 'Tikamgarh',
+            'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Tirur', 'Tiruvallur', 'Tiruvannamalai',
+            'Tonk', 'Tumkur', 'Tura', 'Udaipur', 'Udhampur', 'Udupi', 'Ujjain', 'Uluberia',
+            'Unnao', 'Uttara Kannada', 'Uttarpara', 'Vadakara', 'Vadodara', 'Vaishali',
+            'Valmiki Nagar', 'Valsad', 'Varanasi', 'Vellore', 'Vidisha', 'Vijayawada',
+            'Viluppuram', 'Virudhunagar', 'Visakhapatnam', 'Wardha', 'Warangal', 'Wayanad',
+            'West Delhi', 'Yadgir', 'Yavatmal'
+        ].sort();
     }
 
     async function loadDelegates() {
@@ -96,7 +152,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 adminLogout();
                 return;
             }
-            delegates = await res.json();
+            const all = await res.json();
+            delegates = all.filter(d => d.status === 'verified');
             renderTable();
             updateStats();
         } catch {
@@ -108,8 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const filter = filterStatus.value;
         const search = searchInput.value.toLowerCase().trim();
         const filtered = delegates.filter(d => {
-            if (filter === 'assigned' && !d.assigned_party && !d.portfolio) return false;
-            if (filter === 'unassigned' && (d.assigned_party || d.portfolio)) return false;
+            if (filter === 'assigned' && !d.assigned_constituency) return false;
+            if (filter === 'unassigned' && d.assigned_constituency) return false;
             if (search && !d.name.toLowerCase().includes(search) && !d.college.toLowerCase().includes(search)) return false;
             return true;
         });
@@ -120,7 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         tbody.innerHTML = filtered.map((d, i) => {
-            const constituency = d.assigned_party || d.portfolio || '';
+            const constituency = d.assigned_constituency || '';
             const assigned = !!constituency;
             return `<tr style="animation-delay: ${i * 0.03}s">
                 <td>${i + 1}</td>
@@ -157,14 +214,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
 
         try {
-            const res = await fetch(`${API_BASE}/admin/registrations/${id}/status`, {
-                method: 'POST',
+            const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
+                method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
                     'x-admin-password': adminPassword,
                 },
                 body: JSON.stringify({
-                    assigned_party: constituency,
+                    assigned_constituency: constituency,
                 }),
             });
             if (res.status === 403) {
@@ -175,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const reg = delegates.find(d => d.id === id);
             if (reg) {
-                reg.assigned_party = constituency;
+                reg.assigned_constituency = constituency;
             }
             renderTable();
             showToast(`Assigned ${constituency}`, 'success');
@@ -185,13 +242,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (button) {
                 button.disabled = false;
                 const reg = delegates.find(d => d.id === id);
-                button.textContent = (reg && (reg.assigned_party || reg.portfolio)) ? 'Re-assign' : 'Assign Constituency';
+                button.textContent = (reg && reg.assigned_constituency) ? 'Re-assign' : 'Assign Constituency';
             }
         }
     };
 
     async function assignAllUnassigned() {
-        const unassigned = delegates.filter(d => !d.assigned_party && !d.portfolio);
+        const unassigned = delegates.filter(d => !d.assigned_constituency);
         if (!unassigned.length) {
             showToast('All delegates already assigned', 'error');
             return;
@@ -203,13 +260,13 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!constituencies.length) break;
             const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
             try {
-                const res = await fetch(`${API_BASE}/admin/registrations/${d.id}/status`, {
-                    method: 'POST',
+                const res = await fetch(`${API_BASE}/admin/registrations/${d.id}`, {
+                    method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
-                    body: JSON.stringify({ assigned_party: constituency }),
+                    body: JSON.stringify({ assigned_constituency: constituency }),
                 });
                 if (res.ok) {
-                    d.assigned_party = constituency;
+                    d.assigned_constituency = constituency;
                     success++;
                 }
             } catch {}
@@ -222,7 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function updateStats() {
         totalEl.textContent = delegates.length;
-        const assigned = delegates.filter(d => d.assigned_party || d.portfolio).length;
+        const assigned = delegates.filter(d => d.assigned_constituency).length;
         assignedEl.textContent = assigned;
         unassignedEl.textContent = delegates.length - assigned;
     }
@@ -235,13 +292,6 @@ document.addEventListener('DOMContentLoaded', () => {
         loginSection.classList.remove('hidden');
         document.getElementById('admin-password').value = '';
         showToast('Session expired. Please login again.', 'error');
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
     }
 
     function showToast(msg, type) {
