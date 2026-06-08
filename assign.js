@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const assignedEl = document.getElementById('assigned-count');
     const unassignedEl = document.getElementById('unassigned-count');
 
+    const assignUnassignedBtn = document.getElementById('assign-unassigned-btn');
     const assignAllBtn = document.getElementById('assign-all-btn');
     const reassignAllBtn = document.getElementById('reassign-all-btn');
     const exportBtn = document.getElementById('export-excel-btn');
@@ -70,7 +71,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterStatus.addEventListener('change', renderCards);
     searchInput.addEventListener('input', renderCards);
-    assignAllBtn.addEventListener('click', assignAllUnassigned);
+    assignUnassignedBtn.addEventListener('click', assignUnassigned);
+    assignAllBtn.addEventListener('click', assignAll);
     reassignAllBtn.addEventListener('click', reassignAll);
     exportBtn.addEventListener('click', exportExcel);
 
@@ -247,13 +249,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    async function assignAllUnassigned() {
+    async function assignUnassigned() {
         const unassigned = delegates.filter(d => !d.assigned_constituency);
         if (!unassigned.length) {
             showToast('All delegates already assigned', 'error');
             return;
         }
-        await runBatchAssign(unassigned, 'Assign All');
+        await runBatchAssign(unassigned, 'Assign Unassigned');
+    }
+
+    async function assignAll() {
+        if (!delegates.length) return;
+        if (!confirm('This will assign ALL delegates (overwriting existing assignments). Continue?')) return;
+        await runBatchAssign(delegates, 'Assign All');
+        showToast(`Assigned all ${delegates.length} delegate${delegates.length > 1 ? 's' : ''}`, 'success');
     }
 
     async function reassignAll() {
@@ -263,10 +272,13 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast(`Reassigned all ${delegates.length} delegate${delegates.length > 1 ? 's' : ''}`, 'success');
     }
 
-    async function runBatchAssign(targets, buttonText) {
+    async function runBatchAssign(targets, caller) {
+        assignUnassignedBtn.disabled = true;
         assignAllBtn.disabled = true;
         reassignAllBtn.disabled = true;
-        assignAllBtn.textContent = `Processing ${targets.length}...`;
+        if (caller === 'Assign Unassigned') assignUnassignedBtn.textContent = `Processing ${targets.length}...`;
+        else if (caller === 'Assign All') assignAllBtn.textContent = `Processing ${targets.length}...`;
+        else reassignAllBtn.textContent = `Processing ${targets.length}...`;
 
         for (const d of targets) {
             if (!constituencies.length) break;
@@ -284,9 +296,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderCards();
+        assignUnassignedBtn.disabled = false;
         assignAllBtn.disabled = false;
         reassignAllBtn.disabled = false;
+        assignUnassignedBtn.textContent = 'Assign Unassigned';
         assignAllBtn.textContent = 'Assign All';
+        reassignAllBtn.textContent = 'Reassign All';
     }
 
     function exportExcel() {
