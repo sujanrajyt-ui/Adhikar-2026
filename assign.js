@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Azamgarh', 'Badaun', 'Bagalkot', 'Bahraich', 'Ballia',
     'Banda', 'Bangalore Central', 'Bangalore North', 'Bangalore Rural',
     'Bangalore South', 'Bankura', 'Barabanki', 'Baramati', 'Barasat',
-    'Barmer', 'Barrackpore', 'Basti', 'Bathinda', 'Begusarai',
+    'Barmer', 'Udupi', 'Basti', 'Bathinda', 'Begusarai',
     'Belgaum', 'Bellary', 'Berhampur', 'Bhagalpur', 'Bharatpur',
     'Bharuch', 'Bhavnagar', 'Bhilwara', 'Bhopal', 'Bhubaneswar',
     'Bidar', 'Bijapur', 'Bikaner', 'Bilaspur', 'Bulandshahr',
@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
     'Sultanpur', 'Surat', 'Thane', 'Thanjavur',
     'Thiruvananthapuram', 'Thoothukudi', 'Thrissur',
     'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Tumkur',
-    'Udaipur', 'Udhampur', 'Udupi', 'Ujjain', 'Vadodara',
+    'Udaipur', 'Udhampur', 'Amethi', 'Ujjain', 'Vadodara',
     'Vaishali', 'Varanasi', 'Vellore', 'Vidisha',
     'Vijayawada', 'Visakhapatnam', 'Warangal', 'Wayanad'
 
