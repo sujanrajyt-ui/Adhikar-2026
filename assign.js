@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', () => {
+    const loader = document.getElementById('page-loader');
+    if (loader) {
+        loader.classList.add('fade-out');
+        setTimeout(() => { if (loader.parentNode) loader.remove(); }, 400);
+    }
     const loginForm = document.getElementById('login-form');
     const loginSection = document.getElementById('login-section');
     const assignPanel = document.getElementById('assign-panel');
@@ -11,6 +16,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalEl = document.getElementById('total-delegates');
     const assignedEl = document.getElementById('assigned-count');
     const unassignedEl = document.getElementById('unassigned-count');
+
+    const assignAllBtn = document.getElementById('assign-all-btn');
 
     const saved = sessionStorage.getItem('adhikar_admin');
     if (saved) {
@@ -60,6 +67,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     filterStatus.addEventListener('change', renderTable);
     searchInput.addEventListener('input', renderTable);
+
+    assignAllBtn.addEventListener('click', assignAllUnassigned);
 
     async function init() {
         await loadConstituencies();
@@ -113,11 +122,11 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = filtered.map((d, i) => {
             const constituency = d.assigned_party || d.portfolio || '';
             const assigned = !!constituency;
-            return `<tr>
+            return `<tr style="animation-delay: ${i * 0.03}s">
                 <td>${i + 1}</td>
                 <td><strong>${escapeHtml(d.name)}</strong><br><span class="delegate-id">${d.id}</span></td>
                 <td>${escapeHtml(d.college)}</td>
-                <td>${assigned ? escapeHtml(constituency) : '<span class="unassigned-badge">—</span>'}</td>
+                <td>${assigned ? `<span class="constituency-name">${escapeHtml(constituency)}</span>` : '<span class="unassigned-badge">—</span>'}</td>
                 <td>${assigned
                     ? '<span class="status-badge status-assigned">Assigned</span>'
                     : '<span class="status-badge status-unassigned">Unassigned</span>'
@@ -180,6 +189,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     };
+
+    async function assignAllUnassigned() {
+        const unassigned = delegates.filter(d => !d.assigned_party && !d.portfolio);
+        if (!unassigned.length) {
+            showToast('All delegates already assigned', 'error');
+            return;
+        }
+        assignAllBtn.disabled = true;
+        assignAllBtn.textContent = `Assigning ${unassigned.length}...`;
+        let success = 0;
+        for (const d of unassigned) {
+            if (!constituencies.length) break;
+            const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
+            try {
+                const res = await fetch(`${API_BASE}/admin/registrations/${d.id}/status`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+                    body: JSON.stringify({ assigned_party: constituency }),
+                });
+                if (res.ok) {
+                    d.assigned_party = constituency;
+                    success++;
+                }
+            } catch {}
+        }
+        renderTable();
+        assignAllBtn.disabled = false;
+        assignAllBtn.textContent = 'Assign All Unassigned';
+        showToast(`Assigned ${success} delegate${success > 1 ? 's' : ''}`, 'success');
+    }
 
     function updateStats() {
         totalEl.textContent = delegates.length;

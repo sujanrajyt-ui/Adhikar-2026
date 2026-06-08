@@ -1,3 +1,23 @@
+.assign-info-bar {
+    margin-bottom: 1.25rem;
+    padding: 0.85rem 1.25rem;
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: 10px;
+}
+
+.assign-desc {
+    margin: 0;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+}
+
+.assign-desc strong {
+    color: var(--gold, #d4af37);
+    font-weight: 600;
+}
+
 .assign-toolbar {
     display: flex;
     justify-content: space-between;
@@ -9,6 +29,31 @@
     background: rgba(255, 255, 255, 0.04);
     border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 12px;
+}
+
+.assign-all-btn {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: #fff;
+    font-size: 0.78rem;
+    padding: 0.45rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.assign-all-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+}
+
+.assign-all-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 .assign-stats {
@@ -74,8 +119,22 @@
     vertical-align: middle;
 }
 
+.assign-table tbody tr {
+    animation: assignFadeIn 0.3s ease both;
+}
+
+@keyframes assignFadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 .assign-table tbody tr:hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.constituency-name {
+    font-weight: 600;
+    color: var(--gold, #d4af37);
 }
 
 .delegate-id {

@@ -4,6 +4,18 @@
     {
       "source": "/api/:path*",
       "destination": "/api/server"
+    },
+    {
+      "source": "/assign",
+      "destination": "/assign.html"
+    },
+    {
+      "source": "/scores",
+      "destination": "/scores.html"
+    },
+    {
+      "source": "/leaderboard",
+      "destination": "/leaderboard.html"
     }
   ]
 }

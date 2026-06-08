@@ -49,6 +49,10 @@
         </section>
 
         <section id="assign-panel" class="hidden">
+            <div class="assign-info-bar">
+                <p class="assign-desc">Select a delegate and click <strong>"Assign Constituency"</strong> to randomly assign a constituency from the available list. Already assigned delegates can be <strong>re-assigned</strong>.</p>
+            </div>
+
             <div class="assign-toolbar">
                 <div class="assign-stats">
                     <span id="total-delegates">0</span> Delegates |
@@ -56,6 +60,7 @@
                     <span id="unassigned-count">0</span> Unassigned
                 </div>
                 <div class="assign-filters">
+                    <button id="assign-all-btn" class="action-btn assign-all-btn" title="Assign all unassigned delegates">Assign All Unassigned</button>
                     <select id="filter-status" class="filter-select">
                         <option value="all">All</option>
                         <option value="assigned">Assigned</option>
