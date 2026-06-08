@@ -804,6 +804,37 @@ ol {
   line-height: 1.7;
 }
 
+.hero-central-idea {
+  margin: 2.5rem auto 0;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.central-label {
+  font-family: "Outfit", sans-serif;
+  font-size: clamp(0.65rem, 1vw, 0.75rem);
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--gold-500);
+  font-weight: 600;
+}
+
+.central-theme {
+  font-family: "Playfair Display", serif;
+  font-size: clamp(1.35rem, 3.5vw, 2rem);
+  color: var(--maroon-800);
+  font-weight: 700;
+  line-height: 1.25;
+  max-width: 600px;
+  background: linear-gradient(135deg, var(--maroon-800), var(--gold-600));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* Countdown */
 .countdown {
   margin-top: 4rem;
