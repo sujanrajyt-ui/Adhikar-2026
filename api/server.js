@@ -819,6 +819,10 @@ app.get('/leaderboard', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'leaderboard.html'));
 });
 
+app.get('/assign', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'assign.html'));
+});
+
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'index.html'));

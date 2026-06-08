@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constituency Assignment | ADHIKAR'26</title>
+    <link rel="icon" type="image/x-icon" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assign.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="page-loader" class="page-loader">
+        <div class="loader-logo">
+            <img src="assets/logo.png" alt="Adhikar">
+        </div>
+    </div>
+
+    <header class="scores-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <img src="assets/logo.png" alt="Adhikar">
+                <span>ADHIKAR<span class="gold-text">'26</span> <span class="tabbing-badge">ASSIGN</span></span>
+            </div>
+            <div id="admin-info" class="judge-info hidden">
+                <span class="judge-id-pill">Admin</span>
+                <button id="assign-logout" class="btn-ghost">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="login-section" class="login-card">
+            <div class="login-head">
+                <p class="kicker kicker-gold">Admin Authentication</p>
+                <h2>Constituency Assignment</h2>
+                <p class="login-sub">Enter the admin password to assign constituencies to delegates.</p>
+            </div>
+            <form id="login-form" class="login-form">
+                <div class="field">
+                    <label for="admin-password">Admin Password</label>
+                    <input type="password" id="admin-password" placeholder="Enter admin password" required autocomplete="off">
+                </div>
+                <p id="login-error" class="field-error hidden"></p>
+                <button type="submit" class="btn-primary">Unlock Panel</button>
+            </form>
+        </section>
+
+        <section id="assign-panel" class="hidden">
+            <div class="assign-toolbar">
+                <div class="assign-stats">
+                    <span id="total-delegates">0</span> Delegates |
+                    <span id="assigned-count">0</span> Assigned |
+                    <span id="unassigned-count">0</span> Unassigned
+                </div>
+                <div class="assign-filters">
+                    <select id="filter-status" class="filter-select">
+                        <option value="all">All</option>
+                        <option value="assigned">Assigned</option>
+                        <option value="unassigned">Unassigned</option>
+                    </select>
+                    <input type="text" id="search-delegate" class="filter-input" placeholder="Search delegate...">
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="assign-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Delegate</th>
+                            <th>College</th>
+                            <th>Party</th>
+                            <th>Committee</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assign-tbody">
+                        <tr><td colspan="7" class="empty-row">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = '/api';
+        let adminPassword = '';
+        let delegates = [];
+        let parties = [];
+        let committees = [];
+
+        function adminHeaders() {
+            return { 'x-admin-password': adminPassword };
+        }
+    </script>
+    <script src="assign.js"></script>
+</body>
+</html>
