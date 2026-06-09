@@ -54,6 +54,8 @@
 
         <div id="pf-content"></div>
 
+        <div id="pf-timestamp" style="text-align:center;font-size:0.65rem;color:rgba(255,255,255,0.15);margin-top:1rem;"></div>
+
         <a href="/" class="back-link">&larr; Back to Home</a>
     </div>
 
@@ -72,9 +74,11 @@
             return 'pf-' + party.toLowerCase().replace(/\s+/g, '-');
         }
 
+        let refreshInterval = null;
+
         async function load() {
             const container = document.getElementById('pf-content');
-            container.innerHTML = '<div class="pf-loading">Loading...</div>';
+            const ts = document.getElementById('pf-timestamp');
 
             try {
                 const [delegatesRes, partiesRes] = await Promise.all([
@@ -135,12 +139,15 @@
                 });
 
                 container.innerHTML = html;
+                ts.textContent = 'Last updated: ' + new Date().toLocaleTimeString();
             } catch (e) {
                 container.innerHTML = '<div class="pf-error">Failed to load data. Make sure you are connected to the server.</div>';
+                ts.textContent = '';
             }
         }
 
         load();
+        refreshInterval = setInterval(load, 15000);
     </script>
 </body>
 </html>
