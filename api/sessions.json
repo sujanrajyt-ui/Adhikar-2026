@@ -20,13 +20,18 @@
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
+    "id": "SS",
+    "name": "Surprise Session (SS)",
+    "created_at": "2026-06-09T06:09:40.613Z"
+  },
+  {
     "id": "BP",
     "name": "Bill Presentations (BP)",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
-    "id": "SS",
-    "name": "Surprise Session (SS)",
-    "created_at": "2026-06-09T06:09:40.613Z"
+    "id": "FSH",
+    "name": "Final Sitting of the House (FSH)",
+    "created_at": "2026-06-10T06:09:40.613Z"
   }
 ]
