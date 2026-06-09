@@ -545,6 +545,23 @@ h3 {
     text-align: center;
 }
 
+.coal-flat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+}
+
+.coal-party.coal-flat {
+    border-left: 3px solid rgba(255,255,255,0.15);
+    padding-left: 10px;
+}
+
+.coal-flat .coal-party-count small {
+    color: rgba(255,255,255,0.45);
+    font-weight: 400;
+}
+
 .coal-total-row {
     display: flex;
     justify-content: space-between;

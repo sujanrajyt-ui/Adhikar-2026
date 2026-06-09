@@ -179,15 +179,41 @@ async function loadParties() {
 function renderCoalition() {
     if (!coalitionInfo) return;
 
-    // Count delegates per party from allDelegates
     const counts = {};
     allDelegates.forEach(d => {
         const p = d.assigned_party || 'Unassigned';
         counts[p] = (counts[p] || 0) + 1;
     });
 
-    // Separate parties by side
     const parties = allParties.filter(p => p.type === 'party');
+    const total = allDelegates.length;
+    const hasSides = parties.some(p => p.side && p.side !== 'neutral');
+
+    if (!hasSides) {
+        // No coalition formed yet — show individual parties only
+        const sorted = [...parties].sort((a, b) => (counts[b.name] || 0) - (counts[a.name] || 0));
+        coalitionInfo.innerHTML = `
+            <div class="coal-flat-list">
+                ${sorted.map(p => {
+                    const count = counts[p.name] || 0;
+                    const pct = total > 0 ? Math.round(count / total * 100) : 0;
+                    return `
+                        <div class="coal-party coal-flat">
+                            <span class="coal-party-name">${escapeHtml(p.name)}</span>
+                            <span class="coal-party-count">${count} <small>${pct}%</small></span>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+            <div class="coal-total-row">
+                <span><strong>Total</strong></span>
+                <span><strong>${total}</strong></span>
+            </div>
+        `;
+        return;
+    }
+
+    // Coalition sides are set — show grouped view
     const ruling = parties.filter(p => p.side === 'ruling');
     const opposition = parties.filter(p => p.side === 'opposition');
     const neutral = parties.filter(p => !p.side || p.side === 'neutral');
@@ -195,7 +221,6 @@ function renderCoalition() {
     const totalRuling = ruling.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
     const totalOpp = opposition.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
     const totalNeutral = neutral.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
-    const total = allDelegates.length;
 
     const partyRow = (party, side) => {
         const count = counts[party.name] || 0;
