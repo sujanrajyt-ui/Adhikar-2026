@@ -124,11 +124,6 @@ async function loadSessions() {
 }
 
 function resolveSession() {
-    const saved = sessionStorage.getItem('adhikar_session');
-    if (saved && allSessions.some(s => s.id === saved)) {
-        currentSession = saved;
-        return;
-    }
     currentSession = allSessions[0] ? allSessions[0].id : null;
     if (currentSession) sessionStorage.setItem('adhikar_session', currentSession);
 }
