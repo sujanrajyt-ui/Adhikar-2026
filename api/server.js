@@ -799,7 +799,7 @@ app.post('/api/scores/attendance/bulk', async (req, res) => {
 app.get('/api/public/leaderboard', async (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   try {
-    const [scores, registrations, criteria, awards, parties] = await Promise.all([
+    const [scores, registrations, rawCriteria, awards, parties] = await Promise.all([
       db.getAllScores(),
       db.getAll(),
       db.getCriteria(),
@@ -807,10 +807,16 @@ app.get('/api/public/leaderboard', async (req, res) => {
       db.getParties()
     ]);
 
+    // Deduplicate criteria by ID (take last entry per ID)
+    const criteria = Object.values(rawCriteria.reduce((acc, c) => {
+      if (c.id && c.id !== 'attendance') acc[c.id] = c;
+      return acc;
+    }, {}));
+
     const verified = registrations.filter(r => (r.status || '').toLowerCase() === 'verified');
 
     const leaderboardData = verified.map(d => {
-      const dScores = scores.filter(s => s.delegate_id === d.id);
+      const dScores = scores.filter(s => s.delegate_id === d.id && s.criteria_id !== 'attendance');
       const criteriaScores = {};
 
       // Group scores by criteria AND session, then average across sessions
