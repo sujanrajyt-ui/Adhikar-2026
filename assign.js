@@ -154,11 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadCommittees() {
         committees = [
-            'Education & Youth Affairs Committee',
-            'Home Affairs & Justice Committee',
-            'Health & Social Welfare Committee',
-            'Environment, Science & External Affairs Committee',
-            'Finance & Economic Affairs Committee'
+            'EDUCATION',
+            'FINANCE',
+            'HOME AFFAIRS',
+            'HEALTH',
+            'JUSTICE'
         ];
         const sel = filterCommittee;
         sel.innerHTML = '<option value="all">All Committees</option>' +
