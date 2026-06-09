@@ -286,6 +286,57 @@ body {
 }
 .status-unassigned::before { background: #e74c3c; }
 
+/* ─── Dashboard ─── */
+.assign-dashboard {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+@media (max-width: 768px) {
+    .assign-dashboard { grid-template-columns: 1fr; }
+}
+.dash-section {
+    background: var(--maroon-mid);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+}
+.dash-title {
+    margin: 0 0 0.6rem 0;
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255,255,255,0.3);
+}
+.dash-row {
+    display: grid; grid-template-columns: auto 1fr 2.2rem;
+    gap: 0.5rem; align-items: center;
+    padding: 0.25rem 0;
+    font-size: 0.75rem;
+}
+.dash-label {
+    color: rgba(255,255,255,0.7);
+    white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis;
+    max-width: 9rem;
+}
+.dash-bar-wrap {
+    height: 6px; border-radius: 3px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+}
+.dash-bar {
+    height: 100%; border-radius: 3px;
+    transition: width 0.4s ease;
+}
+.dash-bar-party { background: #5dade2; }
+.dash-bar-committee { background: #bb8fce; }
+.dash-count {
+    text-align: right;
+    font-weight: 700; color: #fff;
+    font-variant-numeric: tabular-nums;
+}
+
 /* ─── Empty ─── */
 .empty-state {
     text-align: center; padding: 3rem 1rem;

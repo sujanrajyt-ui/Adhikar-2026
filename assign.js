@@ -544,6 +544,36 @@ document.addEventListener('DOMContentLoaded', () => {
         const assigned = delegates.filter(d => d.assigned_constituency).length;
         assignedEl.textContent = assigned;
         unassignedEl.textContent = delegates.length - assigned;
+        renderDashboard();
+    }
+
+    function renderDashboard() {
+        const partyCounts = {};
+        parties.forEach(p => partyCounts[p] = 0);
+        const committeeCounts = {};
+        committees.forEach(c => committeeCounts[c] = 0);
+        delegates.forEach(d => {
+            if (d.assigned_party) partyCounts[d.assigned_party] = (partyCounts[d.assigned_party] || 0) + 1;
+            if (d.assigned_committee) committeeCounts[d.assigned_committee] = (committeeCounts[d.assigned_committee] || 0) + 1;
+        });
+
+        const partyMax = Math.max(...Object.values(partyCounts), 1);
+        document.getElementById('dash-parties').innerHTML = parties.map(p =>
+            `<div class="dash-row">
+                <span class="dash-label">${p}</span>
+                <span class="dash-bar-wrap"><span class="dash-bar dash-bar-party" style="width:${(partyCounts[p] / partyMax) * 100}%"></span></span>
+                <span class="dash-count">${partyCounts[p]}</span>
+            </div>`
+        ).join('');
+
+        const commMax = Math.max(...Object.values(committeeCounts), 1);
+        document.getElementById('dash-committees').innerHTML = committees.map(c =>
+            `<div class="dash-row">
+                <span class="dash-label">${c}</span>
+                <span class="dash-bar-wrap"><span class="dash-bar dash-bar-committee" style="width:${(committeeCounts[c] / commMax) * 100}%"></span></span>
+                <span class="dash-count">${committeeCounts[c]}</span>
+            </div>`
+        ).join('');
     }
 
     function adminLogout() {
