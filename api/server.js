@@ -772,6 +772,28 @@ app.post('/api/scores/submit', async (req, res) => {
 
 
 
+// Bulk attendance submit
+app.post('/api/scores/attendance/bulk', async (req, res) => {
+  const { judge_id, session_id, attendance } = req.body;
+  if (!judge_id || !session_id || !Array.isArray(attendance)) {
+    return res.status(400).json({ detail: 'judge_id, session_id, and attendance array required' });
+  }
+  try {
+    const results = await Promise.all(attendance.map(a =>
+      db.submitScore({
+        delegate_id: a.delegate_id,
+        judge_id,
+        criteria_id: 'attendance',
+        score: a.present ? 1 : 0,
+        session_id
+      })
+    ));
+    res.json({ success: true, count: results.length });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 /* ============ Leaderboard API ============ */
 
 app.get('/api/public/leaderboard', async (req, res) => {

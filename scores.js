@@ -73,6 +73,7 @@ async function handleLogin(e) {
 
 function handleLogout() {
     stopCoalitionRefresh();
+    flushAttendance();
     currentJudge = null;
     currentSession = null;
     sessionStorage.removeItem('adhikar_judge');
@@ -137,14 +138,17 @@ function renderSessionTabs() {
     sessionTabs.innerHTML = allSessions.map((s, i) => {
         const status = sessionStatus[s.id] || 'unlocked';
         const isActive = s.id === currentSession;
-        const checkIcon = status === 'completed'
+        const isRC = s.id === 'RC';
+        const icon = status === 'completed'
             ? `<svg class="tab-icon completed" viewBox="0 0 24 24" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>`
-            : '';
+            : isRC
+                ? `<svg class="tab-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
+                : '';
         return `
-            <button class="session-tab ${isActive ? 'active' : ''} ${status === 'completed' ? 'completed' : ''}"
+            <button class="session-tab ${isActive ? 'active' : ''} ${status === 'completed' ? 'completed' : ''} ${isRC ? 'rc-tab' : ''}"
                 data-session="${s.id}"
                 title="${s.name}">
-                ${checkIcon}
+                ${icon}
                 <span class="tab-short">${s.id}</span>
                 <span class="tab-full">${escapeHtml(s.name)}</span>
             </button>
@@ -277,6 +281,16 @@ function renderCriteria() {
 
 function renderDelegates() {
     if (!delegateList) return;
+    // Hide criteria sidebar in Roll Call mode
+    const criteriaCard = document.querySelector('.criteria-card');
+    const statsCard = document.querySelector('.stats-card');
+    if (criteriaCard) criteriaCard.style.display = currentSession === 'RC' ? 'none' : 'block';
+    if (statsCard) statsCard.style.display = currentSession === 'RC' ? 'none' : 'block';
+    // Roll Call mode
+    if (currentSession === 'RC') {
+        renderAttendance();
+        return;
+    }
     const query = (delegateSearch ? delegateSearch.value : '').toLowerCase();
     const filtered = allDelegates.filter(d =>
         d.name.toLowerCase().includes(query) ||
@@ -550,6 +564,213 @@ function initReveal() {
     }, { threshold: 0.1 });
     els.forEach(el => observer.observe(el));
 }
+
+let attendanceDirty = {};
+let attendanceTimer = null;
+
+function renderAttendance() {
+    const query = (delegateSearch ? delegateSearch.value : '').toLowerCase();
+    const filtered = allDelegates.filter(d =>
+        d.name.toLowerCase().includes(query) ||
+        (d.assigned_party && d.assigned_party.toLowerCase().includes(query)) ||
+        (d.assigned_committee && d.assigned_committee.toLowerCase().includes(query))
+    );
+
+    if (filtered.length === 0) {
+        delegateList.innerHTML = '<div class="empty-state"><p>No delegates found.</p></div>';
+        return;
+    }
+
+    const presentCount = filtered.filter(d => getAttendanceStatus(d)).length;
+    const total = filtered.length;
+
+    delegateList.innerHTML = `
+        <div class="attn-header">
+            <div class="attn-stats">
+                <span class="attn-stat attn-stat-present">${presentCount} Present</span>
+                <span class="attn-sep">·</span>
+                <span class="attn-stat attn-stat-absent">${total - presentCount} Absent</span>
+                <span class="attn-sep">·</span>
+                <span class="attn-stat attn-stat-total">${total} Total</span>
+            </div>
+            <div class="attn-actions">
+                <button class="attn-btn attn-btn-all" onclick="markAllAttendance(true)" title="Mark all present (P key)">✓ All Present</button>
+                <button class="attn-btn attn-btn-none" onclick="markAllAttendance(false)" title="Mark all absent (A key)">✗ All Absent</button>
+            </div>
+        </div>
+        <div class="attn-list">
+            ${filtered.map((d, idx) => {
+                const present = getAttendanceStatus(d);
+                return `
+                    <div class="attn-item ${present ? 'attn-item-present' : 'attn-item-absent'}" 
+                         data-id="${d.id}" style="animation-delay: ${idx * 0.03}s">
+                        <div class="attn-item-info">
+                            <span class="attn-item-icon">${present ? '✓' : '○'}</span>
+                            <div>
+                                <div class="attn-item-name">${escapeHtml(d.name)}</div>
+                                <div class="attn-item-meta">
+                                    ${d.assigned_constituency ? `<span>${escapeHtml(d.assigned_constituency)}</span>` : ''}
+                                    ${d.assigned_party ? `<span>${escapeHtml(d.assigned_party)}</span>` : ''}
+                                    ${d.assigned_committee ? `<span>${escapeHtml(d.assigned_committee)}</span>` : ''}
+                                    ${d.portfolio ? `<span class="gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="attn-item-toggles">
+                            <button class="attn-toggle ${present ? 'attn-toggle-active attn-toggle-yes' : 'attn-toggle-yes'}" 
+                                    onclick="handleAttendanceToggle('${d.id}', true, this)">
+                                ✓ Present
+                            </button>
+                            <button class="attn-toggle ${!present && d.scores && d.scores.some(s => s.criteria_id === 'attendance') ? 'attn-toggle-active attn-toggle-no' : 'attn-toggle-no'}" 
+                                    onclick="handleAttendanceToggle('${d.id}', false, this)">
+                                ✗ Absent
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+
+    updateAttendanceStats();
+}
+
+function getAttendanceStatus(delegate) {
+    const attnScore = delegate.scores && delegate.scores.find(s => s.criteria_id === 'attendance');
+    return attnScore ? attnScore.score === 1 : false;
+}
+
+function updateAttendanceStats() {
+    const items = document.querySelectorAll('.attn-item');
+    const present = document.querySelectorAll('.attn-item.attn-item-present').length;
+    const total = items.length;
+    const absent = total - present;
+
+    const statsEl = document.querySelector('.attn-stats');
+    if (statsEl) {
+        statsEl.innerHTML = `
+            <span class="attn-stat attn-stat-present">${present} Present</span>
+            <span class="attn-sep">·</span>
+            <span class="attn-stat attn-stat-absent">${absent} Absent</span>
+            <span class="attn-sep">·</span>
+            <span class="attn-stat attn-stat-total">${total} Total</span>
+        `;
+    }
+}
+
+async function handleAttendanceToggle(delegateId, present, btnElement) {
+    const delegate = allDelegates.find(d => d.id === delegateId);
+    if (!delegate) return;
+
+    // Optimistic UI update
+    const item = btnElement.closest('.attn-item');
+    if (!item) return;
+
+    const yesBtn = item.querySelector('.attn-toggle-yes');
+    const noBtn = item.querySelector('.attn-toggle-no');
+
+    if (present) {
+        item.classList.add('attn-item-present');
+        item.classList.remove('attn-item-absent');
+        yesBtn.classList.add('attn-toggle-active');
+        noBtn.classList.remove('attn-toggle-active');
+        item.querySelector('.attn-item-icon').textContent = '✓';
+    } else {
+        item.classList.add('attn-item-absent');
+        item.classList.remove('attn-item-present');
+        noBtn.classList.add('attn-toggle-active');
+        yesBtn.classList.remove('attn-toggle-active');
+        item.querySelector('.attn-item-icon').textContent = '○';
+    }
+
+    // Update local data
+    if (!delegate.scores) delegate.scores = [];
+    const existing = delegate.scores.find(s => s.criteria_id === 'attendance');
+    if (existing) {
+        existing.score = present ? 1 : 0;
+    } else {
+        delegate.scores.push({ criteria_id: 'attendance', score: present ? 1 : 0 });
+    }
+
+    // Mark dirty for this delegate
+    attendanceDirty[delegateId] = present ? 1 : 0;
+
+    updateAttendanceStats();
+
+    // Debounced bulk save
+    clearTimeout(attendanceTimer);
+    attendanceTimer = setTimeout(() => flushAttendance(), 800);
+}
+
+async function flushAttendance() {
+    const entries = Object.entries(attendanceDirty);
+    if (entries.length === 0) return;
+
+    const attendance = entries.map(([delegate_id, score]) => ({
+        delegate_id,
+        present: score === 1
+    }));
+
+    attendanceDirty = {};
+
+    try {
+        const res = await fetch(`${API_BASE}/scores/attendance/bulk`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                judge_id: currentJudge,
+                session_id: 'RC',
+                attendance
+            })
+        });
+        if (!res.ok) throw new Error('Failed to save attendance');
+
+        // Mark session as completed
+        if (sessionStatus['RC'] !== 'completed') {
+            sessionStatus['RC'] = 'completed';
+            renderSessionTabs();
+        }
+    } catch (err) {
+        console.error('Attendance save error:', err);
+        showToast('Failed to save attendance', 'error');
+    }
+}
+
+function markAllAttendance(present) {
+    const items = document.querySelectorAll('.attn-item');
+    items.forEach(item => {
+        const id = item.dataset.id;
+        const btn = present
+            ? item.querySelector('.attn-toggle-yes')
+            : item.querySelector('.attn-toggle-no');
+        if (btn) {
+            handleAttendanceToggle(id, present, btn);
+        }
+    });
+    showToast(present ? 'All marked Present' : 'All marked Absent', 'info');
+}
+
+// Keyboard shortcuts for attendance
+document.addEventListener('keydown', (e) => {
+    if (currentSession !== 'RC' || !delegateList || delegateList.querySelector('.attn-list') === null) return;
+    if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        markAllAttendance(true);
+    }
+    if (e.key === 'a' || e.key === 'A') {
+        e.preventDefault();
+        markAllAttendance(false);
+    }
+    if (e.key === 'Enter' && e.target.closest('.attn-item')) {
+        const item = e.target.closest('.attn-item');
+        const id = item.dataset.id;
+        const present = !item.classList.contains('attn-item-present');
+        const btn = present
+            ? item.querySelector('.attn-toggle-yes')
+            : item.querySelector('.attn-toggle-no');
+        if (btn) handleAttendanceToggle(id, present, btn);
+    }
+});
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log("Scoring Dashboard v4 — Sequential Session Tabs");

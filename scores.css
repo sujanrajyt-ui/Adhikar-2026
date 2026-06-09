@@ -895,6 +895,255 @@ h3 {
     transform: translateY(0);
 }
 
+/* ========== Roll Call Attendance ========== */
+.rc-tab {
+    background: rgba(78, 205, 196, 0.06);
+    border-color: rgba(78, 205, 196, 0.15);
+}
+
+.rc-tab.active {
+    background: rgba(78, 205, 196, 0.12);
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.3);
+}
+
+/* Attendance Header */
+.attn-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: var(--maroon-mid);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+}
+
+.attn-stats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.attn-sep {
+    color: var(--cream-dim);
+    opacity: 0.3;
+}
+
+.attn-stat-present {
+    color: #4ecdc4;
+}
+
+.attn-stat-absent {
+    color: #ff6b6b;
+}
+
+.attn-stat-total {
+    color: var(--cream-dim);
+}
+
+.attn-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.attn-btn {
+    padding: 8px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--glass-border);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--glass);
+    color: var(--cream);
+}
+
+.attn-btn:hover {
+    transform: translateY(-1px);
+}
+
+.attn-btn-all {
+    border-color: rgba(78, 205, 196, 0.3);
+    color: #4ecdc4;
+}
+
+.attn-btn-all:hover {
+    background: rgba(78, 205, 196, 0.1);
+    box-shadow: 0 4px 12px rgba(78, 205, 196, 0.15);
+}
+
+.attn-btn-none {
+    border-color: rgba(255, 107, 107, 0.3);
+    color: #ff6b6b;
+}
+
+.attn-btn-none:hover {
+    background: rgba(255, 107, 107, 0.1);
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.15);
+}
+
+/* Attendance List */
+.attn-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.attn-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 18px;
+    background: var(--maroon-mid);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardSlideIn 0.4s ease-out both;
+    border-left: 4px solid var(--glass-border);
+}
+
+.attn-item:hover {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.attn-item.attn-item-present {
+    border-left-color: #4ecdc4;
+    background: linear-gradient(135deg, rgba(78, 205, 196, 0.04), var(--maroon-mid));
+}
+
+.attn-item.attn-item-absent {
+    border-left-color: #ff6b6b;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.04), var(--maroon-mid));
+}
+
+.attn-item.attn-item-present:hover {
+    border-color: rgba(78, 205, 196, 0.2);
+    box-shadow: 0 4px 16px rgba(78, 205, 196, 0.08);
+}
+
+.attn-item.attn-item-absent:hover {
+    border-color: rgba(255, 107, 107, 0.2);
+    box-shadow: 0 4px 16px rgba(255, 107, 107, 0.08);
+}
+
+.attn-item-info {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex: 1;
+    min-width: 0;
+}
+
+.attn-item-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+
+.attn-item-present .attn-item-icon {
+    background: rgba(78, 205, 196, 0.15);
+    color: #4ecdc4;
+}
+
+.attn-item-absent .attn-item-icon {
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    opacity: 0.6;
+}
+
+.attn-item-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    font-family: 'Outfit', sans-serif;
+    color: var(--cream);
+}
+
+.attn-item-meta {
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.attn-item-meta span {
+    font-size: 0.65rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 2px 8px;
+    border-radius: 4px;
+    color: var(--cream-dim);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.attn-item-meta span.gold-text {
+    border-color: var(--gold-glow);
+    background: rgba(201, 169, 97, 0.08);
+}
+
+/* Toggle Buttons */
+.attn-item-toggles {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+    margin-left: 12px;
+}
+
+.attn-toggle {
+    padding: 6px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    background: transparent;
+    color: var(--cream-dim);
+}
+
+.attn-toggle:hover {
+    transform: translateY(-1px);
+}
+
+.attn-toggle-yes:hover {
+    border-color: rgba(78, 205, 196, 0.4);
+    color: #4ecdc4;
+    background: rgba(78, 205, 196, 0.06);
+}
+
+.attn-toggle-no:hover {
+    border-color: rgba(255, 107, 107, 0.4);
+    color: #ff6b6b;
+    background: rgba(255, 107, 107, 0.06);
+}
+
+.attn-toggle.attn-toggle-active.attn-toggle-yes {
+    background: rgba(78, 205, 196, 0.15);
+    border-color: #4ecdc4;
+    color: #4ecdc4;
+    box-shadow: 0 0 12px rgba(78, 205, 196, 0.15);
+}
+
+.attn-toggle.attn-toggle-active.attn-toggle-no {
+    background: rgba(255, 107, 107, 0.15);
+    border-color: #ff6b6b;
+    color: #ff6b6b;
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.15);
+}
+
 /* ========== Responsive ========== */
 @media (max-width: 900px) {
     .dashboard-grid {
@@ -942,6 +1191,30 @@ h3 {
     .session-tab {
         padding: 6px 10px;
         font-size: 0.7rem;
+    }
+
+    .attn-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .attn-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .attn-item-toggles {
+        margin-left: 42px;
+    }
+
+    .attn-actions {
+        width: 100%;
+    }
+
+    .attn-btn {
+        flex: 1;
+        text-align: center;
     }
 }
 
