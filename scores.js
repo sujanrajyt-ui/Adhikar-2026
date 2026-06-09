@@ -14,6 +14,9 @@ const delegateList = document.getElementById('delegate-list');
 const criteriaList = document.getElementById('criteria-list');
 const delegateSearch = document.getElementById('delegate-search');
 const sessionTabs = document.getElementById('session-tabs');
+const coalitionInfo = document.getElementById('coalition-info');
+let allParties = [];
+let coalitionRefreshInterval = null;
 
 function showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -69,6 +72,7 @@ async function handleLogin(e) {
 }
 
 function handleLogout() {
+    stopCoalitionRefresh();
     currentJudge = null;
     currentSession = null;
     sessionStorage.removeItem('adhikar_judge');
@@ -85,13 +89,15 @@ async function initDashboard() {
     judgeDisplayId.textContent = currentJudge;
 
     try {
-        await Promise.all([loadCriteria(), loadSessions()]);
+        await Promise.all([loadCriteria(), loadSessions(), loadParties()]);
         resolveSession();
         renderSessionTabs();
         await loadDelegates();
         renderCriteria();
         renderDelegates();
+        renderCoalition();
         updateProgress();
+        startCoalitionRefresh();
     } catch (err) {
         console.error("Dashboard init error:", err);
         showToast("Failed to initialize dashboard", "error");
@@ -180,6 +186,97 @@ async function switchSession() {
     renderDelegates();
     updateProgress();
     showToast(`Switched to ${allSessions.find(s => s.id === currentSession)?.name || currentSession}`, 'info');
+}
+
+async function loadParties() {
+    try {
+        const res = await fetch(`${API_BASE}/parties`);
+        if (res.ok) allParties = await res.json();
+    } catch (e) {
+        console.error("Failed to load parties", e);
+    }
+}
+
+function renderCoalition() {
+    if (!coalitionInfo) return;
+
+    // Count delegates per party from allDelegates
+    const counts = {};
+    allDelegates.forEach(d => {
+        const p = d.assigned_party || 'Unassigned';
+        counts[p] = (counts[p] || 0) + 1;
+    });
+
+    // Separate parties by side
+    const parties = allParties.filter(p => p.type === 'party');
+    const ruling = parties.filter(p => p.side === 'ruling');
+    const opposition = parties.filter(p => p.side === 'opposition');
+    const neutral = parties.filter(p => !p.side || p.side === 'neutral');
+
+    const totalRuling = ruling.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
+    const totalOpp = opposition.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
+    const totalNeutral = neutral.reduce((sum, p) => sum + (counts[p.name] || 0), 0);
+    const total = allDelegates.length;
+
+    const partyRow = (party, side) => {
+        const count = counts[party.name] || 0;
+        const sideClass = side === 'ruling' ? 'coal-gov' : side === 'opposition' ? 'coal-opp' : 'coal-neutral';
+        return `
+            <div class="coal-party ${sideClass}">
+                <span class="coal-party-name">${escapeHtml(party.name)}</span>
+                <span class="coal-party-count">${count}</span>
+            </div>
+        `;
+    };
+
+    coalitionInfo.innerHTML = `
+        ${ruling.length > 0 ? `
+            <div class="coal-block">
+                <div class="coal-block-head coal-head-gov">
+                    <span class="coal-label">GOVERNMENT</span>
+                    <span class="coal-total">${totalRuling}</span>
+                </div>
+                <div class="coal-block-body">${ruling.map(p => partyRow(p, 'ruling')).join('')}</div>
+            </div>
+        ` : ''}
+        ${opposition.length > 0 ? `
+            <div class="coal-block">
+                <div class="coal-block-head coal-head-opp">
+                    <span class="coal-label">OPPOSITION</span>
+                    <span class="coal-total">${totalOpp}</span>
+                </div>
+                <div class="coal-block-body">${opposition.map(p => partyRow(p, 'opposition')).join('')}</div>
+            </div>
+        ` : ''}
+        ${neutral.length > 0 ? `
+            <div class="coal-block">
+                <div class="coal-block-head coal-head-neutral">
+                    <span class="coal-label">CROSS BENCH</span>
+                    <span class="coal-total">${totalNeutral}</span>
+                </div>
+                <div class="coal-block-body">${neutral.map(p => partyRow(p, 'neutral')).join('')}</div>
+            </div>
+        ` : ''}
+        <div class="coal-total-row">
+            <span><strong>Total</strong></span>
+            <span><strong>${total}</strong></span>
+        </div>
+    `;
+}
+
+function startCoalitionRefresh() {
+    stopCoalitionRefresh();
+    coalitionRefreshInterval = setInterval(async () => {
+        await loadParties();
+        renderCoalition();
+    }, 15000);
+}
+
+function stopCoalitionRefresh() {
+    if (coalitionRefreshInterval) {
+        clearInterval(coalitionRefreshInterval);
+        coalitionRefreshInterval = null;
+    }
 }
 
 async function loadDelegates() {
