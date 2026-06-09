@@ -3,35 +3,35 @@
         "id": "party_a",
         "name": "Party A",
         "type": "party",
-        "side": "ruling",
+        "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_b",
         "name": "Party B",
         "type": "party",
-        "side": "opposition",
+        "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_c",
         "name": "Party C",
         "type": "party",
-        "side": "neutral",
+        "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_d",
         "name": "Party D",
         "type": "party",
-        "side": "neutral",
+        "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_e",
         "name": "Party E",
         "type": "party",
-        "side": "neutral",
+        "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
