@@ -661,31 +661,38 @@ app.get('/api/awards', async (req, res) => {
 app.get('/api/sessions', async (req, res) => {
   try {
     const sessions = await db.getSessions();
-    if (sessions.length === 0) {
-      const now = new Date().toISOString();
-      const defaults = [
-        { id: 'QH', name: 'Question Hour (QH)' },
-        { id: 'ZH', name: 'Zero Hour (ZH)' },
-        { id: 'MR', name: 'Ministry Reports (MR)' },
-        { id: 'BP', name: 'Bill Presentations (BP)' },
-        { id: 'SS', name: 'Surprise Session (SS)' }
-      ];
-      for (const s of defaults) await db.createSession(s);
-      return res.json(await db.getSessions());
+    const required = [
+      { id: 'RC', name: 'Roll Call (RC)' },
+      { id: 'QH', name: 'Question Hour (QH)' },
+      { id: 'ZH', name: 'Zero Hour (ZH)' },
+      { id: 'MR', name: 'Ministry Reports (MR)' },
+      { id: 'SS', name: 'Surprise Session (SS)' },
+      { id: 'BP', name: 'Bill Presentations (BP)' },
+      { id: 'FSH', name: 'Final Sitting of the House (FSH)' }
+    ];
+
+    // Insert any missing sessions
+    const existingIds = sessions.map(s => s.id);
+    for (const s of required) {
+      if (!existingIds.includes(s.id)) {
+        await db.createSession(s);
+      }
     }
+
+    const updated = await db.getSessions();
 
     // If judgeId is provided, annotate which sessions they have scored in
     const judgeId = req.query.judgeId;
     if (judgeId) {
       const allScores = await db.getAllScores();
-      const result = sessions.map(s => ({
+      const result = updated.map(s => ({
         ...s,
         hasScores: allScores.some(sc => sc.judge_id === judgeId && (sc.session_id || 'general') === s.id)
       }));
       return res.json(result);
     }
 
-    res.json(sessions);
+    res.json(updated);
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
