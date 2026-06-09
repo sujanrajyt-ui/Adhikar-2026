@@ -188,17 +188,24 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
-        async function renderCoalition() {
-            const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
-            const sides = {};
+        const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
+        const idToName = { 'party_a': 'Party A', 'party_b': 'Party B', 'party_c': 'Party C', 'party_d': 'Party D', 'party_e': 'Party E' };
+        let sides = {};
+
+        async function loadSides() {
+            try {
+                const all = await fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json());
+                const partyList = all.filter(p => p.type === 'party');
+                const s = {};
+                partyList.forEach(p => s[p.name] = p.side || '');
+                sides = s;
+            } catch { sides = {}; }
+        }
+
+        function renderHTML() {
             const counts = {};
             parties.forEach(p => counts[p] = 0);
             delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
-            try {
-                const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
-                const partyList = all.filter(p => p.type === 'party');
-                partyList.forEach(p => sides[p.name] = p.side || '');
-            } catch {}
 
             const ruling = parties.filter(p => sides[p] === 'ruling');
             const opposition = parties.filter(p => sides[p] !== 'ruling');
@@ -226,26 +233,30 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '</div>';
 
             container.innerHTML = html;
-
-            saveBtn.onclick = async () => {
-                const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
-                saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
-                try {
-                    const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-                        body: JSON.stringify({ ruling_ids: checked })
-                    });
-                    if (!res.ok) throw new Error('Failed');
-                    showToast('Coalition saved', 'success');
-                    await renderCoalition();
-                    await initLeadership();
-                } catch { showToast('Failed to save coalition', 'error'); }
-                finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
-            };
         }
 
-        await renderCoalition();
+        await loadSides();
+        renderHTML();
+
+        saveBtn.onclick = async () => {
+            const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
+            saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+            try {
+                const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                    body: JSON.stringify({ ruling_ids: checked })
+                });
+                if (!res.ok) throw new Error('Failed');
+                // Update local sides immediately so re-render uses correct state
+                const checkedNames = checked.map(id => idToName[id] || id);
+                parties.forEach(p => sides[p] = checkedNames.includes(p) ? 'ruling' : 'opposition');
+                renderHTML();
+                showToast('Coalition saved', 'success');
+                initLeadership();
+            } catch { showToast('Failed to save coalition', 'error'); }
+            finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
+        };
     }
 
     async function initLeadership() {
@@ -269,8 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
         async function renderLeadership() {
             try {
                 const [leadership, allParties] = await Promise.all([
-                    fetch(`${API_BASE}/leadership`).then(r => r.json()),
-                    fetch(`${API_BASE}/parties`).then(r => r.json())
+                    fetch(`${API_BASE}/leadership?t=${Date.now()}`).then(r => r.json()),
+                    fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json())
                 ]);
 
                 const partyList = allParties.filter(p => p.type === 'party');
