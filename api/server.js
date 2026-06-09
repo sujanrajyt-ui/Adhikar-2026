@@ -245,7 +245,58 @@ app.post('/api/webhook/uropay', async (req, res) => {
   res.status(200).send("OK");
 });
 
-/* ============ Parties & Committees APIs ============ */
+/* ============ Parties, Committees & Constituencies ============ */
+
+const CONSTITUENCIES = [
+  'Agra', 'Ahmedabad East', 'Ahmedabad West', 'Ajmer', 'Alappuzha',
+  'Aligarh', 'Amethi', 'Amravati', 'Amritsar', 'Anand',
+  'Anantapur', 'Araria', 'Arrah', 'Asansol', 'Aurangabad',
+  'Azamgarh', 'Badaun', 'Bagalkot', 'Bahraich', 'Ballia',
+  'Banda', 'Bangalore Central', 'Bangalore North', 'Bangalore Rural',
+  'Bangalore South', 'Bankura', 'Barabanki', 'Baramati', 'Barasat',
+  'Barmer', 'Basti', 'Bathinda', 'Begusarai', 'Belgaum',
+  'Bellary', 'Berhampur', 'Bhagalpur', 'Bharatpur', 'Bharuch',
+  'Bhavnagar', 'Bhilwara', 'Bhopal', 'Bhubaneswar', 'Bidar',
+  'Bijapur', 'Bikaner', 'Bilaspur', 'Bulandshahr', 'Calicut',
+  'Chalakudy', 'Chamarajanagar', 'Chandigarh', 'Chandni Chowk',
+  'Chennai Central', 'Chennai North', 'Chennai South', 'Chhindwara',
+  'Chikkballapur', 'Chitradurga', 'Chittoor', 'Cuddalore',
+  'Dakshina Kannada', 'Darbhanga', 'Darjeeling', 'Dausa',
+  'Dehradun', 'Dhanbad', 'Dharwad', 'Dibrugarh', 'Dindigul',
+  'Dumka', 'Durg', 'Eluru', 'Ernakulam', 'Faridabad',
+  'Fatehpur Sikri', 'Firozpur', 'Gandhinagar', 'Gaya', 'Ghaziabad',
+  'Ghazipur', 'Gonda', 'Gorakhpur', 'Gulbarga', 'Guntur',
+  'Gurdaspur', 'Guwahati', 'Gwalior', 'Hajipur', 'Haridwar',
+  'Hassan', 'Haveri', 'Hazaribagh', 'Hisar', 'Hoshiarpur',
+  'Hyderabad', 'Idukki', 'Indore', 'Jabalpur', 'Jadavpur',
+  'Jaipur', 'Jaipur Rural', 'Jalandhar', 'Jalgaon', 'Jammu',
+  'Jamnagar', 'Jamshedpur', 'Jaunpur', 'Jhansi', 'Jodhpur',
+  'Junagadh', 'Kairana', 'Kakinada', 'Kalahandi', 'Kannur',
+  'Kanpur', 'Kanyakumari', 'Karnal', 'Karur', 'Katihar',
+  'Kendrapara', 'Khajuraho', 'Khandwa', 'Kheda', 'Kolkata Dakshin',
+  'Kolkata Uttar', 'Kollam', 'Koppal', 'Kota', 'Kottayam',
+  'Kozhikode', 'Kurnool', 'Kurukshetra', 'Latur', 'Lucknow',
+  'Ludhiana', 'Machilipatnam', 'Madurai', 'Mahabubnagar', 'Mainpuri',
+  'Malappuram', 'Mathura', 'Meerut', 'Mirzapur', 'Mumbai North',
+  'Mumbai North Central', 'Mumbai North East', 'Mumbai North West',
+  'Mumbai South', 'Mumbai South Central', 'Muzaffarpur', 'Mysore',
+  'Nagpur', 'Nalgonda', 'Nanded', 'Nashik', 'Navsari',
+  'Nellore', 'New Delhi', 'Nizamabad', 'North Goa',
+  'North West Delhi', 'Ongole', 'Palakkad', 'Patiala',
+  'Patna Sahib', 'Peddapalle', 'Perambalur', 'Phulpur', 'Pilibhit',
+  'Pondicherry', 'Porbandar', 'Pratapgarh', 'Pune', 'Puri',
+  'Purnia', 'Raebareli', 'Raichur', 'Raipur', 'Rajahmundry',
+  'Rajkot', 'Rampur', 'Ranchi', 'Ratlam', 'Ratnagiri', 'Rewa',
+  'Rohtak', 'Sagar', 'Saharanpur', 'Salem', 'Sambalpur',
+  'Sangli', 'Sangrur', 'Saran', 'Satara', 'Satna',
+  'Secunderabad', 'Shillong', 'Shimla', 'Shimoga', 'Silchar',
+  'Siliguri', 'Sitapur', 'Solapur', 'Sonipat', 'Srikakulam',
+  'Srinagar', 'Sultanpur', 'Surat', 'Thane', 'Thanjavur',
+  'Thiruvananthapuram', 'Thoothukudi', 'Thrissur', 'Tiruchirappalli',
+  'Tirunelveli', 'Tirupati', 'Tumkur', 'Udaipur', 'Udhampur',
+  'Ujjain', 'Vadodara', 'Vaishali', 'Varanasi', 'Vellore',
+  'Vidisha', 'Vijayawada', 'Visakhapatnam', 'Warangal', 'Wayanad'
+];
 
 // Public: get all parties & committees
 app.get('/api/parties', async (req, res) => {
@@ -254,6 +305,11 @@ app.get('/api/parties', async (req, res) => {
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
+});
+
+// Public: get all constituencies
+app.get('/api/constituencies', (req, res) => {
+  res.json(CONSTITUENCIES);
 });
 
 // Admin: add a party or committee
