@@ -297,6 +297,21 @@ app.patch('/api/admin/parties/:id', async (req, res) => {
   }
 });
 
+// Admin: set ruling coalition (which parties form govt, rest become opposition)
+app.post('/api/admin/parties/coalition', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { ruling_ids } = req.body;
+  if (!Array.isArray(ruling_ids)) return res.status(400).json({ detail: 'ruling_ids array required' });
+  try {
+    await db.setCoalition(ruling_ids);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 /* ============ Admin Secretariat APIs (Protected) ============ */
 
 // Admin login

@@ -471,6 +471,23 @@ module.exports = {
     }
   },
 
+  async setCoalition(rulingIds) {
+    if (isPg) {
+      await pool.query("UPDATE parties SET side = 'opposition' WHERE type = 'party'");
+      if (rulingIds.length > 0) {
+        const placeholders = rulingIds.map((_, i) => `$${i + 1}`).join(',');
+        await pool.query(`UPDATE parties SET side = 'ruling' WHERE id IN (${placeholders})`, rulingIds);
+      }
+    } else {
+      const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      list.forEach(p => {
+        if (p.type === 'party') p.side = rulingIds.includes(p.id) ? 'ruling' : 'opposition';
+      });
+      fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return { success: true };
+  },
+
   async renameParty(id, newName) {
     if (isPg) {
       const oldRes = await pool.query('SELECT name FROM parties WHERE id = $1', [id]);

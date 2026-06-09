@@ -4288,6 +4288,45 @@ body:hover #cursor-spotlight {
   align-items: center;
 }
 
+.coalition-section {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.coalition-title {
+  margin: 0 0 0.2rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.6);
+}
+.coalition-desc {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  color: rgba(255,255,255,0.3);
+}
+.coalition-parties {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.coalition-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.03);
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.coalition-label:hover {
+  background: rgba(255,255,255,0.06);
+}
+.coalition-label input[type="checkbox"] {
+  accent-color: var(--gold, #d4af37);
+}
+
 
 .party-admin-actions {
   display: flex;

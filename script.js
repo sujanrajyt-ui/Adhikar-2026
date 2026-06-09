@@ -175,6 +175,7 @@ function initPartiesAdmin() {
     try {
       const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
       if (!all.length) { listEl.innerHTML = '<p style="opacity:.5;font-size:.85rem;">No entries yet.</p>'; return; }
+      renderCoalition(all);
       listEl.innerHTML = all.map(p => `
         <div class="party-admin-row">
           <span class="party-admin-label">
@@ -241,6 +242,37 @@ function initPartiesAdmin() {
   });
 
   loadList();
+}
+
+function renderCoalition(all) {
+  const container = document.getElementById('coalition-parties');
+  const saveBtn = document.getElementById('coalition-save-btn');
+  if (!container) return;
+  const partyList = all.filter(p => p.type === 'party');
+  if (!partyList.length) { container.innerHTML = '<p style="opacity:.5;font-size:.8rem;">Add parties first.</p>'; return; }
+  container.innerHTML = partyList.map(p => `
+    <label class="coalition-label">
+      <input type="checkbox" class="coalition-cb" value="${p.id}" ${p.side === 'ruling' ? 'checked' : ''} />
+      <span>${escapeHtml(p.name)}</span>
+      <span class="coalition-side" style="opacity:0.5;font-size:0.75rem;">${p.side || '—'}</span>
+    </label>
+  `).join('');
+
+  saveBtn.onclick = async () => {
+    const checked = [...container.querySelectorAll('.coalition-cb:checked')].map(cb => cb.value);
+    saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+    try {
+      const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+        body: JSON.stringify({ ruling_ids: checked })
+      });
+      if (!res.ok) throw new Error('Failed');
+      await loadList();
+      showToast(`Government: ${partyList.filter(p => checked.includes(p.id)).map(p => p.name).join(' + ')} | Opposition: ${partyList.filter(p => !checked.includes(p.id)).map(p => p.name).join(' + ')}`, 'success');
+    } catch { showToast('Failed to save coalition', 'error'); }
+    finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
+  };
 }
 
 /* ============ Countdown ============ */
