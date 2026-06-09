@@ -362,22 +362,103 @@ body {
     flex-direction: column;
     gap: 4px;
 }
-.coalition-parties label {
+.coalition-blocks {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.coalition-block {
+    border-radius: 8px;
+    overflow: hidden;
+}
+.coalition-block-head {
+    padding: 5px 10px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.coalition-gov .coalition-block-head {
+    background: rgba(46,204,113,0.12);
+    color: #2ecc71;
+    border-left: 3px solid #2ecc71;
+}
+.coalition-opp .coalition-block-head {
+    background: rgba(231,76,60,0.12);
+    color: #e74c3c;
+    border-left: 3px solid #e74c3c;
+}
+.coalition-count {
+    font-weight: 400;
+    opacity: 0.6;
+    font-size: 0.65rem;
+}
+.coalition-block-body {
+    background: rgba(255,255,255,0.02);
+    padding: 4px;
+    min-height: 32px;
+}
+.coalition-empty {
+    padding: 6px 8px;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.2);
+    font-style: italic;
+    text-align: center;
+}
+.coalition-chip {
     display: flex;
     align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
+    justify-content: space-between;
+    gap: 6px;
+    padding: 5px 10px;
+    margin: 3px 2px;
     border-radius: 6px;
-    background: rgba(255,255,255,0.03);
-    font-size: 0.82rem;
+    font-size: 0.8rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.15s;
+    user-select: none;
 }
-.coalition-parties label:hover {
-    background: rgba(255,255,255,0.06);
+.coalition-chip-gov {
+    background: rgba(46,204,113,0.08);
+    color: #2ecc71;
+    border: 1px solid rgba(46,204,113,0.15);
 }
-.coalition-parties label input[type="checkbox"] {
-    accent-color: var(--gold, #d4af37);
+.coalition-chip-gov:hover {
+    background: rgba(46,204,113,0.18);
+    border-color: rgba(46,204,113,0.3);
+}
+.coalition-chip-opp {
+    background: rgba(231,76,60,0.08);
+    color: #e74c3c;
+    border: 1px solid rgba(231,76,60,0.15);
+}
+.coalition-chip-opp:hover {
+    background: rgba(231,76,60,0.18);
+    border-color: rgba(231,76,60,0.3);
+}
+.chip-count {
+    font-weight: 400;
+    opacity: 0.5;
+    font-size: 0.7rem;
+}
+.chip-toggle {
+    font-size: 0.62rem;
+    opacity: 0.5;
+    font-weight: 400;
+}
+.coalition-chip:hover .chip-toggle {
+    opacity: 1;
+}
+.coalition-magic {
+    margin-top: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    background: rgba(255,255,255,0.03);
 }
 .leadership-grid {
     display: grid;

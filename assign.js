@@ -183,23 +183,20 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    async function initCoalition() {
+        async function initCoalition() {
         const container = document.getElementById('coalition-parties');
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
         const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
-        const idToName = { 'party_a': 'Party A', 'party_b': 'Party B', 'party_c': 'Party C', 'party_d': 'Party D', 'party_e': 'Party E' };
-        let sides = {};
+        let rulingSet = new Set();
 
         async function loadSides() {
             try {
-                const all = await fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json());
+                const all = await fetch(${API_BASE}/parties?t=).then(r => r.json());
                 const partyList = all.filter(p => p.type === 'party');
-                const s = {};
-                partyList.forEach(p => s[p.name] = p.side || '');
-                sides = s;
-            } catch { sides = {}; }
+                rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
+            } catch { rulingSet = new Set(); }
         }
 
         function renderHTML() {
@@ -207,59 +204,70 @@ document.addEventListener('DOMContentLoaded', () => {
             parties.forEach(p => counts[p] = 0);
             delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
 
-            const ruling = parties.filter(p => sides[p] === 'ruling');
-            const opposition = parties.filter(p => sides[p] !== 'ruling');
+            const ruling = parties.filter(p => rulingSet.has(p));
+            const opposition = parties.filter(p => !rulingSet.has(p));
             const totalRuling = ruling.reduce((s, p) => s + counts[p], 0);
             const totalOpp = opposition.reduce((s, p) => s + counts[p], 0);
-
-            let html = '<div style="padding:4px 8px;margin-bottom:4px;border-left:3px solid #2ecc71;border-radius:0 6px 6px 0;"><strong style="color:#2ecc71;font-size:0.78rem;">GOVERNMENT</strong> <span style="font-size:0.7rem;opacity:0.5;">(' + totalRuling + ' delegates)</span></div>';
-            html += ruling.map(p => {
-                const id = nameToId[p] || p;
-                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" checked /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
-            }).join('');
-            html += '<div style="padding:4px 8px;margin:8px 0 4px;border-left:3px solid #e74c3c;border-radius:0 6px 6px 0;"><strong style="color:#e74c3c;font-size:0.78rem;">OPPOSITION</strong> <span style="font-size:0.7rem;opacity:0.5;">(' + totalOpp + ' delegates)</span></div>';
-            html += opposition.map(p => {
-                const id = nameToId[p] || p;
-                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
-            }).join('');
-
             const total = Object.values(counts).reduce((s, c) => s + c, 0);
             const magic = Math.floor(total / 2) + 1;
+
+            let html = '<div class="coalition-blocks">';
+            html += '<div class="coalition-block coalition-gov">';
+            html += '<div class="coalition-block-head">GOVERNMENT <span class="coalition-count">' + totalRuling + ' delegates</span></div>';
+            html += '<div class="coalition-block-body">';
+            if (!ruling.length) html += '<div class="coalition-empty">Click a party below to add</div>';
+            ruling.forEach(p => {
+                html += '<div class="coalition-chip coalition-chip-gov" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">? Opp</span></div>';
+            });
+            html += '</div></div>';
+            html += '<div class="coalition-block coalition-opp">';
+            html += '<div class="coalition-block-head">OPPOSITION <span class="coalition-count">' + totalOpp + ' delegates</span></div>';
+            html += '<div class="coalition-block-body">';
+            if (!opposition.length) html += '<div class="coalition-empty">No opposition parties</div>';
+            opposition.forEach(p => {
+                html += '<div class="coalition-chip coalition-chip-opp" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">? Gov</span></div>';
+            });
+            html += '</div></div>';
+            html += '</div>';
+
             const meetsMajority = totalRuling >= magic;
-            html += '<div style="margin-top:8px;padding:6px 8px;border-radius:6px;font-size:0.72rem;background:rgba(255,255,255,0.03);">';
-            html += '<span style="opacity:0.6;">Majority needed: </span><strong>' + magic + '</strong>';
-            html += ' &middot; <span style="opacity:0.6;">Govt: </span><strong style="color:' + (meetsMajority ? '#2ecc71' : '#e74c3c') + ';">' + totalRuling + '</strong>';
+            html += '<div class="coalition-magic">';
+            html += 'Majority needed: <strong>' + magic + '</strong> &middot; Govt: <strong style="color:' + (meetsMajority ? '#2ecc71' : '#e74c3c') + ';">' + totalRuling + '</strong>';
             if (!meetsMajority) html += ' <span style="color:#e74c3c;">(needs ' + (magic - totalRuling) + ' more)</span>';
             html += '</div>';
 
             container.innerHTML = html;
+
+            container.querySelectorAll('.coalition-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const party = chip.dataset.party;
+                    if (rulingSet.has(party)) rulingSet.delete(party);
+                    else rulingSet.add(party);
+                    renderHTML();
+                });
+            });
         }
 
         await loadSides();
         renderHTML();
 
         saveBtn.onclick = async () => {
-            const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
+            const rulingIds = parties.filter(p => rulingSet.has(p)).map(p => nameToId[p] || p);
             saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
             try {
-                const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
+                const res = await fetch(${API_BASE}/admin/parties/coalition, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-                    body: JSON.stringify({ ruling_ids: checked })
+                    body: JSON.stringify({ ruling_ids: rulingIds })
                 });
                 if (!res.ok) throw new Error('Failed');
-                // Update local sides immediately so re-render uses correct state
-                const checkedNames = checked.map(id => idToName[id] || id);
-                parties.forEach(p => sides[p] = checkedNames.includes(p) ? 'ruling' : 'opposition');
-                renderHTML();
                 showToast('Coalition saved', 'success');
                 initLeadership();
             } catch { showToast('Failed to save coalition', 'error'); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
         };
     }
-
-    async function initLeadership() {
+async function initLeadership() {
         const grid = document.getElementById('leadership-grid');
         const saveBtn = document.getElementById('leadership-save-btn');
         if (!grid) return;
