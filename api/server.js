@@ -312,6 +312,23 @@ app.get('/api/constituencies', (req, res) => {
   res.json(CONSTITUENCIES);
 });
 
+// Public: get verified delegates with their assignments
+app.get('/api/delegates', async (req, res) => {
+  try {
+    const all = await db.getAll();
+    const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
+    res.json(verified.map(d => ({
+      id: d.id,
+      name: d.name,
+      assigned_party: d.assigned_party || '',
+      assigned_constituency: d.assigned_constituency || '',
+      assigned_committee: d.assigned_committee || ''
+    })));
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // Admin: add a party or committee
 app.post('/api/admin/parties', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
