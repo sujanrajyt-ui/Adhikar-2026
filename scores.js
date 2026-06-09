@@ -133,7 +133,7 @@ function renderSessionTabs() {
     sessionTabs.innerHTML = allSessions.map((s, i) => {
         const status = sessionStatus[s.id] || 'unlocked';
         const isActive = s.id === currentSession;
-        const isRC = s.id === 'RC';
+        const isRC = s.id === 'RC' || s.id === 'RC2';
         const icon = status === 'completed'
             ? `<svg class="tab-icon completed" viewBox="0 0 24 24" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>`
             : isRC
@@ -208,12 +208,28 @@ function renderCoalition() {
         `;
     };
 
+    const govPct = total > 0 ? (totalRuling / total * 100) : 0;
+    const oppPct = total > 0 ? (totalOpp / total * 100) : 0;
+    const neuPct = total > 0 ? (totalNeutral / total * 100) : 0;
+
     coalitionInfo.innerHTML = `
+        <div class="coal-bar-wrap">
+            <div class="coal-bar">
+                ${totalRuling > 0 ? `<div class="coal-bar-seg coal-bar-gov" style="width:${govPct}%"></div>` : ''}
+                ${totalOpp > 0 ? `<div class="coal-bar-seg coal-bar-opp" style="width:${oppPct}%"></div>` : ''}
+                ${totalNeutral > 0 ? `<div class="coal-bar-seg coal-bar-neutral" style="width:${neuPct}%"></div>` : ''}
+            </div>
+            <div class="coal-bar-labels">
+                ${totalRuling > 0 ? `<span class="coal-bar-label coal-label-gov">${totalRuling}</span>` : ''}
+                ${totalOpp > 0 ? `<span class="coal-bar-label coal-label-opp">${totalOpp}</span>` : ''}
+                ${totalNeutral > 0 ? `<span class="coal-bar-label coal-label-neutral">${totalNeutral}</span>` : ''}
+            </div>
+        </div>
         ${ruling.length > 0 ? `
             <div class="coal-block">
                 <div class="coal-block-head coal-head-gov">
                     <span class="coal-label">GOVERNMENT</span>
-                    <span class="coal-total">${totalRuling}</span>
+                    <span class="coal-total">${totalRuling} <small>${Math.round(govPct)}%</small></span>
                 </div>
                 <div class="coal-block-body">${ruling.map(p => partyRow(p, 'ruling')).join('')}</div>
             </div>
@@ -222,7 +238,7 @@ function renderCoalition() {
             <div class="coal-block">
                 <div class="coal-block-head coal-head-opp">
                     <span class="coal-label">OPPOSITION</span>
-                    <span class="coal-total">${totalOpp}</span>
+                    <span class="coal-total">${totalOpp} <small>${Math.round(oppPct)}%</small></span>
                 </div>
                 <div class="coal-block-body">${opposition.map(p => partyRow(p, 'opposition')).join('')}</div>
             </div>
@@ -231,7 +247,7 @@ function renderCoalition() {
             <div class="coal-block">
                 <div class="coal-block-head coal-head-neutral">
                     <span class="coal-label">CROSS BENCH</span>
-                    <span class="coal-total">${totalNeutral}</span>
+                    <span class="coal-total">${totalNeutral} <small>${Math.round(neuPct)}%</small></span>
                 </div>
                 <div class="coal-block-body">${neutral.map(p => partyRow(p, 'neutral')).join('')}</div>
             </div>
@@ -277,12 +293,13 @@ function renderCriteria() {
 function renderDelegates() {
     if (!delegateList) return;
     // Hide criteria sidebar in Roll Call mode
+    const isRollCall = currentSession === 'RC' || currentSession === 'RC2';
     const criteriaCard = document.querySelector('.criteria-card');
     const statsCard = document.querySelector('.stats-card');
-    if (criteriaCard) criteriaCard.style.display = currentSession === 'RC' ? 'none' : 'block';
-    if (statsCard) statsCard.style.display = currentSession === 'RC' ? 'none' : 'block';
+    if (criteriaCard) criteriaCard.style.display = isRollCall ? 'none' : 'block';
+    if (statsCard) statsCard.style.display = isRollCall ? 'none' : 'block';
     // Roll Call mode
-    if (currentSession === 'RC') {
+    if (isRollCall) {
         renderAttendance();
         return;
     }
@@ -721,8 +738,8 @@ async function flushAttendance() {
         if (!res.ok) throw new Error('Failed to save attendance');
 
         // Mark session as completed
-        if (sessionStatus['RC'] !== 'completed') {
-            sessionStatus['RC'] = 'completed';
+        if (sessionStatus[currentSession] !== 'completed') {
+            sessionStatus[currentSession] = 'completed';
             renderSessionTabs();
         }
     } catch (err) {
@@ -747,7 +764,7 @@ function markAllAttendance(present) {
 
 // Keyboard shortcuts for attendance
 document.addEventListener('keydown', (e) => {
-    if (currentSession !== 'RC' || !delegateList || delegateList.querySelector('.attn-list') === null) return;
+    if (!(currentSession === 'RC' || currentSession === 'RC2') || !delegateList || delegateList.querySelector('.attn-list') === null) return;
     if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         markAllAttendance(true);

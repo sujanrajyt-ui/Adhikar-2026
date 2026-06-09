@@ -664,9 +664,11 @@ app.get('/api/sessions', async (req, res) => {
     const required = [
       { id: 'RC', name: 'Roll Call (RC)' },
       { id: 'QH', name: 'Question Hour (QH)' },
-      { id: 'ZH', name: 'Zero Hour (ZH)' },
+      { id: 'ZH', name: 'Zero Hour 1 (ZH)' },
       { id: 'MR', name: 'Ministry Reports (MR)' },
       { id: 'SS', name: 'Surprise Session (SS)' },
+      { id: 'RC2', name: 'Roll Call Day 2 (RC2)' },
+      { id: 'ZH2', name: 'Zero Hour 2 (ZH2)' },
       { id: 'BP', name: 'Bill Presentations (BP)' },
       { id: 'FSH', name: 'Final Sitting of the House (FSH)' }
     ];

@@ -11,7 +11,7 @@
   },
   {
     "id": "ZH",
-    "name": "Zero Hour (ZH)",
+    "name": "Zero Hour 1 (ZH)",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
@@ -23,6 +23,16 @@
     "id": "SS",
     "name": "Surprise Session (SS)",
     "created_at": "2026-06-09T06:09:40.613Z"
+  },
+  {
+    "id": "RC2",
+    "name": "Roll Call Day 2 (RC2)",
+    "created_at": "2026-06-10T06:09:40.613Z"
+  },
+  {
+    "id": "ZH2",
+    "name": "Zero Hour 2 (ZH2)",
+    "created_at": "2026-06-10T06:09:40.613Z"
   },
   {
     "id": "BP",
