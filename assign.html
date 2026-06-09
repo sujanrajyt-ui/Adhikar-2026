@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Constituency Assignment | ADHIKAR'26</title>
+    <title>Delegate Assignment | ADHIKAR'26</title>
     <link rel="icon" type="image/x-icon" href="assets/logo.png">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="assign.css">
@@ -41,8 +41,8 @@
             <div class="login-card">
                 <div class="login-head">
                     <p class="kicker kicker-gold">Admin Authentication</p>
-                    <h2>Constituency Assignment</h2>
-                    <p class="login-sub">Enter the admin password to assign constituencies to delegates.</p>
+                    <h2>Delegate Assignment</h2>
+                    <p class="login-sub">Enter the admin password to assign constituency, party & committee to delegates.</p>
                 </div>
                 <form id="login-form" class="login-form">
                     <div class="field">
@@ -58,8 +58,8 @@
         <section id="assign-panel" class="hidden">
             <div class="assign-panel-header">
                 <div>
-                    <h1 class="assign-panel-title">Constituency Assignment</h1>
-                    <small>Randomly assign Indian parliamentary constituencies to verified delegates</small>
+                    <h1 class="assign-panel-title">Delegate Assignment</h1>
+                    <small>Auto-assign constituency, party & committee to verified delegates</small>
                 </div>
             </div>
 
@@ -74,6 +74,12 @@
                     <button id="assign-unassigned-btn" class="btn-assign-all" title="Assign only unassigned delegates">Assign Unassigned</button>
                     <button id="assign-all-btn" class="btn-assign-all" title="Assign all delegates (overwrites existing)">Assign All</button>
                     <button id="reassign-all-btn" class="btn-assign-all" style="color:#e74c3c;border-color:rgba(231,76,60,0.2);background:rgba(231,76,60,0.08);" title="Reassign all delegates with new constituencies">Reassign All</button>
+                    <select id="filter-party" class="filter-select">
+                        <option value="all">All Parties</option>
+                    </select>
+                    <select id="filter-committee" class="filter-select">
+                        <option value="all">All Committees</option>
+                    </select>
                     <select id="filter-status" class="filter-select">
                         <option value="all">All</option>
                         <option value="assigned">Assigned</option>
@@ -94,6 +100,8 @@
         let adminPassword = '';
         let delegates = [];
         let constituencies = [];
+        let parties = [];
+        let committees = [];
 
         function adminHeaders() {
             return { 'x-admin-password': adminPassword };

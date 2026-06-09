@@ -202,6 +202,20 @@ body {
     color: rgba(255,255,255,0.3);
 }
 
+.meta-pill.party-pill {
+    border-color: rgba(52,152,219,0.3);
+    background: rgba(52,152,219,0.08);
+    color: #5dade2;
+    font-weight: 600;
+}
+
+.meta-pill.committee-pill {
+    border-color: rgba(155,89,182,0.3);
+    background: rgba(155,89,182,0.08);
+    color: #bb8fce;
+    font-weight: 600;
+}
+
 .card-action {
     flex-shrink: 0;
     display: flex; flex-direction: column;

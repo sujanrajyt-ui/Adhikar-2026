@@ -1,23 +1,79 @@
 [
     {
-        "id": "party_inc",
-        "name": "Indian National Congress",
+        "id": "party_a",
+        "name": "Party A",
         "type": "party",
         "side": "ruling",
-        "created_at": "2026-06-07T02:00:00.000Z"
+        "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "party_bjp",
-        "name": "Bharatiya Janata Party",
+        "id": "party_b",
+        "name": "Party B",
         "type": "party",
         "side": "opposition",
-        "created_at": "2026-06-07T02:00:00.000Z"
+        "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "party_ind",
-        "name": "Independent",
-        "type": "neutral",
+        "id": "party_c",
+        "name": "Party C",
+        "type": "party",
         "side": "neutral",
-        "created_at": "2026-06-07T02:00:00.000Z"
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "party_d",
+        "name": "Party D",
+        "type": "party",
+        "side": "neutral",
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "party_e",
+        "name": "Party E",
+        "type": "party",
+        "side": "neutral",
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_education",
+        "name": "EDUCATION",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_finance",
+        "name": "FINANCE",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_home_affairs",
+        "name": "HOME AFFAIRS",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_technology",
+        "name": "TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_external",
+        "name": "EXTERNAL AFFAIRS",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
+    },
+    {
+        "id": "com_social_justice",
+        "name": "SOCIAL JUSTICE & EMPOWERMENT",
+        "type": "committee",
+        "side": null,
+        "created_at": "2026-06-09T00:00:00.000Z"
     }
 ]

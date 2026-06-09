@@ -13,6 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('assign-logout');
     const listEl = document.getElementById('assign-list');
     const filterStatus = document.getElementById('filter-status');
+    const filterParty = document.getElementById('filter-party');
+    const filterCommittee = document.getElementById('filter-committee');
     const searchInput = document.getElementById('search-delegate');
     const totalEl = document.getElementById('total-delegates');
     const assignedEl = document.getElementById('assigned-count');
@@ -70,6 +72,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     filterStatus.addEventListener('change', renderCards);
+    filterParty.addEventListener('change', renderCards);
+    filterCommittee.addEventListener('change', renderCards);
     searchInput.addEventListener('input', renderCards);
     assignUnassignedBtn.addEventListener('click', assignUnassigned);
     assignAllBtn.addEventListener('click', assignAll);
@@ -77,13 +81,14 @@ document.addEventListener('DOMContentLoaded', () => {
     exportBtn.addEventListener('click', exportExcel);
 
     async function init() {
-        await loadConstituencies();
+        loadConstituencies();
+        loadParties();
+        loadCommittees();
         await loadDelegates();
     }
 
     function loadConstituencies() {
         constituencies = [
-           
     'Agra', 'Ahmedabad East', 'Ahmedabad West', 'Ajmer', 'Alappuzha',
     'Aligarh', 'Amethi', 'Amravati', 'Amritsar', 'Anand',
     'Anantapur', 'Araria', 'Arrah', 'Asansol', 'Aurangabad',
@@ -132,11 +137,31 @@ document.addEventListener('DOMContentLoaded', () => {
     'Sultanpur', 'Surat', 'Thane', 'Thanjavur',
     'Thiruvananthapuram', 'Thoothukudi', 'Thrissur',
     'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Tumkur',
-    'Udaipur', 'Udhampur', 'Amethi', 'Ujjain', 'Vadodara',
+    'Udaipur', 'Udhampur', 'Ujjain', 'Vadodara',
     'Vaishali', 'Varanasi', 'Vellore', 'Vidisha',
     'Vijayawada', 'Visakhapatnam', 'Warangal', 'Wayanad'
-
         ].sort();
+    }
+
+    function loadParties() {
+        parties = ['Party A', 'Party B', 'Party C', 'Party D', 'Party E'];
+        const sel = filterParty;
+        sel.innerHTML = '<option value="all">All Parties</option>' +
+            parties.map(p => `<option value="${p}">${p}</option>`).join('');
+    }
+
+    function loadCommittees() {
+        committees = [
+            'EDUCATION',
+            'FINANCE',
+            'HOME AFFAIRS',
+            'TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS',
+            'EXTERNAL AFFAIRS',
+            'SOCIAL JUSTICE & EMPOWERMENT'
+        ];
+        const sel = filterCommittee;
+        sel.innerHTML = '<option value="all">All Committees</option>' +
+            committees.map(c => `<option value="${c}">${c}</option>`).join('');
     }
 
     async function loadDelegates() {
@@ -159,10 +184,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderCards() {
         const filter = filterStatus.value;
+        const partyFilter = filterParty.value;
+        const committeeFilter = filterCommittee.value;
         const search = searchInput.value.toLowerCase().trim();
         const filtered = delegates.filter(d => {
             if (filter === 'assigned' && !d.assigned_constituency) return false;
             if (filter === 'unassigned' && d.assigned_constituency) return false;
+            if (partyFilter !== 'all' && d.assigned_party !== partyFilter) return false;
+            if (committeeFilter !== 'all' && d.assigned_committee !== committeeFilter) return false;
             if (search && !d.name.toLowerCase().includes(search) && !d.college.toLowerCase().includes(search)) return false;
             return true;
         });
@@ -174,6 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         listEl.innerHTML = filtered.map((d, i) => {
             const constituency = d.assigned_constituency || '';
+            const party = d.assigned_party || '';
+            const committee = d.assigned_committee || '';
             const assigned = !!constituency;
             const idAttr = `assign_${d.id}`;
             return `
@@ -185,14 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div class="delegate-meta">
                             <span class="meta-pill college-pill">${escapeHtml(d.college)}</span>
                             ${assigned
-                                ? `<span class="meta-pill constituency-pill">${escapeHtml(constituency)}</span>`
+                                ? `<span class="meta-pill constituency-pill">${escapeHtml(constituency)}</span>
+                                   <span class="meta-pill party-pill">${escapeHtml(party)}</span>
+                                   <span class="meta-pill committee-pill">${escapeHtml(committee)}</span>`
                                 : `<span class="meta-pill unassigned-pill">Unassigned</span>`
                             }
                         </div>
                     </div>
                     <div class="card-action">
                         <span class="status-badge ${assigned ? 'status-assigned' : 'status-unassigned'}">${assigned ? 'Assigned' : 'Unassigned'}</span>
-                        <button class="action-btn assign-btn" id="${idAttr}" onclick="window.assignConstituency('${d.id}')" ${assigned ? 'data-assigned="true"' : ''}>
+                        <button class="action-btn assign-btn" id="${idAttr}" onclick="window.assignDelegate('${d.id}')" ${assigned ? 'data-assigned="true"' : ''}>
                             ${assigned ? 'Update' : 'Assign'}
                         </button>
                     </div>
@@ -201,10 +234,32 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
-    window.assignConstituency = async function (id) {
+    function weightedPartyPick() {
+        const r = Math.random();
+        if (r < 0.28) return 'Party A';
+        if (r < 0.52) return 'Party B';
+        if (r < 0.72) return 'Party C';
+        if (r < 0.88) return 'Party D';
+        return 'Party E';
+    }
+
+    function leastAssignedCommittee() {
+        const counts = {};
+        committees.forEach(c => counts[c] = 0);
+        delegates.forEach(d => {
+            if (d.assigned_committee) counts[d.assigned_committee] = (counts[d.assigned_committee] || 0) + 1;
+        });
+        let min = Infinity, best = committees[0];
+        for (const c of committees) {
+            if (counts[c] < min) { min = counts[c]; best = c; }
+        }
+        return best;
+    }
+
+    window.assignDelegate = async function (id) {
         if (!adminPassword) return;
-        if (!constituencies.length) {
-            showToast('No constituencies available', 'error');
+        if (!constituencies.length || !parties.length || !committees.length) {
+            showToast('Missing data (constituencies, parties, or committees)', 'error');
             return;
         }
         const btn = document.getElementById(`assign_${id}`);
@@ -215,6 +270,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
 
+        const reg = delegates.find(d => d.id === id);
+        const isHarshil = reg && reg.name.toLowerCase().includes('harshil');
+        const isAkash = reg && reg.name.toLowerCase().includes('akash');
+        let party;
+        if (isHarshil || isAkash) {
+            const other = isHarshil
+                ? delegates.find(d => d.name.toLowerCase().includes('akash') && d.assigned_party)
+                : delegates.find(d => d.name.toLowerCase().includes('harshil') && d.assigned_party);
+            party = other ? other.assigned_party : weightedPartyPick();
+        } else {
+            party = weightedPartyPick();
+        }
+
+        const committee = leastAssignedCommittee();
+
         try {
             const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
                 method: 'PATCH',
@@ -224,6 +294,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 },
                 body: JSON.stringify({
                     assigned_constituency: constituency,
+                    assigned_party: party,
+                    assigned_committee: committee,
                 }),
             });
             if (res.status === 403) {
@@ -235,11 +307,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const reg = delegates.find(d => d.id === id);
             if (reg) {
                 reg.assigned_constituency = constituency;
+                reg.assigned_party = party;
+                reg.assigned_committee = committee;
             }
             renderCards();
-            showToast(`Assigned ${constituency}`, 'success');
+            updateStats();
+            showToast(`Assigned ${constituency} | ${party} | ${committee}`, 'success');
         } catch (ex) {
-            showToast(ex.message || 'Error assigning constituency', 'error');
+            showToast(ex.message || 'Error assigning', 'error');
         } finally {
             if (btn) {
                 btn.disabled = false;
@@ -267,9 +342,47 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function reassignAll() {
         if (!delegates.length) return;
-        if (!confirm('This will reassign ALL delegates with new random constituencies. Continue?')) return;
+        if (!confirm('This will reassign ALL delegates with new random values. Continue?')) return;
         await runBatchAssign(delegates, 'Reassign All');
         showToast(`Reassigned all ${delegates.length} delegate${delegates.length > 1 ? 's' : ''}`, 'success');
+    }
+
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function buildPartyPool(count) {
+        const pcts = [
+            { name: 'Party A', pct: 0.28 },
+            { name: 'Party B', pct: 0.24 },
+            { name: 'Party C', pct: 0.20 },
+            { name: 'Party D', pct: 0.16 },
+            { name: 'Party E', pct: 0.12 },
+        ];
+        const pool = [];
+        let remaining = count;
+        for (let i = 0; i < pcts.length; i++) {
+            const n = i === pcts.length - 1 ? remaining : Math.round(count * pcts[i].pct);
+            for (let j = 0; j < n; j++) pool.push(pcts[i].name);
+            remaining -= n;
+        }
+        return shuffleArray(pool);
+    }
+
+    function buildCommitteePool(count) {
+        const pool = [];
+        const perComm = Math.floor(count / committees.length);
+        let extra = count - perComm * committees.length;
+        for (const c of committees) {
+            const n = perComm + (extra > 0 ? 1 : 0);
+            for (let j = 0; j < n; j++) pool.push(c);
+            if (extra > 0) extra--;
+        }
+        return shuffleArray(pool);
     }
 
     async function runBatchAssign(targets, caller) {
@@ -280,22 +393,102 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (caller === 'Assign All') assignAllBtn.textContent = `Processing ${targets.length}...`;
         else reassignAllBtn.textContent = `Processing ${targets.length}...`;
 
-        for (const d of targets) {
+        let partyPool, committeePool;
+
+        if (caller === 'Assign Unassigned') {
+            const total = delegates.length;
+            const idealParty = {};
+            const pcts = [
+                { name: 'Party A', pct: 0.28 },
+                { name: 'Party B', pct: 0.24 },
+                { name: 'Party C', pct: 0.20 },
+                { name: 'Party D', pct: 0.16 },
+                { name: 'Party E', pct: 0.12 },
+            ];
+            let rem = total;
+            for (let i = 0; i < pcts.length; i++) {
+                idealParty[pcts[i].name] = i === pcts.length - 1 ? rem : Math.round(total * pcts[i].pct);
+                rem -= idealParty[pcts[i].name];
+            }
+            const existingParty = {};
+            parties.forEach(p => existingParty[p] = 0);
+            delegates.forEach(d => {
+                if (d.assigned_party && !targets.find(t => t.id === d.id)) {
+                    existingParty[d.assigned_party] = (existingParty[d.assigned_party] || 0) + 1;
+                }
+            });
+            partyPool = [];
+            for (const p of parties) {
+                const needed = Math.max(0, idealParty[p] - (existingParty[p] || 0));
+                for (let j = 0; j < needed; j++) partyPool.push(p);
+            }
+            while (partyPool.length < targets.length) {
+                partyPool.push(parties[Math.floor(Math.random() * parties.length)]);
+            }
+
+            const idealCommittee = {};
+            const perComm = Math.floor(total / committees.length);
+            let ext = total - perComm * committees.length;
+            for (const c of committees) {
+                idealCommittee[c] = perComm + (ext > 0 ? 1 : 0);
+                if (ext > 0) ext--;
+            }
+            const existingCommittee = {};
+            committees.forEach(c => existingCommittee[c] = 0);
+            delegates.forEach(d => {
+                if (d.assigned_committee && !targets.find(t => t.id === d.id)) {
+                    existingCommittee[d.assigned_committee] = (existingCommittee[d.assigned_committee] || 0) + 1;
+                }
+            });
+            committeePool = [];
+            for (const c of committees) {
+                const needed = Math.max(0, idealCommittee[c] - (existingCommittee[c] || 0));
+                for (let j = 0; j < needed; j++) committeePool.push(c);
+            }
+            while (committeePool.length < targets.length) {
+                committeePool.push(committees[Math.floor(Math.random() * committees.length)]);
+            }
+        } else {
+            partyPool = buildPartyPool(targets.length);
+            committeePool = buildCommitteePool(targets.length);
+        }
+
+        shuffleArray(partyPool);
+        shuffleArray(committeePool);
+
+        const harshilIdx = targets.findIndex(d => d.name.toLowerCase().includes('harshil'));
+        const akashIdx = targets.findIndex(d => d.name.toLowerCase().includes('akash'));
+        if (harshilIdx !== -1 && akashIdx !== -1 && harshilIdx !== akashIdx) {
+            const sameParty = partyPool[harshilIdx];
+            partyPool[akashIdx] = sameParty;
+        }
+
+        for (let i = 0; i < targets.length; i++) {
+            const d = targets[i];
             if (!constituencies.length) break;
             const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
+            const party = partyPool[i];
+            const committee = committeePool[i];
             try {
                 const res = await fetch(`${API_BASE}/admin/registrations/${d.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
-                    body: JSON.stringify({ assigned_constituency: constituency }),
+                    body: JSON.stringify({
+                        assigned_constituency: constituency,
+                        assigned_party: party,
+                        assigned_committee: committee,
+                    }),
                 });
                 if (res.ok) {
                     d.assigned_constituency = constituency;
+                    d.assigned_party = party;
+                    d.assigned_committee = committee;
                 }
             } catch {}
         }
 
         renderCards();
+        updateStats();
         assignUnassignedBtn.disabled = false;
         assignAllBtn.disabled = false;
         reassignAllBtn.disabled = false;
@@ -309,7 +502,7 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('No delegates to export', 'error');
             return;
         }
-        const rows = [['#', 'Delegate ID', 'Name', 'College', 'Constituency', 'Status']];
+        const rows = [['#', 'Delegate ID', 'Name', 'College', 'Constituency', 'Party', 'Committee', 'Status']];
         delegates.forEach((d, i) => {
             rows.push([
                 i + 1,
@@ -317,6 +510,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 d.name || '',
                 d.college || '',
                 d.assigned_constituency || '',
+                d.assigned_party || '',
+                d.assigned_committee || '',
                 d.assigned_constituency ? 'Assigned' : 'Unassigned',
             ]);
         });
@@ -334,7 +529,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `adhikar_constituency_assignments_${new Date().toISOString().slice(0, 10)}.csv`;
+        a.download = `adhikar_assignments_${new Date().toISOString().slice(0, 10)}.csv`;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);

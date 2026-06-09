@@ -1192,9 +1192,13 @@ ol {
   position: relative;
   border-radius: 24px;
   padding: 2rem;
-  background: var(--cream-100);
-  box-shadow: var(--shadow-3d);
-  border: 1px solid rgba(122, 28, 42, 0.1);
+  background:
+    radial-gradient(ellipse 160% 60% at 100% 0%, rgba(122, 28, 42, 0.04), transparent),
+    var(--cream-100);
+  box-shadow:
+    0 0 0 1px rgba(122, 28, 42, 0.06),
+    0 30px 60px -25px rgba(74, 16, 25, 0.35),
+    0 12px 24px -12px rgba(74, 16, 25, 0.2);
   overflow: hidden;
 }
 
@@ -1206,13 +1210,14 @@ ol {
 
 .sc-bloom {
   position: absolute;
-  top: -3rem;
-  right: -3rem;
-  width: 192px;
-  height: 192px;
+  top: -4rem;
+  right: -4rem;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
-  background: rgba(122, 28, 42, 0.08);
-  filter: blur(40px);
+  background: radial-gradient(circle, rgba(168, 136, 74, 0.1), rgba(122, 28, 42, 0.04) 60%, transparent);
+  filter: blur(50px);
+  pointer-events: none;
 }
 
 .sc-head {
@@ -1240,44 +1245,80 @@ ol {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: var(--shadow-press);
+  box-shadow:
+    0 0 0 1px rgba(122, 28, 42, 0.08),
+    0 12px 30px -12px rgba(74, 16, 25, 0.3);
 }
 
 .sc-list {
-  margin-top: 2rem;
+  margin-top: 1.75rem;
   display: flex;
   flex-direction: column;
 }
 
 .sc-list li {
-  display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  padding-bottom: 1rem;
-  border-bottom: 1px dashed rgba(122, 28, 42, 0.15);
-  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0 0.75rem;
+  align-items: baseline;
+  padding: 0.75rem 0.75rem;
+  margin: 0;
+  border-radius: 10px;
+  transition: background 0.2s ease;
 }
 
-.sc-list li:last-child {
-  border-bottom: 0;
-  padding-bottom: 0;
-  margin-bottom: 0;
+.sc-list li:hover {
+  background: rgba(122, 28, 42, 0.03);
+}
+
+.sc-list li:not(:last-child) {
+  border-bottom: 1px solid rgba(122, 28, 42, 0.06);
 }
 
 .sc-num {
   font-family: "Playfair Display", serif;
   font-weight: 700;
+  font-size: 0.8rem;
   color: var(--gold-600);
   font-variant-numeric: tabular-nums;
   width: 2rem;
-  flex-shrink: 0;
+  grid-row: span 2;
+  align-self: center;
+  line-height: 1;
+  opacity: 0.7;
 }
 
-.sc-list li>span:last-child {
-  font-size: 0.9375rem;
-  color: rgba(46, 8, 16, 0.85);
+.sc-time {
+  font-size: 0.725rem;
   font-weight: 500;
-  flex: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(99, 21, 35, 0.55);
+  grid-column: 2;
+  line-height: 1;
+}
+
+.sc-event {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgba(46, 8, 16, 0.9);
+  grid-column: 2;
+  line-height: 1.3;
+}
+
+.sc-list li[data-break="true"] .sc-event {
+  font-weight: 400;
+  color: rgba(99, 21, 35, 0.5);
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+.sc-list li[data-break="true"] .sc-time {
+  color: rgba(99, 21, 35, 0.35);
+}
+
+.sc-list li[data-break="true"]:hover {
+  background: transparent;
 }
 
 /* ============ Accordion ============ */
