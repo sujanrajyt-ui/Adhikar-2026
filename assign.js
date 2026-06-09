@@ -238,6 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
                     if (!res.ok) throw new Error('Failed');
                     showToast('Coalition saved', 'success');
+                    await renderCoalition();
+                    await initLeadership();
                 } catch { showToast('Failed to save coalition', 'error'); }
                 finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
             };
