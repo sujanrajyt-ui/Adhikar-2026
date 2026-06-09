@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         async function loadSides() {
             try {
-                const all = await fetch(${API_BASE}/parties?t=).then(r => r.json());
+                const all = await fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json());
                 const partyList = all.filter(p => p.type === 'party');
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
             } catch { rulingSet = new Set(); }
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '<div class="coalition-block-body">';
             if (!ruling.length) html += '<div class="coalition-empty">Click a party below to add</div>';
             ruling.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-gov" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">? Opp</span></div>';
+                html += '<div class="coalition-chip coalition-chip-gov" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">→ Opp</span></div>';
             });
             html += '</div></div>';
             html += '<div class="coalition-block coalition-opp">';
@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '<div class="coalition-block-body">';
             if (!opposition.length) html += '<div class="coalition-empty">No opposition parties</div>';
             opposition.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-opp" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">? Gov</span></div>';
+                html += '<div class="coalition-chip coalition-chip-opp" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">→ Gov</span></div>';
             });
             html += '</div></div>';
             html += '</div>';
