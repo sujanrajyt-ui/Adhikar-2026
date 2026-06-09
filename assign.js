@@ -200,11 +200,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 partyList.forEach(p => sides[p.name] = p.side || '');
             } catch {}
 
-            container.innerHTML = parties.map(p => {
+            const ruling = parties.filter(p => sides[p] === 'ruling');
+            const opposition = parties.filter(p => sides[p] !== 'ruling');
+            const totalRuling = ruling.reduce((s, p) => s + counts[p], 0);
+            const totalOpp = opposition.reduce((s, p) => s + counts[p], 0);
+
+            let html = '<div style="padding:4px 8px;margin-bottom:4px;border-left:3px solid #2ecc71;border-radius:0 6px 6px 0;"><strong style="color:#2ecc71;font-size:0.78rem;">GOVERNMENT</strong> <span style="font-size:0.7rem;opacity:0.5;">(' + totalRuling + ' delegates)</span></div>';
+            html += ruling.map(p => {
                 const id = nameToId[p] || p;
-                const checked = sides[p] === 'ruling' ? 'checked' : '';
-                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" ${checked} /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
+                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" checked /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
             }).join('');
+            html += '<div style="padding:4px 8px;margin:8px 0 4px;border-left:3px solid #e74c3c;border-radius:0 6px 6px 0;"><strong style="color:#e74c3c;font-size:0.78rem;">OPPOSITION</strong> <span style="font-size:0.7rem;opacity:0.5;">(' + totalOpp + ' delegates)</span></div>';
+            html += opposition.map(p => {
+                const id = nameToId[p] || p;
+                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
+            }).join('');
+
+            container.innerHTML = html;
 
             saveBtn.onclick = async () => {
                 const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
