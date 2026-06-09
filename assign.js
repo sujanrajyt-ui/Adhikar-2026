@@ -191,6 +191,9 @@ document.addEventListener('DOMContentLoaded', () => {
         async function renderCoalition() {
             const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
             const sides = {};
+            const counts = {};
+            parties.forEach(p => counts[p] = 0);
+            delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
             try {
                 const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
                 const partyList = all.filter(p => p.type === 'party');
@@ -200,7 +203,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.innerHTML = parties.map(p => {
                 const id = nameToId[p] || p;
                 const checked = sides[p] === 'ruling' ? 'checked' : '';
-                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" ${checked} /><span>${escapeHtml(p)}</span></label>`;
+                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" ${checked} /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
             }).join('');
 
             saveBtn.onclick = async () => {
