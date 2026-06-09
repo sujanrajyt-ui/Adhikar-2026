@@ -187,16 +187,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('coalition-parties');
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
-        try {
-            const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
-            const partyList = all.filter(p => p.type === 'party');
-            if (!partyList.length) { container.innerHTML = '<p style="opacity:.5;font-size:.75rem;">Add parties in admin panel first.</p>'; return; }
-            container.innerHTML = partyList.map(p => `
-                <label>
-                    <input type="checkbox" class="coaltn-cb" value="${p.id}" ${p.side === 'ruling' ? 'checked' : ''} />
-                    <span>${escapeHtml(p.name)}</span>
-                </label>
-            `).join('');
+
+        async function renderCoalition() {
+            const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
+            const sides = {};
+            try {
+                const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
+                const partyList = all.filter(p => p.type === 'party');
+                partyList.forEach(p => sides[p.name] = p.side || '');
+            } catch {}
+
+            container.innerHTML = parties.map(p => {
+                const id = nameToId[p] || p;
+                const checked = sides[p] === 'ruling' ? 'checked' : '';
+                return `<label><input type="checkbox" class="coaltn-cb" value="${id}" ${checked} /><span>${escapeHtml(p)}</span></label>`;
+            }).join('');
+
             saveBtn.onclick = async () => {
                 const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
                 saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
@@ -211,7 +217,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch { showToast('Failed to save coalition', 'error'); }
                 finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
             };
-        } catch { container.innerHTML = '<p style="opacity:.5;font-size:.75rem;">Failed to load parties</p>'; }
+        }
+
+        await renderCoalition();
     }
 
     async function initLeadership() {
