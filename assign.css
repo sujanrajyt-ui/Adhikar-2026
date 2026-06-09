@@ -493,6 +493,11 @@ body {
 .leadership-field select:focus {
     border-color: rgba(212,175,55,0.4);
 }
+.leadership-field select option,
+.filter-select option {
+    background: #1a1a2e;
+    color: rgba(255,255,255,0.85);
+}
 
 /* ─── Empty ─── */
 .empty-state {
