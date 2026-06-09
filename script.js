@@ -100,21 +100,41 @@ const CHAMPIONSHIP_AWARDS = ["General Championship Award"];
 function renderAwards() {
   const grid = document.getElementById("awards-grid");
   if (!grid) return;
-  fetch(`${API_BASE}/awards?t=${Date.now()}`)
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(awards => {
+  Promise.all([
+    fetch(`${API_BASE}/awards?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject()),
+    fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
+  ])
+    .then(([awards, lb]) => {
+      const top3 = (lb.leaderboard || []).filter(d => {
+        const role = (d.elected_role || "").toLowerCase();
+        return !["speaker", "deputy speaker", "secretary general", "marshal"].some(r => role.includes(r));
+      }).sort((a, b) => b.totalScore - a.totalScore).slice(0, 3);
+      const podiumLabels = ["Champion", "1st Runner-up", "2nd Runner-up"];
+      const medalEmojis = ["🥇", "🥈", "🥉"];
       grid.innerHTML = (awards.length ? awards : AWARDS).map((a, i) => {
-        const isGrand = CHAMPIONSHIP_AWARDS.includes(a.name);
+        const isGrand = CHAMPIONSHIP_AWARDS.includes(a.name || a.title);
         const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
+        let podiumHtml = "";
+        if (isGrand && top3.length) {
+          podiumHtml = `<div class="gc-podium">${top3.map((d, pi) => `
+            <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"}">
+              <span class="gc-medal">${medalEmojis[pi]}</span>
+              <span class="gc-label">${podiumLabels[pi]}</span>
+              <span class="gc-name">${escapeHtml(d.name)}</span>
+              <span class="gc-score">${(d.totalScore || 0).toFixed(1)}</span>
+            </div>
+          `).join("")}</div>`;
+        }
         return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
         <div class="award-icon">${trophySVG}</div>
         <span class="award-num">${String(i + 1).padStart(2, "0")}</span>
       </div>
-      <h3 class="award-title">${a.name}</h3>
+      <h3 class="award-title">${a.name || a.title}</h3>
       ${sideBadge || roleBadge ? `<div class="award-badges">${sideBadge}${roleBadge}</div>` : ''}
-      <p class="award-desc">${AWARD_DESCS[a.name] || 'Awarded to distinguished parliamentarians.'}</p>
+      <p class="award-desc">${AWARD_DESCS[a.name || a.title] || (a.desc || 'Awarded to distinguished parliamentarians.')}</p>
+      ${podiumHtml}
     </article>`;
       }).join("");
     })

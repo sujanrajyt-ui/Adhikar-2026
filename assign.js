@@ -80,11 +80,16 @@ document.addEventListener('DOMContentLoaded', () => {
     reassignAllBtn.addEventListener('click', reassignAll);
     exportBtn.addEventListener('click', exportExcel);
 
+    document.getElementById('dup-fix-dismiss')?.addEventListener('click', () => {
+        document.getElementById('duplicate-fix-panel')?.classList.add('hidden');
+    });
+
     async function init() {
         loadConstituencies();
         loadParties();
         loadCommittees();
         await loadDelegates();
+        await fixDuplicateConstituencies();
         initCoalition();
         initLeadership();
     }
@@ -472,9 +477,16 @@ async function initLeadership() {
             btn.textContent = 'Assigning...';
         }
 
-        const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
-
         const reg = delegates.find(d => d.id === id);
+        const available = getUniqueConstituencies([id]);
+        if (!available.length && !reg?.assigned_constituency) {
+            showToast('No free constituencies left', 'error');
+            if (btn) { btn.disabled = false; btn.textContent = reg?.assigned_constituency ? 'Update' : 'Assign'; }
+            return;
+        }
+        const constituency = available.length
+            ? available[Math.floor(Math.random() * available.length)]
+            : reg.assigned_constituency;
         const isHarshil = reg && reg.name.toLowerCase().includes('harshil');
         const isAkash = reg && reg.name.toLowerCase().includes('akash');
         const party = (isHarshil || isAkash) ? 'Party A' : weightedPartyPick();
@@ -549,6 +561,16 @@ async function initLeadership() {
             [arr[i], arr[j]] = [arr[j], arr[i]];
         }
         return arr;
+    }
+
+    function getUniqueConstituencies(excludeIds) {
+        const taken = new Set();
+        delegates.forEach(d => {
+            if (d.assigned_constituency && !excludeIds.includes(d.id)) {
+                taken.add(d.assigned_constituency);
+            }
+        });
+        return constituencies.filter(c => !taken.has(c));
     }
 
     function buildPartyPool(count) {
@@ -675,11 +697,28 @@ async function initLeadership() {
             committeeOf[idx] = leftoverPool[j];
         });
 
+        // Build unique constituency pool
+        let availablePool;
+        if (caller === 'Assign Unassigned') {
+            const taken = new Set();
+            delegates.forEach(d => {
+                if (d.assigned_constituency && !targets.find(t => t.id === d.id)) {
+                    taken.add(d.assigned_constituency);
+                }
+            });
+            availablePool = constituencies.filter(c => !taken.has(c));
+        } else {
+            availablePool = [...constituencies];
+        }
+        shuffleArray(availablePool);
+
         // Assign each target
         for (let i = 0; i < targets.length; i++) {
             const d = targets[i];
             if (!constituencies.length) break;
-            const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
+            const constituency = i < availablePool.length
+                ? availablePool[i]
+                : constituencies[Math.floor(Math.random() * constituencies.length)];
             const party = partyOf[i];
             const committee = committeeOf[i];
             try {
@@ -702,12 +741,80 @@ async function initLeadership() {
 
         renderCards();
         updateStats();
+        await fixDuplicateConstituencies();
         assignUnassignedBtn.disabled = false;
         assignAllBtn.disabled = false;
         reassignAllBtn.disabled = false;
         assignUnassignedBtn.textContent = 'Assign Unassigned';
         assignAllBtn.textContent = 'Assign All';
         reassignAllBtn.textContent = 'Reassign All';
+    }
+
+    async function fixDuplicateConstituencies() {
+        const map = {};
+        delegates.forEach(d => {
+            if (d.assigned_constituency) {
+                (map[d.assigned_constituency] = map[d.assigned_constituency] || []).push(d);
+            }
+        });
+
+        const toReassign = [];
+        const keep = new Set();
+        const oldConstituencies = {};
+        Object.entries(map).forEach(([c, dels]) => {
+            keep.add(c);
+            for (let i = 1; i < dels.length; i++) {
+                toReassign.push(dels[i]);
+                oldConstituencies[dels[i].id] = c;
+            }
+        });
+
+        const panel = document.getElementById('duplicate-fix-panel');
+        const list = document.getElementById('dup-fix-list');
+        if (!toReassign.length) {
+            if (panel) panel.classList.add('hidden');
+            return;
+        }
+
+        const available = constituencies.filter(c => !keep.has(c));
+        shuffleArray(available);
+
+        if (available.length < toReassign.length) {
+            showToast(`Only ${available.length} free constituencies, need ${toReassign.length}. Some duplicates remain.`, 'error');
+        }
+
+        const changes = [];
+        for (let i = 0; i < toReassign.length; i++) {
+            if (i >= available.length) break;
+            const d = toReassign[i];
+            const newC = available[i];
+            try {
+                await fetch(`${API_BASE}/admin/registrations/${d.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json', 'x-admin-password': adminPassword },
+                    body: JSON.stringify({ assigned_constituency: newC }),
+                });
+                changes.push({ name: d.name, old: oldConstituencies[d.id], new: newC });
+                d.assigned_constituency = newC;
+            } catch {}
+        }
+
+        if (changes.length) {
+            list.innerHTML = changes.map(c =>
+                `<div class="dup-fix-item">
+                    <span class="dup-fix-name">${escapeHtml(c.name)}</span>
+                    <span>
+                        <span class="dup-fix-old">${escapeHtml(c.old)}</span>
+                        <span class="dup-fix-arrow">&rarr;</span>
+                        <span class="dup-fix-new">${escapeHtml(c.new)}</span>
+                    </span>
+                </div>`
+            ).join('');
+            panel.classList.remove('hidden');
+            showToast(`Fixed ${changes.length} duplicate constituency assignment(s)`, 'success');
+        }
+        renderCards();
+        updateStats();
     }
 
     function exportExcel() {
