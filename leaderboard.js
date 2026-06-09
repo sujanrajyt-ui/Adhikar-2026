@@ -17,6 +17,13 @@ async function init() {
         renderCriteriaOptions();
         renderLeaderboard();
 
+        // Auto-refresh every 30 seconds
+        setInterval(async () => {
+            await fetchData();
+            renderCriteriaOptions();
+            renderLeaderboard();
+        }, 30000);
+
         // Hide loader
         const loader = document.getElementById('page-loader');
         if (loader) loader.classList.add('hidden');

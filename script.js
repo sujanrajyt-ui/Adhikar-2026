@@ -84,19 +84,52 @@ function formatDate(iso) {
 }
 
 /* ============ Render static content ============ */
+const AWARD_DESCS = {
+  "Best Student Speaker": "Highest overall parliamentary performer.",
+  "Exceptional Debater": "Focuses on argumentation and rebuttal mastery.",
+  "Asset of the Ruling Government": "Best defender of government policies and strategy.",
+  "Asset of the Opposition": "Best critic of treasury benches and rigorous debater.",
+  "Best Leader of the House": "Measures organizational and strategic parliamentary leadership.",
+  "Best Minister": "Awarded for profound portfolio expertise and policy knowledge.",
+  "Most Creative Mind": "Innovative legislative thinker with out-of-the-box solutions.",
+  "Best Orator": "Pure speaking excellence and rhetorical command.",
+  "Distinguished Policy Advocate": "Research-driven contributor with detailed legislative depth.",
+  "Most Impactful Presence": "The individual who commands the chamber with sheer conviction.",
+};
+const CHAMPIONSHIP_AWARDS = ["General Championship Award"];
 function renderAwards() {
   const grid = document.getElementById("awards-grid");
   if (!grid) return;
-  grid.innerHTML = AWARDS.map((a, i) => `
-    <article class="award-card anim-border ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
+  fetch(`${API_BASE}/awards?t=${Date.now()}`)
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(awards => {
+      grid.innerHTML = (awards.length ? awards : AWARDS).map((a, i) => {
+        const isGrand = CHAMPIONSHIP_AWARDS.includes(a.name);
+        const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
+        const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
+        return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
         <div class="award-icon">${trophySVG}</div>
         <span class="award-num">${String(i + 1).padStart(2, "0")}</span>
       </div>
-      <h3 class="award-title">${a.title}</h3>
-      <p class="award-desc">${a.desc}</p>
-    </article>
-  `).join("");
+      <h3 class="award-title">${a.name}</h3>
+      ${sideBadge || roleBadge ? `<div class="award-badges">${sideBadge}${roleBadge}</div>` : ''}
+      <p class="award-desc">${AWARD_DESCS[a.name] || 'Awarded to distinguished parliamentarians.'}</p>
+    </article>`;
+      }).join("");
+    })
+    .catch(() => {
+      grid.innerHTML = AWARDS.map((a, i) => `
+        <article class="award-card anim-border ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
+          <div class="award-head">
+            <div class="award-icon">${trophySVG}</div>
+            <span class="award-num">${String(i + 1).padStart(2, "0")}</span>
+          </div>
+          <h3 class="award-title">${a.title}</h3>
+          <p class="award-desc">${a.desc}</p>
+        </article>
+      `).join("");
+    });
 }
 function renderTeam() {
   const grid = document.getElementById("team-grid");
