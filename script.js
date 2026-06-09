@@ -889,20 +889,16 @@ function renderRows() {
     const showAssign = r.status === 'verified';
     const portfolioCell = showAssign ? `
       <div class="assign-cell">
-        ${r.assigned_constituency ? `<div class="constituency-display"><span class="constituency-label">Constituency:</span> ${escapeHtml(r.assigned_constituency)}</div>` : ''}
+        <div class="portfolio-tags">
+          ${r.assigned_constituency ? `<span class="pf-tag pf-constituency" title="Constituency">${escapeHtml(r.assigned_constituency)}</span>` : ''}
+          ${r.assigned_party ? `<span class="pf-tag pf-party" title="Party">${escapeHtml(r.assigned_party)}</span>` : ''}
+          ${r.assigned_committee ? `<span class="pf-tag pf-committee" title="Committee">${escapeHtml(r.assigned_committee)}</span>` : ''}
+        </div>
         <input type="text" value="${escapeHtml(r.portfolio || '')}"
-          placeholder="Assign Portfolio..."
+          placeholder="Portfolio / Role..."
           onchange="handlePortfolioChange('${r.id}', this.value)" />
-        <select class="assign-select" id="party-sel-${r.id}" title="Party">
-          <option value="">— Party —</option>
-          ${parties.map(p => `<option value="${escapeHtml(p.name)}" ${r.assigned_party === p.name ? 'selected' : ''}>${escapeHtml(p.name)}</option>`).join('')}
-        </select>
-        <select class="assign-select" id="comm-sel-${r.id}" title="Committee">
-          <option value="">— Committee —</option>
-          ${comms.map(c => `<option value="${escapeHtml(c.name)}" ${r.assigned_committee === c.name ? 'selected' : ''}>${escapeHtml(c.name)}</option>`).join('')}
-        </select>
         <select class="assign-select" id="role-sel-${r.id}" title="Elected Role" onchange="handleElectedRoleChange('${r.id}', this.value)">
-          <option value="">— Role —</option>
+          <option value="">— Elected Role —</option>
           <option value="" ${!r.elected_role ? 'selected' : ''}>None / Remove Role</option>
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
@@ -922,13 +918,6 @@ function renderRows() {
             <option ${r.elected_role === 'Deputy Speaker' ? 'selected' : ''}>Deputy Speaker</option>
           </optgroup>
         </select>
-        <div class="split-buttons">
-          <button class="action-btn assign-save-btn" onclick="handleSaveAssignment('${r.id}')" id="assign-btn-${r.id}" title="Save Party/Committee">Assign</button>
-          ${alreadySent
-        ? `<button class="action-btn inform-btn inform-sent" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}" title="Resend Notification">Resend Mail</button>`
-        : `<button class="action-btn inform-btn" onclick="handleInformDelegate('${r.id}')" id="inform-btn-${r.id}" title="Send Assignment Mail">Send Mail</button>`
-      }
-        </div>
       </div>
     ` : `
       ${r.assigned_constituency ? `<div class="constituency-display"><span class="constituency-label">Constituency:</span> ${escapeHtml(r.assigned_constituency)}</div>` : ''}

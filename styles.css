@@ -4319,6 +4319,38 @@ body:hover #cursor-spotlight {
   gap: 6px;
 }
 
+.portfolio-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.pf-tag {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.pf-tag.pf-constituency {
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  color: #d4af37;
+}
+
+.pf-tag.pf-party {
+  background: rgba(52, 152, 219, 0.1);
+  border: 1px solid rgba(52, 152, 219, 0.25);
+  color: #5dade2;
+}
+
+.pf-tag.pf-committee {
+  background: rgba(155, 89, 182, 0.1);
+  border: 1px solid rgba(155, 89, 182, 0.25);
+  color: #bb8fce;
+}
+
 .constituency-display {
   font-size: 0.78rem;
   color: #d4af37;
