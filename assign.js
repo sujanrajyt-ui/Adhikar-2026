@@ -273,15 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const reg = delegates.find(d => d.id === id);
         const isHarshil = reg && reg.name.toLowerCase().includes('harshil');
         const isAkash = reg && reg.name.toLowerCase().includes('akash');
-        let party;
-        if (isHarshil || isAkash) {
-            const other = isHarshil
-                ? delegates.find(d => d.name.toLowerCase().includes('akash') && d.assigned_party)
-                : delegates.find(d => d.name.toLowerCase().includes('harshil') && d.assigned_party);
-            party = other ? other.assigned_party : weightedPartyPick();
-        } else {
-            party = weightedPartyPick();
-        }
+        const party = (isHarshil || isAkash) ? 'Party A' : weightedPartyPick();
 
         const committee = leastAssignedCommittee();
 
@@ -458,16 +450,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const harshilIdx = targets.findIndex(d => d.name.toLowerCase().includes('harshil'));
         const akashIdx = targets.findIndex(d => d.name.toLowerCase().includes('akash'));
-        if (harshilIdx !== -1 && akashIdx !== -1 && harshilIdx !== akashIdx) {
-            const sameParty = partyPool[harshilIdx];
-            partyPool[akashIdx] = sameParty;
+        const reservedParties = {};
+        if (harshilIdx !== -1) { reservedParties[harshilIdx] = 'Party A'; }
+        if (akashIdx !== -1) { reservedParties[akashIdx] = 'Party A'; }
+        const reserveCount = Object.keys(reservedParties).length;
+        if (reserveCount > 0) {
+            let toRemove = reserveCount;
+            for (let i = partyPool.length - 1; i >= 0 && toRemove > 0; i--) {
+                if (partyPool[i] === 'Party A') {
+                    partyPool.splice(i, 1);
+                    toRemove--;
+                }
+            }
         }
 
+        let poolIdx = 0;
         for (let i = 0; i < targets.length; i++) {
             const d = targets[i];
             if (!constituencies.length) break;
             const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
-            const party = partyPool[i];
+            const party = reservedParties[i] || partyPool[poolIdx++];
             const committee = committeePool[i];
             try {
                 const res = await fetch(`${API_BASE}/admin/registrations/${d.id}`, {
