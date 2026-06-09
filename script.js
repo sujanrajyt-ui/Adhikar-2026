@@ -889,11 +889,12 @@ function renderRows() {
     const showAssign = r.status === 'verified';
     const portfolioCell = showAssign ? `
       <div class="assign-cell">
+        ${r.assigned_constituency || r.assigned_party || r.assigned_committee ? `
         <div class="portfolio-tags">
           ${r.assigned_constituency ? `<span class="pf-tag pf-constituency" title="Constituency">${escapeHtml(r.assigned_constituency)}</span>` : ''}
           ${r.assigned_party ? `<span class="pf-tag pf-party" title="Party">${escapeHtml(r.assigned_party)}</span>` : ''}
           ${r.assigned_committee ? `<span class="pf-tag pf-committee" title="Committee">${escapeHtml(r.assigned_committee)}</span>` : ''}
-        </div>
+        </div>` : ''}
         <input type="text" value="${escapeHtml(r.portfolio || '')}"
           placeholder="Portfolio / Role..."
           onchange="handlePortfolioChange('${r.id}', this.value)" />
@@ -903,19 +904,16 @@ function renderRows() {
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
             <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
-            <option ${r.elected_role === 'Minister of Education' ? 'selected' : ''}>Minister of Education</option>
-            <option ${r.elected_role === 'Minister of Women and Child Developement' ? 'selected' : ''}>Minister of Women and Child Developement</option>
-            <option ${r.elected_role === 'Minister of External Affairs' ? 'selected' : ''}>Minister of External Affairs</option>
-            <option ${r.elected_role === 'Minister of Finance' ? 'selected' : ''}>Minister of Finance</option>
-            <option ${r.elected_role === 'Home Ministry' ? 'selected' : ''}>Home Ministry</option>
+            <option ${r.elected_role === 'Minister of EDUCATION' ? 'selected' : ''}>Minister of EDUCATION</option>
+            <option ${r.elected_role === 'Minister of FINANCE' ? 'selected' : ''}>Minister of FINANCE</option>
+            <option ${r.elected_role === 'Minister of HOME AFFAIRS' ? 'selected' : ''}>Minister of HOME AFFAIRS</option>
+            <option ${r.elected_role === 'Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS' ? 'selected' : ''}>Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS</option>
+            <option ${r.elected_role === 'Minister of EXTERNAL AFFAIRS' ? 'selected' : ''}>Minister of EXTERNAL AFFAIRS</option>
+            <option ${r.elected_role === 'Minister of SOCIAL JUSTICE & EMPOWERMENT' ? 'selected' : ''}>Minister of SOCIAL JUSTICE & EMPOWERMENT</option>
           </optgroup>
           <optgroup label="Opposition">
             <option ${r.elected_role === 'Leader of Opposition' ? 'selected' : ''}>Leader of Opposition</option>
             <option ${r.elected_role === 'Deputy Leader of Opposition' ? 'selected' : ''}>Deputy Leader of Opposition</option>
-          </optgroup>
-          <optgroup label="House Officers">
-            <option ${r.elected_role === 'Speaker' ? 'selected' : ''}>Speaker</option>
-            <option ${r.elected_role === 'Deputy Speaker' ? 'selected' : ''}>Deputy Speaker</option>
           </optgroup>
         </select>
       </div>
@@ -1749,9 +1747,11 @@ async function loadAwards() {
 }
 
 const PARLIAMENTARY_ROLES = [
-  "Speaker", "Deputy Speaker", "Secretary General", "Marshal",
-  "Prime Minister", "Deputy Prime Minister", "Leader of the House",
-  "Minister", "Leader of Opposition", "Deputy Leader of Opposition", "Whip"
+  "Prime Minister", "Deputy Prime Minister",
+  "Minister of EDUCATION", "Minister of FINANCE", "Minister of HOME AFFAIRS",
+  "Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS",
+  "Minister of EXTERNAL AFFAIRS", "Minister of SOCIAL JUSTICE & EMPOWERMENT",
+  "Leader of Opposition", "Deputy Leader of Opposition", "Whip"
 ];
 
 let _pendingMappingChanges = {}; // Stores { awardId: { requires_role, requires_side } }

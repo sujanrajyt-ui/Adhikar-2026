@@ -541,16 +541,6 @@
     </section>
 
     <main class="ldr-content">
-        <!-- Speakers & House Officers -->
-        <div class="section-divider">
-            <span class="section-icon">⚖️</span>
-            <span class="section-title">The Chair & House Officers</span>
-            <button class="btn-assign admin-only" onclick="openAssignModal('chair')"><span>+</span> Assign</button>
-        </div>
-        <div id="chair-grid" class="leaders-grid">
-            <div class="empty-state">Loading...</div>
-        </div>
-
         <!-- Government -->
         <div class="section-divider">
             <span class="section-icon">🏛️</span>
@@ -580,10 +570,13 @@
         const API_BASE = '/api';
 
         // Role lists matching admin configuration
-        const CHAIR_ROLES = ['Speaker', 'Deputy Speaker', 'Secretary General', 'Marshal'];
-        const GOV_ROLES = ['Prime Minister', 'Deputy Prime Minister', 'Minister', 'Leader of the House'];
+        const GOV_ROLES = ['Prime Minister', 'Deputy Prime Minister',
+            'Minister of EDUCATION', 'Minister of FINANCE', 'Minister of HOME AFFAIRS',
+            'Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS',
+            'Minister of EXTERNAL AFFAIRS', 'Minister of SOCIAL JUSTICE & EMPOWERMENT'
+        ];
         const OPP_ROLES = ['Leader of Opposition', 'Deputy Leader of Opposition', 'Whip'];
-        const HIGHLIGHT_ROLES = ['Prime Minister', 'Speaker', 'Leader of Opposition'];
+        const HIGHLIGHT_ROLES = ['Prime Minister', 'Leader of Opposition'];
 
         function escapeHtml(s) {
             return String(s ?? '').replace(/[&<>"']/g, m =>
@@ -677,7 +670,7 @@
 
         async function openAssignModal(section) {
             currentSection = section;
-            document.getElementById('modal-title').textContent = `Assign to ${section === 'chair' ? 'The Chair' : section === 'gov' ? 'Government' : 'Opposition'}`;
+            document.getElementById('modal-title').textContent = `Assign to ${section === 'gov' ? 'Government' : 'Opposition'}`;
             showStep('search');
             modal.style.display = 'flex';
 
@@ -735,7 +728,7 @@
         function selectDelegate(id) {
             selectedDelegate = allDelegates.find(d => d.id === id);
             document.getElementById('selected-delegate-name').textContent = `Assigning: ${selectedDelegate.name}`;
-            const roles = currentSection === 'chair' ? CHAIR_ROLES : currentSection === 'gov' ? GOV_ROLES : OPP_ROLES;
+            const roles = currentSection === 'gov' ? GOV_ROLES : OPP_ROLES;
             const select = document.getElementById('role-pick');
             select.innerHTML = roles.map(r => `<option value="${r}">${r}</option>`).join('') + '<option value="">(Remove Role)</option>';
             showStep('role');
@@ -773,16 +766,14 @@
             try {
                 const res = await fetch(`${API_BASE}/public/leadership`);
                 const leaders = await res.json();
-                const chairLeaders = leaders.filter(l => CHAIR_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
                 const govLeaders = leaders.filter(l => GOV_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
                 const oppLeaders = leaders.filter(l => OPP_ROLES.some(r => (l.role || '').toLowerCase().includes(r.toLowerCase())));
-                const roleOrder = [...CHAIR_ROLES, ...GOV_ROLES, ...OPP_ROLES];
+                const roleOrder = [...GOV_ROLES, ...OPP_ROLES];
                 const sortByRole = (a, b) => {
                     const idxA = roleOrder.findIndex(r => (a.role || '').toLowerCase().includes(r.toLowerCase()));
                     const idxB = roleOrder.findIndex(r => (b.role || '').toLowerCase().includes(r.toLowerCase()));
                     return idxA - idxB;
                 };
-                document.getElementById('chair-grid').innerHTML = chairLeaders.length ? chairLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No house officers assigned yet.</div>';
                 document.getElementById('gov-grid').innerHTML = govLeaders.length ? govLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No government leadership assigned yet.</div>';
                 document.getElementById('opp-grid').innerHTML = oppLeaders.length ? oppLeaders.sort(sortByRole).map(makeCard).join('') : '<div class="empty-state">No opposition leadership assigned yet.</div>';
 
