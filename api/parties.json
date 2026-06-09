@@ -35,43 +35,36 @@
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "com_education",
-        "name": "EDUCATION",
+        "id": "com_education_youth",
+        "name": "Education & Youth Affairs Committee",
         "type": "committee",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "com_finance",
-        "name": "FINANCE",
+        "id": "com_home_justice",
+        "name": "Home Affairs & Justice Committee",
         "type": "committee",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "com_home_affairs",
-        "name": "HOME AFFAIRS",
+        "id": "com_health_social",
+        "name": "Health & Social Welfare Committee",
         "type": "committee",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "com_technology",
-        "name": "TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS",
+        "id": "com_env_science_external",
+        "name": "Environment, Science & External Affairs Committee",
         "type": "committee",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
-        "id": "com_external",
-        "name": "EXTERNAL AFFAIRS",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_social_justice",
-        "name": "SOCIAL JUSTICE & EMPOWERMENT",
+        "id": "com_finance_economic",
+        "name": "Finance & Economic Affairs Committee",
         "type": "committee",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"

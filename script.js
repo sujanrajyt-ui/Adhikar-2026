@@ -958,12 +958,11 @@ function renderRows() {
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
             <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
-            <option ${r.elected_role === 'Minister of EDUCATION' ? 'selected' : ''}>Minister of EDUCATION</option>
-            <option ${r.elected_role === 'Minister of FINANCE' ? 'selected' : ''}>Minister of FINANCE</option>
-            <option ${r.elected_role === 'Minister of HOME AFFAIRS' ? 'selected' : ''}>Minister of HOME AFFAIRS</option>
-            <option ${r.elected_role === 'Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS' ? 'selected' : ''}>Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS</option>
-            <option ${r.elected_role === 'Minister of EXTERNAL AFFAIRS' ? 'selected' : ''}>Minister of EXTERNAL AFFAIRS</option>
-            <option ${r.elected_role === 'Minister of SOCIAL JUSTICE & EMPOWERMENT' ? 'selected' : ''}>Minister of SOCIAL JUSTICE & EMPOWERMENT</option>
+            <option ${r.elected_role === 'Minister of Education & Youth Affairs Committee' ? 'selected' : ''}>Minister of Education & Youth Affairs Committee</option>
+            <option ${r.elected_role === 'Minister of Home Affairs & Justice Committee' ? 'selected' : ''}>Minister of Home Affairs & Justice Committee</option>
+            <option ${r.elected_role === 'Minister of Health & Social Welfare Committee' ? 'selected' : ''}>Minister of Health & Social Welfare Committee</option>
+            <option ${r.elected_role === 'Minister of Environment, Science & External Affairs Committee' ? 'selected' : ''}>Minister of Environment, Science & External Affairs Committee</option>
+            <option ${r.elected_role === 'Minister of Finance & Economic Affairs Committee' ? 'selected' : ''}>Minister of Finance & Economic Affairs Committee</option>
           </optgroup>
           <optgroup label="Opposition">
             <option ${r.elected_role === 'Leader of Opposition' ? 'selected' : ''}>Leader of Opposition</option>
@@ -1802,9 +1801,11 @@ async function loadAwards() {
 
 const PARLIAMENTARY_ROLES = [
   "Prime Minister", "Deputy Prime Minister",
-  "Minister of EDUCATION", "Minister of FINANCE", "Minister of HOME AFFAIRS",
-  "Minister of TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS",
-  "Minister of EXTERNAL AFFAIRS", "Minister of SOCIAL JUSTICE & EMPOWERMENT",
+  "Minister of Education & Youth Affairs Committee",
+  "Minister of Home Affairs & Justice Committee",
+  "Minister of Health & Social Welfare Committee",
+  "Minister of Environment, Science & External Affairs Committee",
+  "Minister of Finance & Economic Affairs Committee",
   "Leader of Opposition", "Deputy Leader of Opposition", "Whip"
 ];
 

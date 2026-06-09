@@ -337,6 +337,82 @@ body {
     font-variant-numeric: tabular-nums;
 }
 
+/* ─── Governance ─── */
+.assign-governance {
+    display: flex; gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+@media (max-width: 768px) {
+    .assign-governance { flex-direction: column; }
+}
+.governance-panel {
+    flex: 1;
+    background: var(--maroon-mid);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+}
+.governance-desc {
+    margin: 0 0 0.5rem;
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.3);
+}
+.coalition-parties {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.coalition-parties label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    background: rgba(255,255,255,0.03);
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.coalition-parties label:hover {
+    background: rgba(255,255,255,0.06);
+}
+.coalition-parties label input[type="checkbox"] {
+    accent-color: var(--gold, #d4af37);
+}
+.leadership-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+@media (max-width: 768px) {
+    .leadership-grid { grid-template-columns: 1fr; }
+}
+.leadership-field {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.leadership-field label {
+    font-size: 0.68rem;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.leadership-field select {
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255,255,255,0.04);
+    color: rgba(255,255,255,0.7);
+    font-size: 0.75rem;
+    font-family: inherit;
+    outline: none;
+    max-width: 100%;
+}
+.leadership-field select:focus {
+    border-color: rgba(212,175,55,0.4);
+}
+
 /* ─── Empty ─── */
 .empty-state {
     text-align: center; padding: 3rem 1rem;

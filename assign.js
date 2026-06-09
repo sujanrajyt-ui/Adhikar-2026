@@ -85,6 +85,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loadParties();
         loadCommittees();
         await loadDelegates();
+        initCoalition();
+        initLeadership();
     }
 
     function loadConstituencies() {
@@ -152,12 +154,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadCommittees() {
         committees = [
-            'EDUCATION',
-            'FINANCE',
-            'HOME AFFAIRS',
-            'TECHNOLOGY, INNOVATION & DIGITAL AFFAIRS',
-            'EXTERNAL AFFAIRS',
-            'SOCIAL JUSTICE & EMPOWERMENT'
+            'Education & Youth Affairs Committee',
+            'Home Affairs & Justice Committee',
+            'Health & Social Welfare Committee',
+            'Environment, Science & External Affairs Committee',
+            'Finance & Economic Affairs Committee'
         ];
         const sel = filterCommittee;
         sel.innerHTML = '<option value="all">All Committees</option>' +
@@ -180,6 +181,131 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch {
             listEl.innerHTML = '<div class="empty-state">Failed to load delegates</div>';
         }
+    }
+
+    async function initCoalition() {
+        const container = document.getElementById('coalition-parties');
+        const saveBtn = document.getElementById('coalition-save-btn');
+        if (!container) return;
+        try {
+            const all = await fetch(`${API_BASE}/parties`).then(r => r.json());
+            const partyList = all.filter(p => p.type === 'party');
+            if (!partyList.length) { container.innerHTML = '<p style="opacity:.5;font-size:.75rem;">Add parties in admin panel first.</p>'; return; }
+            container.innerHTML = partyList.map(p => `
+                <label>
+                    <input type="checkbox" class="coaltn-cb" value="${p.id}" ${p.side === 'ruling' ? 'checked' : ''} />
+                    <span>${escapeHtml(p.name)}</span>
+                </label>
+            `).join('');
+            saveBtn.onclick = async () => {
+                const checked = [...container.querySelectorAll('.coaltn-cb:checked')].map(cb => cb.value);
+                saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+                try {
+                    const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                        body: JSON.stringify({ ruling_ids: checked })
+                    });
+                    if (!res.ok) throw new Error('Failed');
+                    showToast('Coalition saved', 'success');
+                } catch { showToast('Failed to save coalition', 'error'); }
+                finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
+            };
+        } catch { container.innerHTML = '<p style="opacity:.5;font-size:.75rem;">Failed to load parties</p>'; }
+    }
+
+    async function initLeadership() {
+        const grid = document.getElementById('leadership-grid');
+        const saveBtn = document.getElementById('leadership-save-btn');
+        if (!grid) return;
+
+        const roles = [
+            { key: 'pm', label: 'Prime Minister' },
+            { key: 'dpm', label: 'Deputy PM' },
+            { key: 'lop', label: 'Leader of Opposition' },
+            { key: 'dep_lop', label: 'Deputy LOP' },
+        ];
+
+        // Build minister roles from current committees
+        const ministerRoles = committees.map(c => ({
+            key: c,
+            label: `Minister of ${c}`
+        }));
+
+        async function renderLeadership() {
+            try {
+                const [leadership, allParties] = await Promise.all([
+                    fetch(`${API_BASE}/leadership`).then(r => r.json()),
+                    fetch(`${API_BASE}/parties`).then(r => r.json())
+                ]);
+
+                const partyList = allParties.filter(p => p.type === 'party');
+                const rulingPartyNames = partyList.filter(p => p.side === 'ruling').map(p => p.name);
+                const oppPartyNames = partyList.filter(p => p.side === 'opposition').map(p => p.name);
+
+                const eligible = delegates.filter(d => d.assigned_party);
+                const rulingEligible = eligible.filter(d => rulingPartyNames.includes(d.assigned_party));
+                const oppEligible = eligible.filter(d => oppPartyNames.includes(d.assigned_party));
+
+                const opt = (list, currentId, placeholder) => {
+                    let h = `<option value="">-- ${placeholder} --</option>`;
+                    list.forEach(d => {
+                        const sel = d.id === currentId ? 'selected' : '';
+                        h += `<option value="${d.id}" ${sel}>${escapeHtml(d.name)} (${escapeHtml(d.assigned_party)})</option>`;
+                    });
+                    return h;
+                };
+
+                // Ruling roles (pm, dpm)
+                const rulingRoles = roles.filter(r => r.key === 'pm' || r.key === 'dpm');
+                // Opposition roles (lop, dep_lop)
+                const oppRoles = roles.filter(r => r.key === 'lop' || r.key === 'dep_lop');
+
+                let html = '';
+                html += '<div class="leadership-field"><label>Prime Minister</label><select id="ldr-pm">' + opt(rulingEligible, leadership.pm?.id, 'Select PM') + '</select></div>';
+                html += '<div class="leadership-field"><label>Deputy PM</label><select id="ldr-dpm">' + opt(rulingEligible, leadership.dpm?.id, 'Select DPM') + '</select></div>';
+                html += '<div class="leadership-field"><label>Leader of Opposition</label><select id="ldr-lop">' + opt(oppEligible, leadership.lop?.id, 'Select LOP') + '</select></div>';
+                html += '<div class="leadership-field"><label>Deputy LOP</label><select id="ldr-dep_lop">' + opt(oppEligible, leadership.dep_lop?.id, 'Select Dep LOP') + '</select></div>';
+
+                ministerRoles.forEach(mr => {
+                    const eligibleMinisters = eligible.filter(d => d.assigned_committee === mr.key);
+                    const current = leadership.ministers?.[mr.key]?.id || '';
+                    const safeKey = mr.key.replace(/[^a-zA-Z0-9_-]/g, '_');
+                    html += `<div class="leadership-field"><label>${escapeHtml(mr.label)}</label><select id="ldr-m-${safeKey}" data-minister-key="${escapeHtml(mr.key)}">${opt(eligibleMinisters, current, 'Select Minister')}</select></div>`;
+                });
+
+                grid.innerHTML = html;
+            } catch { grid.innerHTML = '<p style="opacity:.5;font-size:.75rem;">Failed to load leadership</p>'; }
+        }
+
+        await renderLeadership();
+
+        saveBtn.onclick = async () => {
+            saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+            const getVal = (id) => document.getElementById(id)?.value || '';
+            const ministers = {};
+            grid.querySelectorAll('[data-minister-key]').forEach(sel => {
+                const key = sel.getAttribute('data-minister-key');
+                if (sel.value) ministers[key] = sel.value;
+            });
+            const body = {
+                pm: getVal('ldr-pm'),
+                dpm: getVal('ldr-dpm'),
+                lop: getVal('ldr-lop'),
+                dep_lop: getVal('ldr-dep_lop'),
+                ministers
+            };
+            try {
+                const res = await fetch(`${API_BASE}/admin/leadership`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('Failed');
+                showToast('Leadership saved', 'success');
+            } catch { showToast('Failed to save leadership', 'error'); }
+            finally { saveBtn.disabled = false; saveBtn.textContent = 'Save Leadership'; }
+        };
     }
 
     function renderCards() {
@@ -243,15 +369,30 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'Party E';
     }
 
-    function leastAssignedCommittee() {
-        const counts = {};
-        committees.forEach(c => counts[c] = 0);
+    function leastAssignedCommittee(forParty) {
+        const totalCounts = {};
+        const partyCounts = {};
+        committees.forEach(c => { totalCounts[c] = 0; partyCounts[c] = 0; });
         delegates.forEach(d => {
-            if (d.assigned_committee) counts[d.assigned_committee] = (counts[d.assigned_committee] || 0) + 1;
+            if (d.assigned_committee) {
+                totalCounts[d.assigned_committee] = (totalCounts[d.assigned_committee] || 0) + 1;
+                if (forParty && d.assigned_party === forParty) {
+                    partyCounts[d.assigned_committee] = (partyCounts[d.assigned_committee] || 0) + 1;
+                }
+            }
         });
+        if (forParty) {
+            const minParty = Math.min(...committees.map(c => partyCounts[c]));
+            const candidates = committees.filter(c => partyCounts[c] === minParty);
+            let best = candidates[0], minTotal = totalCounts[best];
+            for (const c of candidates) {
+                if (totalCounts[c] < minTotal) { minTotal = totalCounts[c]; best = c; }
+            }
+            return best;
+        }
         let min = Infinity, best = committees[0];
         for (const c of committees) {
-            if (counts[c] < min) { min = counts[c]; best = c; }
+            if (totalCounts[c] < min) { min = totalCounts[c]; best = c; }
         }
         return best;
     }
@@ -275,7 +416,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isAkash = reg && reg.name.toLowerCase().includes('akash');
         const party = (isHarshil || isAkash) ? 'Party A' : weightedPartyPick();
 
-        const committee = leastAssignedCommittee();
+        const committee = leastAssignedCommittee(party);
 
         try {
             const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
@@ -385,7 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (caller === 'Assign All') assignAllBtn.textContent = `Processing ${targets.length}...`;
         else reassignAllBtn.textContent = `Processing ${targets.length}...`;
 
-        let partyPool, committeePool;
+        let partyPool;
 
         if (caller === 'Assign Unassigned') {
             const total = delegates.length;
@@ -417,36 +558,11 @@ document.addEventListener('DOMContentLoaded', () => {
             while (partyPool.length < targets.length) {
                 partyPool.push(parties[Math.floor(Math.random() * parties.length)]);
             }
-
-            const idealCommittee = {};
-            const perComm = Math.floor(total / committees.length);
-            let ext = total - perComm * committees.length;
-            for (const c of committees) {
-                idealCommittee[c] = perComm + (ext > 0 ? 1 : 0);
-                if (ext > 0) ext--;
-            }
-            const existingCommittee = {};
-            committees.forEach(c => existingCommittee[c] = 0);
-            delegates.forEach(d => {
-                if (d.assigned_committee && !targets.find(t => t.id === d.id)) {
-                    existingCommittee[d.assigned_committee] = (existingCommittee[d.assigned_committee] || 0) + 1;
-                }
-            });
-            committeePool = [];
-            for (const c of committees) {
-                const needed = Math.max(0, idealCommittee[c] - (existingCommittee[c] || 0));
-                for (let j = 0; j < needed; j++) committeePool.push(c);
-            }
-            while (committeePool.length < targets.length) {
-                committeePool.push(committees[Math.floor(Math.random() * committees.length)]);
-            }
         } else {
             partyPool = buildPartyPool(targets.length);
-            committeePool = buildCommitteePool(targets.length);
         }
 
         shuffleArray(partyPool);
-        shuffleArray(committeePool);
 
         const harshilIdx = targets.findIndex(d => d.name.toLowerCase().includes('harshil'));
         const akashIdx = targets.findIndex(d => d.name.toLowerCase().includes('akash'));
@@ -464,13 +580,45 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Determine party for each target
         let poolIdx = 0;
+        const partyOf = {};
+        targets.forEach((d, i) => {
+            partyOf[i] = reservedParties[i] || partyPool[poolIdx++];
+        });
+
+        // Build committee assignments ensuring each committee has ≥1 from each party
+        const guaranteeSlots = [];
+        for (const p of parties) {
+            for (const c of committees) {
+                guaranteeSlots.push({ party: p, committee: c });
+            }
+        }
+        shuffleArray(guaranteeSlots);
+
+        const committeeOf = {};
+        const remainingIdxs = [];
+        for (let i = 0; i < targets.length; i++) {
+            const slotIdx = guaranteeSlots.findIndex(s => s.party === partyOf[i]);
+            if (slotIdx !== -1) {
+                committeeOf[i] = guaranteeSlots[slotIdx].committee;
+                guaranteeSlots.splice(slotIdx, 1);
+            } else {
+                remainingIdxs.push(i);
+            }
+        }
+        const leftoverPool = buildCommitteePool(remainingIdxs.length);
+        remainingIdxs.forEach((idx, j) => {
+            committeeOf[idx] = leftoverPool[j];
+        });
+
+        // Assign each target
         for (let i = 0; i < targets.length; i++) {
             const d = targets[i];
             if (!constituencies.length) break;
             const constituency = constituencies[Math.floor(Math.random() * constituencies.length)];
-            const party = reservedParties[i] || partyPool[poolIdx++];
-            const committee = committeePool[i];
+            const party = partyOf[i];
+            const committee = committeeOf[i];
             try {
                 const res = await fetch(`${API_BASE}/admin/registrations/${d.id}`, {
                     method: 'PATCH',

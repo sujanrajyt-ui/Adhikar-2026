@@ -312,6 +312,47 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
   }
 });
 
+// Public: get current leadership
+app.get('/api/leadership', async (req, res) => {
+  try {
+    const data = await db.getLeadership();
+    // Enrich with delegate names
+    const regs = await db.getAll();
+    const enrich = (id) => {
+      const d = regs.find(r => r.id === id);
+      return d ? { id: d.id, name: d.name, party: d.assigned_party } : null;
+    };
+    const result = {
+      pm: enrich(data.pm),
+      dpm: enrich(data.dpm),
+      lop: enrich(data.lop),
+      dep_lop: enrich(data.dep_lop),
+      ministers: {}
+    };
+    if (data.ministers) {
+      for (const [key, val] of Object.entries(data.ministers)) {
+        result.ministers[key] = enrich(val);
+      }
+    }
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Admin: save leadership
+app.post('/api/admin/leadership', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    await db.setLeadership(req.body);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 /* ============ Admin Secretariat APIs (Protected) ============ */
 
 // Admin login

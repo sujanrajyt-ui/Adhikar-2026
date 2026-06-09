@@ -8,6 +8,7 @@ const JUDGES_FILE = path.join(__dirname, 'judges.json');
 const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
 const SCORES_FILE = path.join(__dirname, 'scores.json');
 const AWARDS_FILE = path.join(__dirname, 'awards.json');
+const LEADERSHIP_FILE = path.join(__dirname, 'leadership.json');
 const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
 
 
@@ -114,6 +115,13 @@ async function init() {
       await client.query(`ALTER TABLE awards ADD COLUMN IF NOT EXISTS requires_side VARCHAR(50);`);
       await client.query(`ALTER TABLE awards ADD COLUMN IF NOT EXISTS requires_role VARCHAR(255);`);
 
+      // Leadership table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS leadership (
+          role VARCHAR(50) PRIMARY KEY,
+          delegate_id VARCHAR(50) NOT NULL
+        );
+      `);
 
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
@@ -139,6 +147,9 @@ async function init() {
     }
     if (!fs.existsSync(AWARDS_FILE)) {
       fs.writeFileSync(AWARDS_FILE, JSON.stringify([], null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(LEADERSHIP_FILE)) {
+      fs.writeFileSync(LEADERSHIP_FILE, JSON.stringify({ ministers: {} }, null, 2), 'utf-8');
     }
   }
 
@@ -736,6 +747,45 @@ module.exports = {
       fs.writeFileSync(AWARDS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
       return true;
     }
+  },
+
+  // ============ Leadership ============
+
+  async getLeadership() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM leadership');
+      const data = { ministers: {} };
+      res.rows.forEach(r => {
+        if (r.role.startsWith('minister_')) data.ministers[r.role] = r.delegate_id;
+        else data[r.role] = r.delegate_id;
+      });
+      return data;
+    } else {
+      const raw = fs.existsSync(LEADERSHIP_FILE) ? fs.readFileSync(LEADERSHIP_FILE, 'utf-8') : '{}';
+      return JSON.parse(raw);
+    }
+  },
+
+  async setLeadership(data) {
+    const { pm, dpm, lop, dep_lop, ministers } = data;
+    if (isPg) {
+      await pool.query('DELETE FROM leadership');
+      const inserts = [];
+      if (pm) inserts.push(pool.query('INSERT INTO leadership (role, delegate_id) VALUES ($1,$2)', ['pm', pm]));
+      if (dpm) inserts.push(pool.query('INSERT INTO leadership (role, delegate_id) VALUES ($1,$2)', ['dpm', dpm]));
+      if (lop) inserts.push(pool.query('INSERT INTO leadership (role, delegate_id) VALUES ($1,$2)', ['lop', lop]));
+      if (dep_lop) inserts.push(pool.query('INSERT INTO leadership (role, delegate_id) VALUES ($1,$2)', ['dep_lop', dep_lop]));
+      if (ministers) {
+        for (const [key, val] of Object.entries(ministers)) {
+          if (val) inserts.push(pool.query('INSERT INTO leadership (role, delegate_id) VALUES ($1,$2)', [`minister_${key}`, val]));
+        }
+      }
+      await Promise.all(inserts);
+    } else {
+      const entry = { pm: pm || '', dpm: dpm || '', lop: lop || '', dep_lop: dep_lop || '', ministers: ministers || {} };
+      fs.writeFileSync(LEADERSHIP_FILE, JSON.stringify(entry, null, 2), 'utf-8');
+    }
+    return { success: true };
   }
 };
 
