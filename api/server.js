@@ -281,6 +281,22 @@ app.delete('/api/admin/parties/:id', async (req, res) => {
   res.json({ success: true });
 });
 
+// Admin: rename a party/committee (updates all delegates too)
+app.patch('/api/admin/parties/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { name } = req.body;
+  if (!name || !name.trim()) return res.status(400).json({ detail: 'New name is required' });
+  try {
+    const result = await db.renameParty(req.params.id, name.trim());
+    if (!result) return res.status(404).json({ detail: 'Not found' });
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 /* ============ Admin Secretariat APIs (Protected) ============ */
 
 // Admin login

@@ -4289,8 +4289,34 @@ body:hover #cursor-spotlight {
 }
 
 
+.party-admin-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
 .party-admin-label {
   flex: 1;
+}
+
+.party-rename-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(52, 152, 219, 0.12);
+  border: 1px solid rgba(52, 152, 219, 0.2);
+  color: #5dade2;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.party-rename-btn:hover {
+  background: rgba(52, 152, 219, 0.25);
 }
 
 .party-del-btn {

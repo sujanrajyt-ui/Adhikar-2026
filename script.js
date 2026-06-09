@@ -181,7 +181,10 @@ function initPartiesAdmin() {
             <strong>${escapeHtml(p.name)}</strong>
             <em style="opacity:.6;font-size:.8rem;"> — ${p.type}${p.side ? ' · ' + p.side : ''}</em>
           </span>
-          <button class="party-del-btn" data-id="${p.id}" title="Delete">✕</button>
+          <span class="party-admin-actions">
+            <button class="party-rename-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" title="Rename">✎</button>
+            <button class="party-del-btn" data-id="${p.id}" title="Delete">✕</button>
+          </span>
         </div>`).join('');
       listEl.querySelectorAll('.party-del-btn').forEach(btn => {
         btn.addEventListener('click', async () => {
@@ -191,9 +194,28 @@ function initPartiesAdmin() {
             await fetch(`${API_BASE}/admin/parties/${btn.dataset.id}`, {
               method: 'DELETE', headers: { 'X-Admin-Password': adminPassword }
             });
-            await Promise.all([loadList(), renderParties()]);
+            await Promise.all([loadList(), renderParties(), loadPartiesCache()]);
             showToast('Deleted');
           } catch { showToast('Failed to delete', 'error'); btn.disabled = false; }
+        });
+      });
+      listEl.querySelectorAll('.party-rename-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const oldName = btn.dataset.name;
+          const newName = prompt(`Rename "${oldName}" to:`, oldName);
+          if (!newName || newName.trim() === oldName) return;
+          btn.disabled = true;
+          try {
+            const res = await fetch(`${API_BASE}/admin/parties/${btn.dataset.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+              body: JSON.stringify({ name: newName.trim() })
+            });
+            if (!res.ok) throw new Error('Rename failed');
+            const data = await res.json();
+            await Promise.all([loadList(), renderParties(), loadPartiesCache()]);
+            showToast(`Renamed to "${data.name}"${data.updated_delegates ? ` · ${data.updated_delegates} delegates updated` : ''}`, 'success');
+          } catch { showToast('Failed to rename', 'error'); btn.disabled = false; }
         });
       });
     } catch { listEl.innerHTML = '<p style="color:#ff6b6b;font-size:.85rem;">Could not load.</p>'; }
