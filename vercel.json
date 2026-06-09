@@ -6,10 +6,6 @@
       "destination": "/api/server"
     },
     {
-      "source": "/assign",
-      "destination": "/assign.html"
-    },
-    {
       "source": "/scores",
       "destination": "/scores.html"
     },
