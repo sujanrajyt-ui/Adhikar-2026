@@ -582,6 +582,67 @@ app.get('/api/awards', async (req, res) => {
   res.json(await db.getAwards());
 });
 
+// ============ Sessions APIs ============
+
+// Public: Get all sessions (with optional judgeId for completion status)
+app.get('/api/sessions', async (req, res) => {
+  try {
+    const sessions = await db.getSessions();
+    if (sessions.length === 0) {
+      const now = new Date().toISOString();
+      const defaults = [
+        { id: 'QH', name: 'Question Hour (QH)' },
+        { id: 'ZH', name: 'Zero Hour (ZH)' },
+        { id: 'MR', name: 'Ministry Reports (MR)' },
+        { id: 'BP', name: 'Bill Presentations (BP)' },
+        { id: 'SS', name: 'Surprise Session (SS)' }
+      ];
+      for (const s of defaults) await db.createSession(s);
+      return res.json(await db.getSessions());
+    }
+
+    // If judgeId is provided, annotate which sessions they have scored in
+    const judgeId = req.query.judgeId;
+    if (judgeId) {
+      const allScores = await db.getAllScores();
+      const result = sessions.map(s => ({
+        ...s,
+        hasScores: allScores.some(sc => sc.judge_id === judgeId && (sc.session_id || 'general') === s.id)
+      }));
+      return res.json(result);
+    }
+
+    res.json(sessions);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Admin: Create session
+app.post('/api/admin/sessions', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const { id, name } = req.body;
+  if (!name) return res.status(400).json({ detail: 'name required' });
+  try {
+    const entry = await db.createSession({ id, name });
+    res.json(entry);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Admin: Delete session
+app.delete('/api/admin/sessions/:id', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  const deleted = await db.deleteSession(req.params.id);
+  if (!deleted) return res.status(404).json({ detail: 'Not found' });
+  res.json({ success: true });
+});
+
 // Public/Judge: Get all criteria
 app.get('/api/scores/criteria', async (req, res) => {
   res.json(await db.getCriteria());
@@ -590,11 +651,12 @@ app.get('/api/scores/criteria', async (req, res) => {
 // Judge: Get all verified delegates with their scores
 app.get('/api/scores/delegates', async (req, res) => {
   const judgeId = req.query.judgeId;
+  const sessionId = req.query.sessionId || null;
   if (!judgeId) return res.status(400).json({ detail: 'judgeId required' });
 
   const [registrations, scores] = await Promise.all([
     db.getAll(),
-    db.getScoresForJudge(judgeId)
+    db.getScoresForJudge(judgeId, sessionId)
   ]);
 
   // Filter for delegates who are either verified OR have been assigned a committee
@@ -614,7 +676,7 @@ app.get('/api/scores/delegates', async (req, res) => {
 
 // Judge: Submit score
 app.post('/api/scores/submit', async (req, res) => {
-  const { delegate_id, judge_id, criteria_id, score } = req.body;
+  const { delegate_id, judge_id, criteria_id, score, session_id } = req.body;
   if (!delegate_id || !judge_id || !criteria_id || score === undefined) {
     return res.status(400).json({ detail: 'Missing required fields' });
   }
@@ -627,7 +689,7 @@ app.post('/api/scores/submit', async (req, res) => {
       return res.status(400).json({ detail: 'Score out of range (0-100)' });
     }
 
-    const entry = await db.submitScore({ delegate_id, judge_id, criteria_id, score: scoreVal });
+    const entry = await db.submitScore({ delegate_id, judge_id, criteria_id, score: scoreVal, session_id: session_id || 'general' });
     res.json(entry);
   } catch (err) {
     res.status(500).json({ detail: err.message });
@@ -655,10 +717,30 @@ app.get('/api/public/leaderboard', async (req, res) => {
     const leaderboardData = verified.map(d => {
       const dScores = scores.filter(s => s.delegate_id === d.id);
       const criteriaScores = {};
+
+      // Group scores by criteria AND session, then average across sessions
       criteria.forEach(c => {
         const cMatches = dScores.filter(s => s.criteria_id === c.id);
-        const total = cMatches.reduce((sum, s) => sum + s.score, 0);
-        criteriaScores[c.id] = cMatches.length > 0 ? (total / cMatches.length) : 0;
+        if (cMatches.length === 0) {
+          criteriaScores[c.id] = 0;
+          return;
+        }
+
+        // Group by session_id
+        const sessionGroups = {};
+        cMatches.forEach(s => {
+          const sid = s.session_id || 'general';
+          if (!sessionGroups[sid]) sessionGroups[sid] = [];
+          sessionGroups[sid].push(s.score);
+        });
+
+        // Average within each session
+        const sessionAvgs = Object.values(sessionGroups).map(scores => {
+          return scores.reduce((sum, sc) => sum + sc, 0) / scores.length;
+        });
+
+        // Average across sessions
+        criteriaScores[c.id] = sessionAvgs.reduce((sum, avg) => sum + avg, 0) / sessionAvgs.length;
       });
       const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
 
@@ -732,7 +814,7 @@ app.get('/api/admin/scores/export', async (req, res) => {
 
     // Build CSV header
     const criteriaNames = criteria.map(c => c.name);
-    const headerRow = ['Delegate Name', 'Party', 'Committee', 'Portfolio', 'Judge ID', ...criteriaNames, 'Total Score', 'Scored At'];
+    const headerRow = ['Delegate Name', 'Party', 'Committee', 'Portfolio', 'Judge ID', 'Session', ...criteriaNames, 'Total Score', 'Scored At'];
 
     // Build rows: one row per delegate per judge
     const rows = [];
@@ -753,6 +835,7 @@ app.get('/api/admin/scores/export', async (req, res) => {
           delegate.assigned_committee || '',
           delegate.portfolio || '',
           '—',
+          '—',
           ...criteriaNames.map(() => ''),
           '0',
           ''
@@ -770,12 +853,14 @@ app.get('/api/admin/scores/export', async (req, res) => {
             ? judgeScores.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))[0].updated_at
             : '';
 
+          const sessionId = judgeScores.length > 0 ? (judgeScores[0].session_id || 'general') : '—';
           const row = [
             delegate.name,
             delegate.assigned_party || '',
             delegate.assigned_committee || '',
             delegate.portfolio || '',
             judgeId,
+            sessionId,
             ...criteriaValues,
             total,
             lastUpdate

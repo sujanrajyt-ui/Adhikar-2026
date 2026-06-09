@@ -9,6 +9,7 @@ const CRITERIA_FILE = path.join(__dirname, 'criteria.json');
 const SCORES_FILE = path.join(__dirname, 'scores.json');
 const AWARDS_FILE = path.join(__dirname, 'awards.json');
 const LEADERSHIP_FILE = path.join(__dirname, 'leadership.json');
+const SESSIONS_FILE = path.join(__dirname, 'sessions.json');
 const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
 
 
@@ -123,6 +124,30 @@ async function init() {
         );
       `);
 
+      // Sessions table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id VARCHAR(50) PRIMARY KEY,
+          name VARCHAR(255) NOT NULL,
+          created_at VARCHAR(100) NOT NULL
+        );
+      `);
+
+      // Add session_id to scores table
+      await client.query(`ALTER TABLE scores ADD COLUMN IF NOT EXISTS session_id VARCHAR(50) DEFAULT 'general'`);
+
+      // If scores table exists with old PK, migrate to include session_id
+      try {
+        await client.query(`
+          ALTER TABLE scores DROP CONSTRAINT scores_pkey CASCADE
+        `);
+        await client.query(`
+          ALTER TABLE scores ADD PRIMARY KEY (delegate_id, judge_id, criteria_id, session_id)
+        `);
+      } catch (e) {
+        // PK might already be updated or table doesn't have data yet
+      }
+
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
@@ -150,6 +175,17 @@ async function init() {
     }
     if (!fs.existsSync(LEADERSHIP_FILE)) {
       fs.writeFileSync(LEADERSHIP_FILE, JSON.stringify({ ministers: {} }, null, 2), 'utf-8');
+    }
+    if (!fs.existsSync(SESSIONS_FILE)) {
+      const now = new Date().toISOString();
+      const defaultSessions = [
+        { id: 'QH', name: 'Question Hour (QH)', created_at: now },
+        { id: 'ZH', name: 'Zero Hour (ZH)', created_at: now },
+        { id: 'MR', name: 'Ministry Reports (MR)', created_at: now },
+        { id: 'BP', name: 'Bill Presentations (BP)', created_at: now },
+        { id: 'SS', name: 'Surprise Session (SS)', created_at: now }
+      ];
+      fs.writeFileSync(SESSIONS_FILE, JSON.stringify(defaultSessions, null, 2), 'utf-8');
     }
   }
 
@@ -193,8 +229,8 @@ function writeData(data) {
 function appendToLog(entry) {
   try {
     const isNew = !fs.existsSync(LOG_FILE);
-    const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score\n";
-    const line = `${new Date().toISOString()},${entry.delegate_id},${entry.judge_id},${entry.criteria_id},${entry.score}\n`;
+    const header = "Timestamp,Delegate ID,Judge ID,Criteria ID,Score,Session ID\n";
+    const line = `${new Date().toISOString()},${entry.delegate_id},${entry.judge_id},${entry.criteria_id},${entry.score},${entry.session_id || ''}\n`;
 
     if (isNew) {
       fs.writeFileSync(LOG_FILE, header + line, 'utf-8');
@@ -619,40 +655,47 @@ module.exports = {
 
   // ============ Scores ============
 
-  async getScoresForJudge(judgeId) {
+  async getScoresForJudge(judgeId, sessionId) {
     if (isPg) {
+      if (sessionId) {
+        const res = await pool.query('SELECT * FROM scores WHERE judge_id = $1 AND session_id = $2', [judgeId, sessionId]);
+        return res.rows;
+      }
       const res = await pool.query('SELECT * FROM scores WHERE judge_id = $1', [judgeId]);
       return res.rows;
     } else {
       const list = JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
-      return list.filter(s => s.judge_id === judgeId);
+      let filtered = list.filter(s => s.judge_id === judgeId);
+      if (sessionId) filtered = filtered.filter(s => s.session_id === sessionId);
+      return filtered;
     }
   },
 
-  async submitScore({ delegate_id, judge_id, criteria_id, score }) {
+  async submitScore({ delegate_id, judge_id, criteria_id, score, session_id }) {
     const now = new Date().toISOString();
+    const sid = session_id || 'general';
     if (isPg) {
       await pool.query(`
-        INSERT INTO scores (delegate_id, judge_id, criteria_id, score, updated_at)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (delegate_id, judge_id, criteria_id)
+        INSERT INTO scores (delegate_id, judge_id, criteria_id, score, updated_at, session_id)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        ON CONFLICT (delegate_id, judge_id, criteria_id, session_id)
         DO UPDATE SET score = EXCLUDED.score, updated_at = EXCLUDED.updated_at
-      `, [delegate_id, judge_id, criteria_id, score, now]);
+      `, [delegate_id, judge_id, criteria_id, score, now, sid]);
     } else {
       const list = JSON.parse(fs.existsSync(SCORES_FILE) ? fs.readFileSync(SCORES_FILE, 'utf-8') : '[]');
-      const idx = list.findIndex(s => s.delegate_id === delegate_id && s.judge_id === judge_id && s.criteria_id === criteria_id);
+      const idx = list.findIndex(s => s.delegate_id === delegate_id && s.judge_id === judge_id && s.criteria_id === criteria_id && s.session_id === sid);
       if (idx > -1) {
         list[idx] = { ...list[idx], score, updated_at: now };
       } else {
-        list.push({ delegate_id, judge_id, criteria_id, score, updated_at: now });
+        list.push({ delegate_id, judge_id, criteria_id, score, updated_at: now, session_id: sid });
       }
       fs.writeFileSync(SCORES_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
 
     // Always append to safety log
-    appendToLog({ delegate_id, judge_id, criteria_id, score });
+    appendToLog({ delegate_id, judge_id, criteria_id, score, session_id: sid });
 
-    return { delegate_id, judge_id, criteria_id, score, updated_at: now };
+    return { delegate_id, judge_id, criteria_id, score, session_id: sid, updated_at: now };
   },
 
 
@@ -745,6 +788,54 @@ module.exports = {
       const filtered = list.filter(a => a.id !== id);
       if (filtered.length === list.length) return false;
       fs.writeFileSync(AWARDS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      return true;
+    }
+  },
+
+  // ============ Sessions ============
+
+  async getSessions() {
+    if (isPg) {
+      const res = await pool.query('SELECT * FROM sessions ORDER BY created_at ASC');
+      return res.rows;
+    } else {
+      const raw = fs.existsSync(SESSIONS_FILE) ? fs.readFileSync(SESSIONS_FILE, 'utf-8') : '[]';
+      return JSON.parse(raw);
+    }
+  },
+
+  async createSession(data) {
+    const id = data.id || ('session_' + Date.now().toString(36).toUpperCase());
+    const { name } = data;
+    const now = new Date().toISOString();
+    const entry = { id, name, created_at: now };
+    if (isPg) {
+      await pool.query(
+        'INSERT INTO sessions (id, name, created_at) VALUES ($1, $2, $3) ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name',
+        [id, name, now]
+      );
+    } else {
+      const list = JSON.parse(fs.existsSync(SESSIONS_FILE) ? fs.readFileSync(SESSIONS_FILE, 'utf-8') : '[]');
+      const existing = list.findIndex(s => s.id === id);
+      if (existing > -1) {
+        list[existing] = { ...list[existing], name };
+      } else {
+        list.push(entry);
+      }
+      fs.writeFileSync(SESSIONS_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    return entry;
+  },
+
+  async deleteSession(id) {
+    if (isPg) {
+      const res = await pool.query('DELETE FROM sessions WHERE id = $1', [id]);
+      return (res.rowCount || 0) > 0;
+    } else {
+      const list = JSON.parse(fs.existsSync(SESSIONS_FILE) ? fs.readFileSync(SESSIONS_FILE, 'utf-8') : '[]');
+      const filtered = list.filter(s => s.id !== id);
+      if (filtered.length === list.length) return false;
+      fs.writeFileSync(SESSIONS_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
       return true;
     }
   },
