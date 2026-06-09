@@ -252,10 +252,20 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHTML();
 
         saveBtn.onclick = async () => {
+            const counts = {};
+            parties.forEach(p => counts[p] = 0);
+            delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
+            const totalRuling = parties.filter(p => rulingSet.has(p)).reduce((s, p) => s + counts[p], 0);
+            const total = Object.values(counts).reduce((s, c) => s + c, 0);
+            const magic = Math.floor(total / 2) + 1;
+            if (totalRuling < magic) {
+                showToast('Government needs at least ' + magic + ' delegates (has ' + totalRuling + '). Cannot form government.', 'error');
+                return;
+            }
             const rulingIds = parties.filter(p => rulingSet.has(p)).map(p => nameToId[p] || p);
             saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
             try {
-                const res = await fetch(${API_BASE}/admin/parties/coalition, {
+                const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
                     body: JSON.stringify({ ruling_ids: rulingIds })
