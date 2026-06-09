@@ -181,6 +181,14 @@ h3 {
 
 .login-form input:focus {
     border-color: var(--gold);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.login-form input:-webkit-autofill,
+.login-form input:-webkit-autofill:focus {
+    -webkit-text-fill-color: white;
+    -webkit-box-shadow: 0 0 0 1000px var(--maroon-mid) inset;
+    caret-color: white;
 }
 
 .btn-primary {
