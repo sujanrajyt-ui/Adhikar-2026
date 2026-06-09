@@ -115,58 +115,38 @@ async function loadSessions() {
     if (!res.ok) throw new Error("Failed to load sessions");
     allSessions = await res.json();
 
-    // Build session status map
+    // All sessions always accessible; mark completed if has scores
     sessionStatus = {};
-    for (let i = 0; i < allSessions.length; i++) {
-        const s = allSessions[i];
-        if (i === 0) {
-            sessionStatus[s.id] = s.hasScores ? 'completed' : 'unlocked';
-        } else if (s.hasScores) {
-            sessionStatus[s.id] = 'completed';
-        } else if (sessionStatus[allSessions[i - 1].id] === 'completed') {
-            sessionStatus[s.id] = 'unlocked';
-        } else {
-            sessionStatus[s.id] = 'locked';
-        }
-    }
+    allSessions.forEach(s => {
+        sessionStatus[s.id] = s.hasScores ? 'completed' : 'unlocked';
+    });
 }
 
 function resolveSession() {
     const saved = sessionStorage.getItem('adhikar_session');
-    if (saved && sessionStatus[saved] && sessionStatus[saved] !== 'locked') {
+    if (saved && allSessions.some(s => s.id === saved)) {
         currentSession = saved;
         return;
     }
-    // Fall back to first unlocked session
-    const first = allSessions.find(s => sessionStatus[s.id] === 'unlocked');
-    currentSession = first ? first.id : (allSessions[0] ? allSessions[0].id : null);
+    currentSession = allSessions[0] ? allSessions[0].id : null;
     if (currentSession) sessionStorage.setItem('adhikar_session', currentSession);
 }
 
 function renderSessionTabs() {
     if (!sessionTabs) return;
     sessionTabs.innerHTML = allSessions.map((s, i) => {
-        const status = sessionStatus[s.id] || 'locked';
+        const status = sessionStatus[s.id] || 'unlocked';
         const isActive = s.id === currentSession;
-        let icon = '';
-        let label = '';
-        if (status === 'completed') {
-            icon = `<svg class="tab-icon completed" viewBox="0 0 24 24" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>`;
-            label = 'completed';
-        } else if (status === 'locked') {
-            icon = `<svg class="tab-icon locked" viewBox="0 0 24 24" width="16" height="16"><path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z" fill="currentColor"/></svg>`;
-            label = 'locked';
-        }
+        const checkIcon = status === 'completed'
+            ? `<svg class="tab-icon completed" viewBox="0 0 24 24" width="16" height="16"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/></svg>`
+            : '';
         return `
-            <button class="session-tab ${isActive ? 'active' : ''} ${status}"
+            <button class="session-tab ${isActive ? 'active' : ''} ${status === 'completed' ? 'completed' : ''}"
                 data-session="${s.id}"
-                ${status === 'locked' ? 'disabled' : ''}
-                title="${status === 'locked' ? 'Score the previous session first' : s.name}">
-                ${icon}
+                title="${s.name}">
+                ${checkIcon}
                 <span class="tab-short">${s.id}</span>
                 <span class="tab-full">${escapeHtml(s.name)}</span>
-                ${status === 'completed' ? `<span class="tab-badge">${label}</span>` : ''}
-                ${status === 'unlocked' && !isActive ? `<span class="tab-badge tab-ready">ready</span>` : ''}
             </button>
         `;
     }).join('');
@@ -464,8 +444,11 @@ async function handleInlineSave(delegateId) {
         showToast(`Scores saved for ${delegate.name}`);
         updateProgress();
 
-        // Unlock next session if this was the first score in current session
-        await checkSessionUnlock();
+        // Mark session as completed if first score
+        if (sessionStatus[currentSession] !== 'completed') {
+            sessionStatus[currentSession] = 'completed';
+            renderSessionTabs();
+        }
 
         focusNextDelegate(delegateId);
 
@@ -475,31 +458,6 @@ async function handleInlineSave(delegateId) {
         btn.disabled = false;
         btn.innerHTML = '⟳ Retry Save';
     }
-}
-
-async function checkSessionUnlock() {
-    // Check if this session now has scores (first submission unlocks next)
-    const hadScoresBefore = sessionStatus[currentSession] === 'completed';
-    if (hadScoresBefore) return;
-
-    // Check if current session actually has scores now
-    const hasAnyScore = allDelegates.some(d => d.scores && d.scores.length > 0);
-    if (!hasAnyScore) return;
-
-    // Mark current as completed
-    sessionStatus[currentSession] = 'completed';
-
-    // Unlock next session
-    const currentIdx = allSessions.findIndex(s => s.id === currentSession);
-    if (currentIdx >= 0 && currentIdx < allSessions.length - 1) {
-        const nextSession = allSessions[currentIdx + 1];
-        if (sessionStatus[nextSession.id] === 'locked') {
-            sessionStatus[nextSession.id] = 'unlocked';
-            showToast(`🔓 ${nextSession.name} is now unlocked!`, 'info');
-        }
-    }
-
-    renderSessionTabs();
 }
 
 function updateProgress() {
