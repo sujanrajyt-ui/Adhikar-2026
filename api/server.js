@@ -301,7 +301,24 @@ const CONSTITUENCIES = [
 // Public: get all parties & committees
 app.get('/api/parties', async (req, res) => {
   try {
-    res.json(await db.getParties());
+    let parties = await db.getParties();
+    if (!parties || parties.length === 0) {
+      const defaults = [
+        { id: 'party_a', name: 'Party A', type: 'party', side: 'ruling' },
+        { id: 'party_b', name: 'Party B', type: 'party', side: 'opposition' },
+        { id: 'party_c', name: 'Party C', type: 'party', side: 'neutral' },
+        { id: 'party_d', name: 'Party D', type: 'party', side: 'neutral' },
+        { id: 'party_e', name: 'Party E', type: 'party', side: 'neutral' },
+        { id: 'com_education', name: 'EDUCATION', type: 'committee' },
+        { id: 'com_finance', name: 'FINANCE', type: 'committee' },
+        { id: 'com_home_affairs', name: 'HOME AFFAIRS', type: 'committee' },
+        { id: 'com_health', name: 'HEALTH', type: 'committee' },
+        { id: 'com_justice', name: 'JUSTICE', type: 'committee' }
+      ];
+      for (const p of defaults) await db.createParty(p);
+      parties = await db.getParties();
+    }
+    res.json(parties);
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
