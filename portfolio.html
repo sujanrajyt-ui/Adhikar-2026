@@ -3,55 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parties, Portfolios & Constituencies | ADHIKAR'26</title>
+    <title>My Portfolio | ADHIKAR'26</title>
     <link rel="icon" type="image/x-icon" href="assets/logo.png">
     <link rel="stylesheet" href="styles.css">
     <style>
         body { background: var(--maroon-900); color: var(--cream-300); }
-        .portfolio-page { padding: 2rem 1rem; max-width: 900px; margin: 0 auto; }
-        .portfolio-page h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff; margin-bottom: 0.25rem; }
-        .portfolio-page .subtitle { color: rgba(255,255,255,0.35); font-size: 0.85rem; margin-bottom: 2rem; }
-        .portfolio-section { margin-bottom: 2rem; }
-        .portfolio-section h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold-500); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
-        .portfolio-grid { display: grid; gap: 0.75rem; }
-        .portfolio-card { background: var(--maroon-800); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
-        .portfolio-card:hover { border-color: rgba(212,175,55,0.2); }
-        .portfolio-card .card-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
-        .portfolio-card .card-side { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
-        .card-side-ruling { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.15); }
-        .card-side-opposition { background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.15); }
-        .portfolio-card .card-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
-        .portfolio-loading { text-align: center; padding: 3rem; color: rgba(255,255,255,0.2); }
-        .portfolio-error { text-align: center; padding: 3rem; color: #e74c3c; }
+        .pf-page { padding: 2rem 1rem; max-width: 700px; margin: 0 auto; }
+        .pf-page h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff; margin-bottom: 0.25rem; }
+        .pf-page .subtitle { color: rgba(255,255,255,0.35); font-size: 0.85rem; margin-bottom: 2rem; }
+        .pf-search { margin-bottom: 2rem; }
+        .pf-search input { width: 100%; padding: 0.75rem 1rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); background: var(--maroon-800); color: var(--cream-300); font-size: 0.95rem; font-family: inherit; outline: none; box-sizing: border-box; transition: border-color 0.2s; }
+        .pf-search input:focus { border-color: var(--gold-500); }
+        .pf-search input::placeholder { color: rgba(255,255,255,0.2); }
+        .pf-result { background: var(--maroon-800); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 1.5rem; margin-bottom: 1rem; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .pf-result h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #fff; margin: 0 0 0.25rem; }
+        .pf-result .pf-id { font-size: 0.7rem; color: rgba(255,255,255,0.25); margin-bottom: 1rem; }
+        .pf-row { display: flex; justify-content: space-between; align-items: center; padding: 0.6rem 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .pf-row:last-child { border-bottom: none; }
+        .pf-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: rgba(255,255,255,0.3); }
+        .pf-value { font-size: 0.9rem; font-weight: 600; color: #fff; text-align: right; }
+        .pf-value.party-a { color: #5dade2; }
+        .pf-value.party-b { color: #2ecc71; }
+        .pf-value.party-c { color: #bb8fce; }
+        .pf-value.party-d { color: #e67e22; }
+        .pf-value.party-e { color: #e74c3c; }
+        .pf-none { text-align: center; padding: 3rem; color: rgba(255,255,255,0.2); font-size: 0.9rem; }
+        .pf-loading { text-align: center; padding: 3rem; color: rgba(255,255,255,0.2); }
+        .pf-error { text-align: center; padding: 3rem; color: #e74c3c; }
         .back-link { display: inline-block; margin-top: 2rem; font-size: 0.8rem; color: var(--gold-500); text-decoration: none; }
         .back-link:hover { text-decoration: underline; }
     </style>
 </head>
 <body>
-    <div class="portfolio-page">
-        <h1>Parties &amp; Portfolios</h1>
-        <p class="subtitle">ADHIKAR'26 Mock Parliament &mdash; Political parties, ministerial portfolios and constituencies</p>
+    <div class="pf-page">
+        <h1>My Portfolio</h1>
+        <p class="subtitle">Search your name to see your constituency, party &amp; committee</p>
 
-        <div id="parties-section" class="portfolio-section">
-            <h2>Political Parties</h2>
-            <div id="parties-list" class="portfolio-grid"></div>
+        <div class="pf-search">
+            <input type="text" id="pf-search-input" placeholder="Search your name..." autocomplete="off">
         </div>
 
-        <div id="committees-section" class="portfolio-section">
-            <h2>Ministerial Portfolios</h2>
-            <div id="committees-list" class="portfolio-grid"></div>
-        </div>
-
-        <div id="constituencies-section" class="portfolio-section">
-            <h2>Constituencies by Party</h2>
-            <div id="constituencies-list"></div>
-        </div>
+        <div id="pf-results"></div>
 
         <a href="/" class="back-link">&larr; Back to Home</a>
     </div>
 
     <script>
         const API_BASE = '/api';
+        let delegates = [];
+        let searchTimeout = null;
 
         function escapeHtml(str) {
             if (!str) return '';
@@ -60,118 +61,63 @@
             return div.innerHTML;
         }
 
-        function partyColor(party) {
-            const colors = {
-                'Party A': { bg: 'rgba(52,152,219,0.12)', border: 'rgba(52,152,219,0.2)', text: '#5dade2' },
-                'Party B': { bg: 'rgba(46,204,113,0.12)', border: 'rgba(46,204,113,0.2)', text: '#2ecc71' },
-                'Party C': { bg: 'rgba(155,89,182,0.12)', border: 'rgba(155,89,182,0.2)', text: '#bb8fce' },
-                'Party D': { bg: 'rgba(230,126,34,0.12)', border: 'rgba(230,126,34,0.2)', text: '#e67e22' },
-                'Party E': { bg: 'rgba(231,76,60,0.12)', border: 'rgba(231,76,60,0.2)', text: '#e74c3c' },
-            };
-            return colors[party] || { bg: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.08)', text: 'rgba(255,255,255,0.4)' };
+        function partyClass(party) {
+            if (!party) return '';
+            return 'party-' + party.toLowerCase().replace(/\s+/g, '-');
         }
 
-        function constituencyPill(name, party) {
-            const c = partyColor(party);
-            return `<span style="display:inline-flex;align-items:center;gap:6px;background:${c.bg};border:1px solid ${c.border};border-radius:6px;padding:4px 12px;font-size:0.78rem;transition:border-color 0.15s;" onmouseover="this.style.borderColor='rgba(212,175,55,0.3)'" onmouseout="this.style.borderColor='${c.border}'">
-                <span style="color:var(--cream-300);">${escapeHtml(name)}</span>
-                ${party ? `<span style="font-size:0.6rem;font-weight:600;color:${c.text};">${escapeHtml(party)}</span>` : ''}
-            </span>`;
+        function renderResult(d) {
+            const colourClass = partyClass(d.assigned_party);
+            return `<div class="pf-result">
+                <h2>${escapeHtml(d.name)}</h2>
+                <div class="pf-id">ID: ${escapeHtml(d.id)}</div>
+                <div class="pf-row">
+                    <span class="pf-label">Constituency</span>
+                    <span class="pf-value">${d.assigned_constituency ? escapeHtml(d.assigned_constituency) : '<span style="color:rgba(255,255,255,0.2);font-weight:400;">Not assigned</span>'}</span>
+                </div>
+                <div class="pf-row">
+                    <span class="pf-label">Party</span>
+                    <span class="pf-value ${colourClass}">${d.assigned_party ? escapeHtml(d.assigned_party) : '<span style="color:rgba(255,255,255,0.2);font-weight:400;">Not assigned</span>'}</span>
+                </div>
+                <div class="pf-row">
+                    <span class="pf-label">Committee / Portfolio</span>
+                    <span class="pf-value">${d.assigned_committee ? escapeHtml(d.assigned_committee) : '<span style="color:rgba(255,255,255,0.2);font-weight:400;">Not assigned</span>'}</span>
+                </div>
+            </div>`;
+        }
+
+        function doSearch(query) {
+            const container = document.getElementById('pf-results');
+            const q = query.trim().toLowerCase();
+            if (!q) {
+                container.innerHTML = '<div class="pf-none">Type your name above to find your portfolio.</div>';
+                return;
+            }
+            const matches = delegates.filter(d =>
+                d.name.toLowerCase().includes(q) || d.id.toLowerCase().includes(q)
+            );
+            if (!matches.length) {
+                container.innerHTML = '<div class="pf-none">No delegate found matching "' + escapeHtml(q) + '".</div>';
+                return;
+            }
+            container.innerHTML = matches.map(renderResult).join('');
         }
 
         async function load() {
-            const partiesList = document.getElementById('parties-list');
-            const committeesList = document.getElementById('committees-list');
-            const constituenciesList = document.getElementById('constituencies-list');
-
+            const container = document.getElementById('pf-results');
+            container.innerHTML = '<div class="pf-loading">Loading...</div>';
             try {
-                const [partiesRes, delegatesRes, constituenciesRes] = await Promise.all([
-                    fetch(`${API_BASE}/parties?t=${Date.now()}`),
-                    fetch(`${API_BASE}/delegates?t=${Date.now()}`),
-                    fetch(`${API_BASE}/constituencies?t=${Date.now()}`)
-                ]);
+                const res = await fetch(`${API_BASE}/delegates?t=${Date.now()}`);
+                if (!res.ok) throw new Error('Failed to load');
+                delegates = await res.json();
+                container.innerHTML = '<div class="pf-none">Type your name above to find your portfolio.</div>';
 
-                if (!partiesRes.ok) throw new Error('Failed to load');
-
-                const items = await partiesRes.json();
-                const parties = items.filter(p => p.type === 'party');
-                const committees = items.filter(p => p.type === 'committee');
-
-                if (parties.length) {
-                    partiesList.innerHTML = parties.map(p => {
-                        const side = p.side === 'ruling' ? 'Ruling' : p.side === 'opposition' ? 'Opposition' : '';
-                        const sideBadge = side ? `<span class="card-side card-side-${p.side}">${side}</span>` : '';
-                        return `<div class="portfolio-card">
-                            <div class="card-name">${escapeHtml(p.name)}${sideBadge}</div>
-                            ${p.description ? `<div class="card-desc">${escapeHtml(p.description)}</div>` : ''}
-                        </div>`;
-                    }).join('');
-                } else {
-                    partiesList.innerHTML = '<div class="portfolio-loading">No parties configured yet.</div>';
-                }
-
-                if (committees.length) {
-                    committeesList.innerHTML = committees.map(c =>
-                        `<div class="portfolio-card">
-                            <div class="card-name">${escapeHtml(c.name)}</div>
-                            ${c.description ? `<div class="card-desc">${escapeHtml(c.description)}</div>` : ''}
-                        </div>`
-                    ).join('');
-                } else {
-                    committeesList.innerHTML = '<div class="portfolio-loading">No portfolios configured yet.</div>';
-                }
-
-                // Build constituency → party map from delegate assignments
-                const consParty = {};
-                if (delegatesRes.ok) {
-                    const delegateList = await delegatesRes.json();
-                    delegateList.forEach(d => {
-                        if (d.assigned_constituency && d.assigned_party) {
-                            consParty[d.assigned_constituency] = d.assigned_party;
-                        }
-                    });
-                }
-
-                // Group all constituencies by party
-                const allConstituencies = constituenciesRes.ok ? await constituenciesRes.json() : [];
-                const byParty = {};
-                const unassigned = [];
-                allConstituencies.sort().forEach(c => {
-                    const party = consParty[c];
-                    if (party) {
-                        if (!byParty[party]) byParty[party] = [];
-                        byParty[party].push(c);
-                    } else {
-                        unassigned.push(c);
-                    }
+                document.getElementById('pf-search-input').addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => doSearch(this.value), 150);
                 });
-
-                const partyOrder = parties.map(p => p.name);
-                const sortedKeys = Object.keys(byParty).sort((a, b) => {
-                    const ai = partyOrder.indexOf(a);
-                    const bi = partyOrder.indexOf(b);
-                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
-                });
-
-                let html = '';
-                sortedKeys.forEach(key => {
-                    html += `<div class="portfolio-section" style="margin-bottom:1rem;">
-                        <h3 style="font-family:'Playfair Display',serif;font-size:0.95rem;color:var(--cream-100);margin-bottom:0.5rem;">${escapeHtml(key)} <span style="font-weight:400;font-size:0.7rem;color:rgba(255,255,255,0.25);">(${byParty[key].length})</span></h3>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;">${byParty[key].map(c => constituencyPill(c, key)).join('')}</div>
-                    </div>`;
-                });
-                if (unassigned.length) {
-                    html += `<div class="portfolio-section" style="margin-bottom:1rem;">
-                        <h3 style="font-family:'Playfair Display',serif;font-size:0.95rem;color:rgba(255,255,255,0.3);margin-bottom:0.5rem;">Unassigned <span style="font-weight:400;font-size:0.7rem;color:rgba(255,255,255,0.2);">(${unassigned.length})</span></h3>
-                        <div style="display:flex;flex-wrap:wrap;gap:6px;">${unassigned.map(c => constituencyPill(c, null)).join('')}</div>
-                    </div>`;
-                }
-
-                constituenciesList.innerHTML = html || '<div class="portfolio-loading">No constituencies found.</div>';
             } catch (e) {
-                partiesList.innerHTML = '<div class="portfolio-error">Failed to load data. Make sure you are connected to the server.</div>';
-                committeesList.innerHTML = '';
-                constituenciesList.innerHTML = '';
+                container.innerHTML = '<div class="pf-error">Failed to load delegate data. Make sure you are connected to the server.</div>';
             }
         }
 
