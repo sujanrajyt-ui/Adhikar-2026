@@ -300,6 +300,7 @@ const CONSTITUENCIES = [
 
 // Public: get all parties & committees
 app.get('/api/parties', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache');
   try {
     let parties = await db.getParties();
     if (!parties || parties.length === 0) {

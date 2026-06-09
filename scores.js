@@ -169,7 +169,7 @@ async function switchSession() {
 
 async function loadParties() {
     try {
-        const res = await fetch(`${API_BASE}/parties`);
+        const res = await fetch(`${API_BASE}/parties?t=${Date.now()}`);
         if (res.ok) allParties = await res.json();
     } catch (e) {
         console.error("Failed to load parties", e);
