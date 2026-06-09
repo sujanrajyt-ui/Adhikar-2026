@@ -70,6 +70,8 @@ async function init() {
           created_at VARCHAR(100) NOT NULL
         );
       `);
+      // Clear all party sides until coalition is set via admin panel
+      await client.query(`UPDATE parties SET side = NULL`);
 
       // Judges table
       await client.query(`
