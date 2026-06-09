@@ -834,18 +834,27 @@ app.get('/api/public/leaderboard', async (req, res) => {
     ]);
 
     // Deduplicate criteria by ID (take last entry per ID)
-    const criteria = Object.values(rawCriteria.reduce((acc, c) => {
-      if (c.id && c.id !== 'attendance') acc[c.id] = c;
-      return acc;
-    }, {}));
+    // Deduplicate criteria by ID, exclude attendance
+    const criteriaMap = {};
+    rawCriteria.forEach(c => {
+      if (c.id && c.id !== 'attendance') criteriaMap[c.id] = c;
+    });
+    const criteria = Object.values(criteriaMap);
+
+    // Scorable session IDs (exclude roll calls)
+    const scorableSessions = ['QH', 'ZH', 'MR', 'SS', 'BP', 'FSH', 'ZH2', 'general'];
 
     const verified = registrations.filter(r => (r.status || '').toLowerCase() === 'verified');
 
     const leaderboardData = verified.map(d => {
-      const dScores = scores.filter(s => s.delegate_id === d.id && s.criteria_id !== 'attendance');
+      const dScores = scores.filter(s =>
+        s.delegate_id === d.id &&
+        s.criteria_id !== 'attendance' &&
+        scorableSessions.includes(s.session_id || 'general')
+      );
       const criteriaScores = {};
+      let sessionCount = 0;
 
-      // Group scores by criteria AND session, then average across sessions
       criteria.forEach(c => {
         const cMatches = dScores.filter(s => s.criteria_id === c.id);
         if (cMatches.length === 0) {
@@ -853,22 +862,22 @@ app.get('/api/public/leaderboard', async (req, res) => {
           return;
         }
 
-        // Group by session_id
-        const sessionGroups = {};
+        // Group scores by session_id, average within each session
+        const sessionMap = {};
         cMatches.forEach(s => {
           const sid = s.session_id || 'general';
-          if (!sessionGroups[sid]) sessionGroups[sid] = [];
-          sessionGroups[sid].push(s.score);
+          if (!sessionMap[sid]) sessionMap[sid] = [];
+          sessionMap[sid].push(s.score);
         });
 
-        // Average within each session
-        const sessionAvgs = Object.values(sessionGroups).map(scores => {
-          return scores.reduce((sum, sc) => sum + sc, 0) / scores.length;
-        });
+        const sessionAvgs = Object.values(sessionMap).map(scores =>
+          scores.reduce((sum, sc) => sum + sc, 0) / scores.length
+        );
 
-        // Average across sessions
         criteriaScores[c.id] = sessionAvgs.reduce((sum, avg) => sum + avg, 0) / sessionAvgs.length;
+        sessionCount = Math.max(sessionCount, Object.keys(sessionMap).length);
       });
+
       const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
 
       // Find individual side - Robust matching

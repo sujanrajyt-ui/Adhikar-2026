@@ -1,47 +1,48 @@
 [
   {
     "id": "RC",
-    "name": "Roll Call (RC)",
+    "name": "Roll Call",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "QH",
-    "name": "Question Hour (QH)",
+    "name": "Question Hour",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "ZH",
-    "name": "Zero Hour 1 (ZH)",
+    "name": "Zero Hour",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "MR",
-    "name": "Ministry Reports (MR)",
+    "name": "Ministry Reports",
+    "created_at": "2026-06-09T06:09:40.613Z"
+  },
+  {
+    "id": "BP",
+    "name": "Bill Presentations",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "SS",
-    "name": "Surprise Session (SS)",
+    "name": "Surprise Session",
     "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "RC2",
-    "name": "Roll Call Day 2 (RC2)",
+    "name": "Roll Call Day 2",
     "created_at": "2026-06-10T06:09:40.613Z"
   },
   {
     "id": "ZH2",
-    "name": "Zero Hour 2 (ZH2)",
+    "name": "Zero Hour 2",
     "created_at": "2026-06-10T06:09:40.613Z"
-  },
-  {
-    "id": "BP",
-    "name": "Bill Presentations (BP)",
-    "created_at": "2026-06-09T06:09:40.613Z"
   },
   {
     "id": "FSH",
-    "name": "Final Sitting of the House (FSH)",
+    "name": "Final Sitting of the House",
     "created_at": "2026-06-10T06:09:40.613Z"
   }
 ]
+
