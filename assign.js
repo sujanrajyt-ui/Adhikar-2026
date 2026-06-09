@@ -216,6 +216,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 return `<label><input type="checkbox" class="coaltn-cb" value="${id}" /><span>${escapeHtml(p)} (${counts[p]})</span></label>`;
             }).join('');
 
+            const total = Object.values(counts).reduce((s, c) => s + c, 0);
+            const magic = Math.floor(total / 2) + 1;
+            const meetsMajority = totalRuling >= magic;
+            html += '<div style="margin-top:8px;padding:6px 8px;border-radius:6px;font-size:0.72rem;background:rgba(255,255,255,0.03);">';
+            html += '<span style="opacity:0.6;">Majority needed: </span><strong>' + magic + '</strong>';
+            html += ' &middot; <span style="opacity:0.6;">Govt: </span><strong style="color:' + (meetsMajority ? '#2ecc71' : '#e74c3c') + ';">' + totalRuling + '</strong>';
+            if (!meetsMajority) html += ' <span style="color:#e74c3c;">(needs ' + (magic - totalRuling) + ' more)</span>';
+            html += '</div>';
+
             container.innerHTML = html;
 
             saveBtn.onclick = async () => {
