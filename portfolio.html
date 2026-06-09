@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parties & Portfolios | ADHIKAR'26</title>
+    <link rel="icon" type="image/x-icon" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body { background: var(--maroon-900); color: var(--cream-300); }
+        .portfolio-page { padding: 2rem 1rem; max-width: 900px; margin: 0 auto; }
+        .portfolio-page h1 { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #fff; margin-bottom: 0.25rem; }
+        .portfolio-page .subtitle { color: rgba(255,255,255,0.35); font-size: 0.85rem; margin-bottom: 2rem; }
+        .portfolio-section { margin-bottom: 2rem; }
+        .portfolio-section h2 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--gold-500); margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+        .portfolio-grid { display: grid; gap: 0.75rem; }
+        .portfolio-card { background: var(--maroon-800); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 1rem 1.25rem; transition: border-color 0.2s; }
+        .portfolio-card:hover { border-color: rgba(212,175,55,0.2); }
+        .portfolio-card .card-name { font-weight: 700; font-size: 0.95rem; color: #fff; }
+        .portfolio-card .card-side { display: inline-block; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; padding: 2px 8px; border-radius: 4px; margin-left: 0.5rem; vertical-align: middle; }
+        .card-side-ruling { background: rgba(46,204,113,0.12); color: #2ecc71; border: 1px solid rgba(46,204,113,0.15); }
+        .card-side-opposition { background: rgba(231,76,60,0.12); color: #e74c3c; border: 1px solid rgba(231,76,60,0.15); }
+        .portfolio-card .card-desc { font-size: 0.8rem; color: rgba(255,255,255,0.5); margin-top: 4px; }
+        .portfolio-loading { text-align: center; padding: 3rem; color: rgba(255,255,255,0.2); }
+        .portfolio-error { text-align: center; padding: 3rem; color: #e74c3c; }
+        .back-link { display: inline-block; margin-top: 2rem; font-size: 0.8rem; color: var(--gold-500); text-decoration: none; }
+        .back-link:hover { text-decoration: underline; }
+    </style>
+</head>
+<body>
+    <div class="portfolio-page">
+        <h1>Parties &amp; Portfolios</h1>
+        <p class="subtitle">ADHIKAR'26 Mock Parliament &mdash; Political parties and ministerial portfolios</p>
+
+        <div id="parties-section" class="portfolio-section">
+            <h2>Political Parties</h2>
+            <div id="parties-list" class="portfolio-grid"></div>
+        </div>
+
+        <div id="committees-section" class="portfolio-section">
+            <h2>Ministerial Portfolios</h2>
+            <div id="committees-list" class="portfolio-grid"></div>
+        </div>
+
+        <a href="/" class="back-link">&larr; Back to Home</a>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        async function load() {
+            try {
+                const res = await fetch(`${API_BASE}/parties?t=${Date.now()}`);
+                if (!res.ok) throw new Error('Failed to load');
+                const items = await res.json();
+
+                const parties = items.filter(p => p.type === 'party');
+                const committees = items.filter(p => p.type === 'committee');
+
+                const partiesList = document.getElementById('parties-list');
+                const committeesList = document.getElementById('committees-list');
+
+                if (parties.length) {
+                    partiesList.innerHTML = parties.map(p => {
+                        const side = p.side === 'ruling' ? 'Ruling' : p.side === 'opposition' ? 'Opposition' : '';
+                        const sideBadge = side ? `<span class="card-side card-side-${p.side}">${side}</span>` : '';
+                        return `<div class="portfolio-card">
+                            <div class="card-name">${escapeHtml(p.name)}${sideBadge}</div>
+                            ${p.description ? `<div class="card-desc">${escapeHtml(p.description)}</div>` : ''}
+                        </div>`;
+                    }).join('');
+                } else {
+                    partiesList.innerHTML = '<div class="portfolio-loading">No parties configured yet.</div>';
+                }
+
+                if (committees.length) {
+                    committeesList.innerHTML = committees.map(c =>
+                        `<div class="portfolio-card">
+                            <div class="card-name">${escapeHtml(c.name)}</div>
+                            ${c.description ? `<div class="card-desc">${escapeHtml(c.description)}</div>` : ''}
+                        </div>`
+                    ).join('');
+                } else {
+                    committeesList.innerHTML = '<div class="portfolio-loading">No portfolios configured yet.</div>';
+                }
+            } catch (e) {
+                document.getElementById('parties-list').innerHTML = '<div class="portfolio-error">Failed to load data. Make sure you are connected to the server.</div>';
+                document.getElementById('committees-list').innerHTML = '';
+            }
+        }
+
+        load();
+    </script>
+</body>
+</html>
