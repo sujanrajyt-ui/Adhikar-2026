@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Coalition saved and locked', 'success');
                 renderHTML();
                 initLeadership();
-            } catch (e) { console.error('Coalition save error:', e); showToast('Failed to save coalition: ' + (e.message || e), 'error'); }
+            } catch (e) { console.error('Coalition save error:', e); showToast('Failed: ' + (e.message || e), 'error'); alert('ERROR: ' + (e.message || e)); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
         };
 
