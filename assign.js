@@ -230,9 +230,31 @@ document.addEventListener('DOMContentLoaded', () => {
                 partyList.forEach(p => { if (p.name) nameToId[p.name] = p.id; });
 
                 console.log('[loadSides] Synced from server, ruling:', Array.from(rulingSet));
+
+                // Always override with localStorage if available
+                const saved = localStorage.getItem('adhikar_coalition');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        const storedRuling = new Set(parsed.rulingNames || []);
+                        const validNames = [...storedRuling].filter(n => partyList.some(p => p.name === n));
+                        if (validNames.length > 0) {
+                            rulingSet = new Set(validNames);
+                            console.log('[loadSides] Overrode from localStorage:', [...rulingSet]);
+                        }
+                    } catch (e) { console.warn('Corrupt adhikar_coalition in localStorage'); }
+                }
             } catch (e) {
                 console.error('loadSides error:', e);
-                showToast('Failed to sync sides from server', 'error');
+                // Fallback: try localStorage when server fails
+                const saved = localStorage.getItem('adhikar_coalition');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        rulingSet = new Set(parsed.rulingNames || []);
+                        console.log('[loadSides] Restored from localStorage after error:', [...rulingSet]);
+                    } catch (e) { }
+                }
             }
         }
 
