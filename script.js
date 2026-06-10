@@ -85,6 +85,7 @@ function formatDate(iso) {
 
 /* ============ Render static content ============ */
 const AWARD_DESCS = {
+  "General Championship Award": "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference.",
   "Best Student Speaker": "Highest overall parliamentary performer.",
   "Exceptional Debater": "Focuses on argumentation and rebuttal mastery.",
   "Asset of the Ruling Government": "Best defender of government policies and strategy.",
