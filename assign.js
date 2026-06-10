@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadParties() {
-        parties = ['Party A', 'Party B', 'Party C', 'Party D', 'Party E'];
+        parties = ['Rashtriya Yuva Pragati Manch (A)', 'Yuva Drishti Party (B)', 'Next Gen Leaders (C)', 'Catalyst Party (D)', 'Navpeedhi Bharat Party (E)'];
         const sel = filterParty;
         sel.innerHTML = '<option value="all">All Parties</option>' +
             parties.map(p => `<option value="${p}">${p}</option>`).join('');
@@ -193,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
-        const nameToId = { 'Party A': 'party_a', 'Party B': 'party_b', 'Party C': 'party_c', 'Party D': 'party_d', 'Party E': 'party_e' };
+        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'Next Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
         let rulingSet = new Set();
 
         async function loadSides() {
@@ -430,11 +430,11 @@ async function initLeadership() {
 
     function weightedPartyPick() {
         const r = Math.random();
-        if (r < 0.28) return 'Party A';
-        if (r < 0.52) return 'Party B';
-        if (r < 0.72) return 'Party C';
-        if (r < 0.88) return 'Party D';
-        return 'Party E';
+        if (r < 0.28) return 'Rashtriya Yuva Pragati Manch (A)';
+        if (r < 0.52) return 'Yuva Drishti Party (B)';
+        if (r < 0.72) return 'Next Gen Leaders (C)';
+        if (r < 0.88) return 'Catalyst Party (D)';
+        return 'Navpeedhi Bharat Party (E)';
     }
 
     function leastAssignedCommittee(forParty) {
@@ -489,7 +489,7 @@ async function initLeadership() {
             : reg.assigned_constituency;
         const isHarshil = reg && reg.name.toLowerCase().includes('harshil');
         const isAkash = reg && reg.name.toLowerCase().includes('akash');
-        const party = (isHarshil || isAkash) ? 'Party A' : weightedPartyPick();
+        const party = (isHarshil || isAkash) ? 'Rashtriya Yuva Pragati Manch (A)' : weightedPartyPick();
 
         const committee = leastAssignedCommittee(party);
 
@@ -575,11 +575,11 @@ async function initLeadership() {
 
     function buildPartyPool(count) {
         const pcts = [
-            { name: 'Party A', pct: 0.28 },
-            { name: 'Party B', pct: 0.24 },
-            { name: 'Party C', pct: 0.20 },
-            { name: 'Party D', pct: 0.16 },
-            { name: 'Party E', pct: 0.12 },
+            { name: 'Rashtriya Yuva Pragati Manch (A)', pct: 0.28 },
+            { name: 'Yuva Drishti Party (B)', pct: 0.24 },
+            { name: 'Next Gen Leaders (C)', pct: 0.20 },
+            { name: 'Catalyst Party (D)', pct: 0.16 },
+            { name: 'Navpeedhi Bharat Party (E)', pct: 0.12 },
         ];
         const pool = [];
         let remaining = count;
@@ -617,11 +617,11 @@ async function initLeadership() {
             const total = delegates.length;
             const idealParty = {};
             const pcts = [
-                { name: 'Party A', pct: 0.28 },
-                { name: 'Party B', pct: 0.24 },
-                { name: 'Party C', pct: 0.20 },
-                { name: 'Party D', pct: 0.16 },
-                { name: 'Party E', pct: 0.12 },
+                { name: 'Rashtriya Yuva Pragati Manch (A)', pct: 0.28 },
+                { name: 'Yuva Drishti Party (B)', pct: 0.24 },
+                { name: 'Next Gen Leaders (C)', pct: 0.20 },
+                { name: 'Catalyst Party (D)', pct: 0.16 },
+                { name: 'Navpeedhi Bharat Party (E)', pct: 0.12 },
             ];
             let rem = total;
             for (let i = 0; i < pcts.length; i++) {
@@ -652,13 +652,13 @@ async function initLeadership() {
         const harshilIdx = targets.findIndex(d => d.name.toLowerCase().includes('harshil'));
         const akashIdx = targets.findIndex(d => d.name.toLowerCase().includes('akash'));
         const reservedParties = {};
-        if (harshilIdx !== -1) { reservedParties[harshilIdx] = 'Party A'; }
-        if (akashIdx !== -1) { reservedParties[akashIdx] = 'Party A'; }
+        if (harshilIdx !== -1) { reservedParties[harshilIdx] = 'Rashtriya Yuva Pragati Manch (A)'; }
+        if (akashIdx !== -1) { reservedParties[akashIdx] = 'Rashtriya Yuva Pragati Manch (A)'; }
         const reserveCount = Object.keys(reservedParties).length;
         if (reserveCount > 0) {
             let toRemove = reserveCount;
             for (let i = partyPool.length - 1; i >= 0 && toRemove > 0; i--) {
-                if (partyPool[i] === 'Party A') {
+                if (partyPool[i] === 'Rashtriya Yuva Pragati Manch (A)') {
                     partyPool.splice(i, 1);
                     toRemove--;
                 }

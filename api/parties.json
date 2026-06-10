@@ -1,35 +1,35 @@
 [
     {
         "id": "party_a",
-        "name": "Party A",
+        "name": "Rashtriya Yuva Pragati Manch (A)",
         "type": "party",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_b",
-        "name": "Party B",
+        "name": "Yuva Drishti Party (B)",
         "type": "party",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_c",
-        "name": "Party C",
+        "name": "Next Gen Leaders (C)",
         "type": "party",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_d",
-        "name": "Party D",
+        "name": "Catalyst Party (D)",
         "type": "party",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
     },
     {
         "id": "party_e",
-        "name": "Party E",
+        "name": "Navpeedhi Bharat Party (E)",
         "type": "party",
         "side": null,
         "created_at": "2026-06-09T00:00:00.000Z"
