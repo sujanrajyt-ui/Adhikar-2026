@@ -405,7 +405,7 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
     const ver = await db.getParties();
     const sides = ver.filter(p => p.type === 'party').map(p => ({ id: p.id, name: p.name, side: p.side }));
     console.log('[Coalition] Verification after save:', JSON.stringify(sides));
-    res.json({ success: true });
+    res.json({ success: true, sides });
   } catch (err) {
     console.error('[Coalition] Error saving coalition:', err);
     res.status(500).json({ detail: err.message });
@@ -439,6 +439,16 @@ app.get('/api/debug/parties', async (req, res) => {
   try {
     const raw = await db.getParties();
     res.json(raw.map(p => ({ id: p.id, name: p.name, side: p.side, type: p.type })));
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.get('/api/debug/coalition', async (req, res) => {
+  if (req.query.key !== process.env.ADMIN_PASSWORD) return res.status(403).json({ detail: 'Forbidden' });
+  try {
+    const { rulingIds, partyCount } = await db.getCoalitionDebug();
+    res.json({ rulingIds, partyCount });
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }

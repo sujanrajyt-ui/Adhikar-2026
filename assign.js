@@ -224,6 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const all = await res.json();
                 if (!Array.isArray(all)) throw new Error('Parties response is not an array');
                 const partyList = all.filter(p => p.type === 'party');
+                console.log('[loadSides] Parties from server:', JSON.stringify(partyList.map(p => ({ id: p.id, name: p.name, side: p.side }))));
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
                 partyList.forEach(p => { nameToId[p.name] = p.id; });
@@ -331,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const body = await res.json();
                 if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
+                console.log('[Coalition] Save response sides:', JSON.stringify(body.sides));
                 coalitionLocked = true;
                 showToast('Coalition saved and locked', 'success');
                 renderHTML();

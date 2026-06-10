@@ -967,6 +967,25 @@ module.exports = {
     }
     fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
     return { success: true };
+  },
+
+  async getCoalitionDebug() {
+    if (isPg) {
+      const [configRes, countRes] = await Promise.all([
+        pool.query("SELECT value FROM app_config WHERE key = 'coalition_ruling_ids'"),
+        pool.query('SELECT COUNT(*)::int AS cnt FROM parties')
+      ]);
+      return {
+        rulingIds: configRes.rows.length > 0 ? JSON.parse(configRes.rows[0].value) : [],
+        partyCount: countRes.rows[0].cnt
+      };
+    } else {
+      const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      return {
+        rulingIds: list.filter(p => p.type === 'party' && p.side === 'ruling').map(p => p.id),
+        partyCount: list.filter(p => p.type === 'party').length
+      };
+    }
   }
 };
 
