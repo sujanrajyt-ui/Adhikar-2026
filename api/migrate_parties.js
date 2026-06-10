@@ -8,6 +8,7 @@ const MAP = {
   'Party C': 'New Gen Leaders (C)',
   'Party D': 'Catalyst Party (D)',
   'Party E': 'Navpeedhi Bharat Party (E)',
+  'Next Gen Leaders (C)': 'New Gen Leaders (C)',
 };
 
 const COMM_MAP = {
