@@ -104,18 +104,11 @@
             const ts = document.getElementById('pf-timestamp');
 
             try {
-                const [delegatesRes, partiesRes] = await Promise.all([
-                    fetch(`${API_BASE}/delegates?t=${Date.now()}`),
-                    fetch(`${API_BASE}/parties?t=${Date.now()}`)
-                ]);
-
+                const delegatesRes = await fetch(`${API_BASE}/delegates?t=${Date.now()}`);
                 if (!delegatesRes.ok) throw new Error('Failed to load');
 
                 let delegates = await delegatesRes.json();
                 delegates.forEach(normalizeDelegate);
-
-                const partyItems = partiesRes.ok ? await partiesRes.json() : [];
-                const partyNames = partyItems.filter(p => p.type === 'party').map(p => p.name);
 
                 const withAssignment = delegates.filter(d => d.assigned_party);
 
@@ -131,13 +124,9 @@
                     byParty[d.assigned_party].push(d);
                 });
 
-                const partyOrder = partyNames.length
-                    ? partyNames
-                    : ['Rashtriya Yuva Pragati Manch (A)', 'Yuva Drishti Party (B)', 'Next Gen Leaders (C)', 'Catalyst Party (D)', 'Navpeedhi Bharat Party (E)'];
                 const sortedKeys = Object.keys(byParty).sort((a, b) => {
-                    const ai = partyOrder.indexOf(a);
-                    const bi = partyOrder.indexOf(b);
-                    return (ai === -1 ? 999 : ai) - (bi === -1 ? 999 : bi);
+                    const extract = (s) => { const m = s.match(/\((\w)\)$/); return m ? m[1] : s; };
+                    return extract(a).localeCompare(extract(b));
                 });
 
                 let html = '';
