@@ -31,7 +31,7 @@ if (typeof emailjs !== 'undefined') {
 const AWARDS = [
   {
     title: "General Championship Award",
-    desc: "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference.",
+    desc: "Awarded to the institution with the most delegates and highest total points across all sessions.",
     isGrand: true
   },
   { title: "Best Student Speaker", desc: "Highest overall parliamentary performer." },
@@ -85,7 +85,7 @@ function formatDate(iso) {
 
 /* ============ Render static content ============ */
 const AWARD_DESCS = {
-  "General Championship Award": "Presented to the institution that achieves the highest overall distinction through exceptional participation and outstanding award-winning performances across the conference.",
+  "General Championship Award": "Awarded to the institution with the most delegates and highest total points across all sessions — a measure of institutional engagement and excellence.",
   "Best Student Speaker": "Highest overall parliamentary performer.",
   "Exceptional Debater": "Focuses on argumentation and rebuttal mastery.",
   "Asset of the Ruling Government": "Best defender of government policies and strategy.",
@@ -106,12 +106,20 @@ function renderAwards() {
     fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
   ])
     .then(([awards, lb]) => {
-      const top3 = (lb.leaderboard || []).filter(d => {
+      const all = (lb.leaderboard || []).filter(d => {
         const role = (d.elected_role || "").toLowerCase();
         return !["speaker", "deputy speaker", "secretary general", "marshal"].some(r => role.includes(r));
-      }).sort((a, b) => b.totalScore - a.totalScore).slice(0, 3);
-      const hasRealScores = top3.some(d => (d.totalScore || 0) > 0);
-      const podiumLabels = ["Champion", "1st Runner-up", "2nd Runner-up"];
+      });
+      const collegeMap = {};
+      all.forEach(d => {
+        const col = d.college || 'Unknown';
+        if (!collegeMap[col]) collegeMap[col] = { college: col, count: 0, totalScore: 0 };
+        collegeMap[col].count++;
+        collegeMap[col].totalScore += d.totalScore || 0;
+      });
+      const collegeRankings = Object.values(collegeMap).sort((a, b) => b.totalScore - a.totalScore || b.count - a.count).slice(0, 3);
+      const hasRealScores = collegeRankings.some(c => c.totalScore > 0);
+      const podiumLabels = ["Champion Institution", "1st Runner-up", "2nd Runner-up"];
       const medalEmojis = ["🥇", "🥈", "🥉"];
       let displayAwards = awards.length ? awards : AWARDS;
       if (!displayAwards.some(a => CHAMPIONSHIP_AWARDS.includes(a.name || a.title))) {
@@ -123,19 +131,19 @@ function renderAwards() {
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
         let podiumHtml = "";
         if (isGrand) {
-          if (top3.length) {
-            podiumHtml = `<div class="gc-podium">${top3.map((d, pi) => `
+          if (collegeRankings.length) {
+            podiumHtml = `<div class="gc-podium">${collegeRankings.map((c, pi) => `
               <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"} gc-anim gc-anim-${pi + 1}">
-                ${pi === 0 ? '<div class="gc-crown">👑</div>' : ''}
+                ${pi === 0 ? '<div class="gc-crown">🏛️</div>' : ''}
                 <span class="gc-medal">${medalEmojis[pi]}</span>
                 <span class="gc-label">${podiumLabels[pi]}</span>
-                <span class="gc-name">${escapeHtml(d.name)}</span>
-                <span class="gc-affil">${escapeHtml(d.college || d.party || d.committee || '')}</span>
-                <span class="gc-score">${hasRealScores ? `<span class="gc-score-label">Score</span> ${(d.totalScore || 0).toFixed(1)}` : '<span class="gc-score-placeholder">Awaiting scores</span>'}</span>
+                <span class="gc-name">${escapeHtml(c.college)}</span>
+                <span class="gc-affil">${c.count} delegate${c.count !== 1 ? 's' : ''}</span>
+                <span class="gc-score">${hasRealScores ? `<span class="gc-score-label">Total Points</span> ${c.totalScore.toFixed(1)}` : '<span class="gc-score-placeholder">Awaiting scores</span>'}</span>
               </div>
             `).join("")}</div>`;
           } else {
-            podiumHtml = `<div class="gc-podium"><div class="gc-pending"><span class="gc-pending-text">No delegates assigned yet</span><span class="gc-pending-sub">Results will appear once delegates are verified and assigned.</span></div></div>`;
+            podiumHtml = `<div class="gc-podium"><div class="gc-pending"><span class="gc-pending-text">No institutions yet</span><span class="gc-pending-sub">Results will appear once delegates are verified and assigned.</span></div></div>`;
           }
         }
         return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
