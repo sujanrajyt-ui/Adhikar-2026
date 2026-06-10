@@ -148,6 +148,14 @@ async function init() {
         // PK might already be updated or table doesn't have data yet
       }
 
+      // App config table
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS app_config (
+          key TEXT PRIMARY KEY,
+          value TEXT NOT NULL
+        )
+      `);
+
       // Seed parties if table is empty
       const partyCount = await client.query('SELECT COUNT(*)::int AS cnt FROM parties');
       if (partyCount.rows[0].cnt === 0) {
@@ -502,8 +510,18 @@ module.exports = {
 
   async getParties() {
     if (isPg) {
-      const res = await pool.query('SELECT * FROM parties ORDER BY type, side, name');
-      return res.rows;
+      const [partiesRes, configRes] = await Promise.all([
+        pool.query('SELECT * FROM parties ORDER BY type, name'),
+        pool.query("SELECT value FROM app_config WHERE key = 'coalition_ruling_ids'")
+      ]);
+      const parties = partiesRes.rows;
+      const rulingIds = configRes.rows.length > 0 ? JSON.parse(configRes.rows[0].value) : [];
+      for (const p of parties) {
+        if (p.type === 'party') {
+          p.side = rulingIds.includes(p.id) ? 'ruling' : 'opposition';
+        }
+      }
+      return parties;
     } else {
       const raw = fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]';
       return JSON.parse(raw).sort((a, b) => a.name.localeCompare(b.name));
@@ -542,21 +560,11 @@ module.exports = {
 
   async setCoalition(rulingIds) {
     if (isPg) {
-      const client = await pool.connect();
-      try {
-        await client.query('BEGIN');
-        await client.query("UPDATE parties SET side = 'opposition' WHERE type = 'party'");
-        if (rulingIds.length > 0) {
-          const placeholders = rulingIds.map((_, i) => `$${i + 1}`).join(',');
-          await client.query(`UPDATE parties SET side = 'ruling' WHERE id IN (${placeholders})`, rulingIds);
-        }
-        await client.query('COMMIT');
-      } catch (e) {
-        await client.query('ROLLBACK');
-        throw e;
-      } finally {
-        client.release();
-      }
+      await pool.query(
+        `INSERT INTO app_config (key, value) VALUES ('coalition_ruling_ids', $1)
+         ON CONFLICT (key) DO UPDATE SET value = $1`,
+        [JSON.stringify(rulingIds)]
+      );
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
       list.forEach(p => {
@@ -951,7 +959,7 @@ module.exports = {
 
   async resetCoalition() {
     if (isPg) {
-      await pool.query("UPDATE parties SET side = NULL WHERE type = 'party'");
+      await pool.query("DELETE FROM app_config WHERE key = 'coalition_ruling_ids'");
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
       list.forEach(p => { if (p.type === 'party') p.side = null; });

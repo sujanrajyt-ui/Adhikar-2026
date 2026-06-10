@@ -405,7 +405,7 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
     const ver = await db.getParties();
     const sides = ver.filter(p => p.type === 'party').map(p => ({ id: p.id, name: p.name, side: p.side }));
     console.log('[Coalition] Verification after save:', JSON.stringify(sides));
-    res.json({ success: true, sides });
+    res.json({ success: true });
   } catch (err) {
     console.error('[Coalition] Error saving coalition:', err);
     res.status(500).json({ detail: err.message });
