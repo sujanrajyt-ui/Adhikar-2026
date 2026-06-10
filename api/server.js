@@ -402,8 +402,10 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
     console.log('[Coalition] Setting coalition with ruling_ids:', JSON.stringify(ruling_ids));
     await db.setCoalition(ruling_ids);
     await db.setCoalitionLock(true);
-    console.log('[Coalition] Coalition saved successfully');
-    res.json({ success: true });
+    const ver = await db.getParties();
+    const sides = ver.filter(p => p.type === 'party').map(p => ({ id: p.id, name: p.name, side: p.side }));
+    console.log('[Coalition] Verification after save:', JSON.stringify(sides));
+    res.json({ success: true, sides });
   } catch (err) {
     console.error('[Coalition] Error saving coalition:', err);
     res.status(500).json({ detail: err.message });

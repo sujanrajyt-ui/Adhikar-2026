@@ -106,21 +106,6 @@ function renderAwards() {
     fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`).then(r => r.ok ? r.json() : Promise.reject())
   ])
     .then(([awards, lb]) => {
-      const all = (lb.leaderboard || []).filter(d => {
-        const role = (d.elected_role || "").toLowerCase();
-        return !["speaker", "deputy speaker", "secretary general", "marshal"].some(r => role.includes(r));
-      });
-      const collegeMap = {};
-      all.forEach(d => {
-        const col = d.college || 'Unknown';
-        if (!collegeMap[col]) collegeMap[col] = { college: col, count: 0, totalScore: 0 };
-        collegeMap[col].count++;
-        collegeMap[col].totalScore += d.totalScore || 0;
-      });
-      const collegeRankings = Object.values(collegeMap).sort((a, b) => b.totalScore - a.totalScore || b.count - a.count).slice(0, 3);
-      const hasRealScores = collegeRankings.some(c => c.totalScore > 0);
-      const podiumLabels = ["Champion Institution", "1st Runner-up", "2nd Runner-up"];
-      const medalEmojis = ["🥇", "🥈", "🥉"];
       let displayAwards = awards.length ? awards : AWARDS;
       if (!displayAwards.some(a => CHAMPIONSHIP_AWARDS.includes(a.name || a.title))) {
         displayAwards = [{ name: 'General Championship Award', desc: '', isGrand: true }, ...displayAwards];
@@ -129,23 +114,6 @@ function renderAwards() {
         const isGrand = CHAMPIONSHIP_AWARDS.includes(a.name || a.title);
         const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
-        let podiumHtml = "";
-        if (isGrand) {
-          if (collegeRankings.length) {
-            podiumHtml = `<div class="gc-podium">${collegeRankings.map((c, pi) => `
-              <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"} gc-anim gc-anim-${pi + 1}">
-                ${pi === 0 ? '<div class="gc-crown">🏛️</div>' : ''}
-                <span class="gc-medal">${medalEmojis[pi]}</span>
-                <span class="gc-label">${podiumLabels[pi]}</span>
-                <span class="gc-name">${escapeHtml(c.college)}</span>
-                <span class="gc-affil">${c.count} delegate${c.count !== 1 ? 's' : ''}</span>
-                <span class="gc-score">${hasRealScores ? `<span class="gc-score-label">Total Points</span> ${c.totalScore.toFixed(1)}` : '<span class="gc-score-placeholder">Awaiting scores</span>'}</span>
-              </div>
-            `).join("")}</div>`;
-          } else {
-            podiumHtml = `<div class="gc-podium"><div class="gc-pending"><span class="gc-pending-text">No institutions yet</span><span class="gc-pending-sub">Results will appear once delegates are verified and assigned.</span></div></div>`;
-          }
-        }
         return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
         <div class="award-icon">${trophySVG}</div>
@@ -154,7 +122,6 @@ function renderAwards() {
       <h3 class="award-title">${a.name || a.title}</h3>
       ${sideBadge || roleBadge ? `<div class="award-badges">${sideBadge}${roleBadge}</div>` : ''}
       <p class="award-desc">${AWARD_DESCS[a.name || a.title] || (a.desc || 'Awarded to distinguished parliamentarians.')}</p>
-      ${podiumHtml}
     </article>`;
       }).join("");
     })

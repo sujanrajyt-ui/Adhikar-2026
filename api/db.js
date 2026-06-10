@@ -528,10 +528,20 @@ module.exports = {
 
   async setCoalition(rulingIds) {
     if (isPg) {
-      await pool.query("UPDATE parties SET side = 'opposition' WHERE type = 'party'");
-      if (rulingIds.length > 0) {
-        const placeholders = rulingIds.map((_, i) => `$${i + 1}`).join(',');
-        await pool.query(`UPDATE parties SET side = 'ruling' WHERE id IN (${placeholders})`, rulingIds);
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
+        await client.query("UPDATE parties SET side = 'opposition' WHERE type = 'party'");
+        if (rulingIds.length > 0) {
+          const placeholders = rulingIds.map((_, i) => `$${i + 1}`).join(',');
+          await client.query(`UPDATE parties SET side = 'ruling' WHERE id IN (${placeholders})`, rulingIds);
+        }
+        await client.query('COMMIT');
+      } catch (e) {
+        await client.query('ROLLBACK');
+        throw e;
+      } finally {
+        client.release();
       }
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
