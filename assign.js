@@ -228,6 +228,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
                 partyList.forEach(p => { nameToId[p.name] = p.id; });
+
+                // Fallback: if server returned all opposition, restore from localStorage
+                if (rulingSet.size === 0 && partyList.length > 0) {
+                    const saved = localStorage.getItem('adhikar_coalition');
+                    if (saved) {
+                        const parsed = JSON.parse(saved);
+                        const storedRuling = new Set(parsed.rulingNames || []);
+                        const exists = [...storedRuling].every(n => partyList.some(p => p.name === n));
+                        if (exists && storedRuling.size > 0) {
+                            rulingSet = storedRuling;
+                            console.log('[loadSides] Restored coalition from localStorage:', [...rulingSet]);
+                        }
+                    }
+                }
             } catch (e) { console.error('loadSides error:', e); rulingSet = new Set(); nameToId = {}; }
         }
 
@@ -237,7 +251,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const state = await res.json();
                 coalitionLocked = state.locked === true;
-            } catch { coalitionLocked = false; }
+                // Fallback: restore locked state from localStorage if server says unlocked
+                if (!coalitionLocked && localStorage.getItem('adhikar_coalition')) {
+                    coalitionLocked = true;
+                }
+            } catch { coalitionLocked = !!localStorage.getItem('adhikar_coalition'); }
         }
 
         const noConfidenceBtn = document.createElement('button');
@@ -334,6 +352,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
                 console.log('[Coalition] Save response sides:', JSON.stringify(body.sides));
                 coalitionLocked = true;
+                localStorage.setItem('adhikar_coalition', JSON.stringify({
+                    rulingNames: parties.filter(p => rulingSet.has(p)),
+                    rulingIds: rulingIds
+                }));
                 showToast('Coalition saved and locked', 'success');
                 renderHTML();
                 initLeadership();
@@ -352,6 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error('Failed');
                 coalitionLocked = false;
                 rulingSet = new Set();
+                localStorage.removeItem('adhikar_coalition');
                 showToast('No Confidence Motion passed. Coalition reset.', 'success');
                 await loadSides();
                 renderHTML();
