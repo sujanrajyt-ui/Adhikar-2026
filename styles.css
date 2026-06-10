@@ -1651,6 +1651,12 @@ ol {
   letter-spacing: 0.1em;
   opacity: 0.5;
 }
+.gc-score-placeholder {
+  font-size: 0.6rem;
+  font-weight: 400;
+  opacity: 0.35;
+  letter-spacing: 0.04em;
+}
 .gc-affil {
   font-size: 0.65rem;
   color: rgba(245, 239, 230, 0.55);

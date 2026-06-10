@@ -118,8 +118,7 @@ function renderAwards() {
         const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
         let podiumHtml = "";
-        if (isGrand) {
-          if (top3.length && hasRealScores) {
+        if (isGrand && top3.length) {
             podiumHtml = `<div class="gc-podium">${top3.map((d, pi) => `
               <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"} gc-anim gc-anim-${pi + 1}">
                 ${pi === 0 ? '<div class="gc-crown">👑</div>' : ''}
@@ -127,12 +126,9 @@ function renderAwards() {
                 <span class="gc-label">${podiumLabels[pi]}</span>
                 <span class="gc-name">${escapeHtml(d.name)}</span>
                 <span class="gc-affil">${escapeHtml(d.college || d.party || d.committee || '')}</span>
-                <span class="gc-score"><span class="gc-score-label">Score</span> ${(d.totalScore || 0).toFixed(1)}</span>
+                <span class="gc-score">${hasRealScores ? `<span class="gc-score-label">Score</span> ${(d.totalScore || 0).toFixed(1)}` : '<span class="gc-score-placeholder">Awaiting scores</span>'}</span>
               </div>
             `).join("")}</div>`;
-          } else if (top3.length) {
-            podiumHtml = `<div class="gc-podium"><div class="gc-pending"><span class="gc-pending-icon">🏆</span><span class="gc-pending-text">Awaiting Results</span><span class="gc-pending-sub">Scores are being tabulated — check back after the sessions.</span></div></div>`;
-          }
         }
         return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
