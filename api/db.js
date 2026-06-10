@@ -148,6 +148,20 @@ async function init() {
         // PK might already be updated or table doesn't have data yet
       }
 
+      // Seed parties if table is empty
+      const partyCount = await client.query('SELECT COUNT(*)::int AS cnt FROM parties');
+      if (partyCount.rows[0].cnt === 0) {
+        const seed = JSON.parse(fs.readFileSync(PARTIES_FILE, 'utf-8'));
+        for (const p of seed) {
+          await client.query(
+            `INSERT INTO parties (id, name, type, side, description, created_at)
+             VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING`,
+            [p.id, p.name, p.type, p.side || null, p.description || '', p.created_at || new Date().toISOString()]
+          );
+        }
+        console.log("[Database] Seeded " + seed.length + " parties.");
+      }
+
       console.log("[Database] PostgreSQL table and columns verified.");
     } catch (err) {
       console.error("[Database] Error initializing PostgreSQL:", err);
