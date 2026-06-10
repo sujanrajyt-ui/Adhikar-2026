@@ -1,72 +1,72 @@
 [
-    {
-        "id": "party_a",
-        "name": "Rashtriya Yuva Pragati Manch (A)",
-        "type": "party",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "party_b",
-        "name": "Yuva Drishti Party (B)",
-        "type": "party",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "party_c",
-        "name": "New Gen Leaders (C)",
-        "type": "party",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "party_d",
-        "name": "Catalyst Party (D)",
-        "type": "party",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "party_e",
-        "name": "Navpeedhi Bharat Party (E)",
-        "type": "party",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_education",
-        "name": "EDUCATION",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_finance",
-        "name": "FINANCE",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_home_affairs",
-        "name": "HOME AFFAIRS",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_health",
-        "name": "HEALTH",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    },
-    {
-        "id": "com_justice",
-        "name": "JUSTICE",
-        "type": "committee",
-        "side": null,
-        "created_at": "2026-06-09T00:00:00.000Z"
-    }
+  {
+    "id": "party_a",
+    "name": "Rashtriya Yuva Pragati Manch (A)",
+    "type": "party",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "party_b",
+    "name": "Yuva Drishti Party (B)",
+    "type": "party",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "party_c",
+    "name": "New Gen Leaders (C)",
+    "type": "party",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "party_d",
+    "name": "Catalyst Party (D)",
+    "type": "party",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "party_e",
+    "name": "Navpeedhi Bharat Party (E)",
+    "type": "party",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "com_education",
+    "name": "EDUCATION",
+    "type": "committee",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "com_finance",
+    "name": "FINANCE",
+    "type": "committee",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "com_home_affairs",
+    "name": "HOME AFFAIRS",
+    "type": "committee",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "com_health",
+    "name": "HEALTH",
+    "type": "committee",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  },
+  {
+    "id": "com_justice",
+    "name": "JUSTICE",
+    "type": "committee",
+    "side": null,
+    "created_at": "2026-06-09T00:00:00.000Z"
+  }
 ]

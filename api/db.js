@@ -946,6 +946,18 @@ module.exports = {
   // ============ Coalition Lock ============
 
   async getCoalitionLock() {
+    if (isPg) {
+      try {
+        await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+        const res = await pool.query("SELECT value FROM app_config WHERE key = 'coalition_locked'");
+        if (res.rows.length > 0) {
+          return JSON.parse(res.rows[0].value);
+        }
+        return { locked: false };
+      } catch {
+        return { locked: false };
+      }
+    }
     try {
       const raw = fs.readFileSync(COALITION_LOCK_FILE, 'utf-8');
       return JSON.parse(raw);
@@ -955,6 +967,15 @@ module.exports = {
   },
 
   async setCoalitionLock(locked) {
+    if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+      await pool.query(
+        `INSERT INTO app_config (key, value) VALUES ('coalition_locked', $1)
+         ON CONFLICT (key) DO UPDATE SET value = $1`,
+        [JSON.stringify({ locked })]
+      );
+      return { locked };
+    }
     fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked }), 'utf-8');
     return { locked };
   },
@@ -963,12 +984,17 @@ module.exports = {
     if (isPg) {
       await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
       await pool.query("DELETE FROM app_config WHERE key = 'coalition_ruling_ids'");
+      await pool.query(
+        `INSERT INTO app_config (key, value) VALUES ('coalition_locked', $1)
+         ON CONFLICT (key) DO UPDATE SET value = $1`,
+        [JSON.stringify({ locked: false })]
+      );
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
       list.forEach(p => { if (p.type === 'party') p.side = null; });
       fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+      fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
     }
-    fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
     return { success: true };
   },
 

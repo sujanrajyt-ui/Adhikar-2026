@@ -96,57 +96,57 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function loadConstituencies() {
         constituencies = [
-    'Agra', 'Ahmedabad East', 'Ahmedabad West', 'Ajmer', 'Alappuzha',
-    'Aligarh', 'Amethi', 'Amravati', 'Amritsar', 'Anand',
-    'Anantapur', 'Araria', 'Arrah', 'Asansol', 'Aurangabad',
-    'Azamgarh', 'Badaun', 'Bagalkot', 'Bahraich', 'Ballia',
-    'Banda', 'Bangalore Central', 'Bangalore North', 'Bangalore Rural',
-    'Bangalore South', 'Bankura', 'Barabanki', 'Baramati', 'Barasat',
-    'Barmer', 'Udupi', 'Basti', 'Bathinda', 'Begusarai',
-    'Belgaum', 'Bellary', 'Berhampur', 'Bhagalpur', 'Bharatpur',
-    'Bharuch', 'Bhavnagar', 'Bhilwara', 'Bhopal', 'Bhubaneswar',
-    'Bidar', 'Bijapur', 'Bikaner', 'Bilaspur', 'Bulandshahr',
-    'Calicut', 'Chalakudy', 'Chamarajanagar', 'Chandigarh',
-    'Chandni Chowk', 'Chennai Central', 'Chennai North',
-    'Chennai South', 'Chhindwara', 'Chikkballapur', 'Chitradurga',
-    'Chittoor', 'Cuddalore', 'Dakshina Kannada', 'Darbhanga',
-    'Darjeeling', 'Dausa', 'Dehradun', 'Dhanbad', 'Dharwad',
-    'Dibrugarh', 'Dindigul', 'Dumka', 'Durg', 'Eluru',
-    'Ernakulam', 'Faridabad', 'Fatehpur Sikri', 'Firozpur',
-    'Gandhinagar', 'Gaya', 'Ghaziabad', 'Ghazipur', 'Gonda',
-    'Gorakhpur', 'Gulbarga', 'Guntur', 'Gurdaspur', 'Guwahati',
-    'Gwalior', 'Hajipur', 'Haridwar', 'Hassan', 'Haveri',
-    'Hazaribagh', 'Hisar', 'Hoshiarpur', 'Hyderabad', 'Idukki',
-    'Indore', 'Jabalpur', 'Jadavpur', 'Jaipur', 'Jaipur Rural',
-    'Jalandhar', 'Jalgaon', 'Jammu', 'Jamnagar', 'Jamshedpur',
-    'Jaunpur', 'Jhansi', 'Jodhpur', 'Junagadh', 'Kairana',
-    'Kakinada', 'Kalahandi', 'Kannur', 'Kanpur', 'Kanyakumari',
-    'Karnal', 'Karur', 'Katihar', 'Kendrapara', 'Khajuraho',
-    'Khandwa', 'Kheda', 'Kolkata Dakshin', 'Kolkata Uttar',
-    'Kollam', 'Koppal', 'Kota', 'Kottayam', 'Kozhikode',
-    'Kurnool', 'Kurukshetra', 'Latur', 'Lucknow', 'Ludhiana',
-    'Machilipatnam', 'Madurai', 'Dharwad', 'Mainpuri',
-    'Malappuram', 'Mathura', 'Meerut', 'Mirzapur', 'Mumbai North',
-    'Mumbai North Central', 'Mumbai North East', 'Mumbai North West',
-    'Mumbai South', 'Mumbai South Central', 'Muzaffarpur', 'Mysore',
-    'Nagpur', 'Nalgonda', 'Nanded', 'Nashik', 'Navsari',
-    'Nellore', 'New Delhi', 'Nizamabad', 'North Goa',
-    'North West Delhi', 'Ongole', 'Palakkad', 'Udupi',
-    'Patiala', 'Patna Sahib', 'Peddapalle', 'Perambalur',
-    'Phulpur', 'Pilibhit', 'Pondicherry', 'Porbandar',
-    'Pratapgarh', 'Pune', 'Puri', 'Purnia', 'Raebareli',
-    'Raichur', 'Raipur', 'Rajahmundry', 'Rajkot', 'Rampur',
-    'Ranchi', 'Ratlam', 'Ratnagiri', 'Rewa', 'Rohtak',
-    'Sagar', 'Saharanpur', 'Salem', 'Sambalpur', 'Sangli',
-    'Sangrur', 'Saran', 'Satara', 'Udupi', 'Secunderabad',
-    'Shillong', 'Shimla', 'Shimoga', 'Silchar', 'Siliguri',
-    'Sitapur', 'Solapur', 'Sonipat', 'Srikakulam', 'Srinagar',
-    'Sultanpur', 'Surat', 'Thane', 'Thanjavur',
-    'Thiruvananthapuram', 'Thoothukudi', 'Thrissur',
-    'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Tumkur',
-    'Udaipur', 'Udhampur', 'Ujjain', 'Vadodara',
-    'Vaishali', 'Varanasi', 'Vellore', 'Vidisha',
-    'Vijayawada', 'Visakhapatnam', 'Warangal', 'Wayanad'
+            'Agra', 'Ahmedabad East', 'Ahmedabad West', 'Ajmer', 'Alappuzha',
+            'Aligarh', 'Amethi', 'Amravati', 'Amritsar', 'Anand',
+            'Anantapur', 'Araria', 'Arrah', 'Asansol', 'Aurangabad',
+            'Azamgarh', 'Badaun', 'Bagalkot', 'Bahraich', 'Ballia',
+            'Banda', 'Bangalore Central', 'Bangalore North', 'Bangalore Rural',
+            'Bangalore South', 'Bankura', 'Barabanki', 'Baramati', 'Barasat',
+            'Barmer', 'Udupi', 'Basti', 'Bathinda', 'Begusarai',
+            'Belgaum', 'Bellary', 'Berhampur', 'Bhagalpur', 'Bharatpur',
+            'Bharuch', 'Bhavnagar', 'Bhilwara', 'Bhopal', 'Bhubaneswar',
+            'Bidar', 'Bijapur', 'Bikaner', 'Bilaspur', 'Bulandshahr',
+            'Calicut', 'Chalakudy', 'Chamarajanagar', 'Chandigarh',
+            'Chandni Chowk', 'Chennai Central', 'Chennai North',
+            'Chennai South', 'Chhindwara', 'Chikkballapur', 'Chitradurga',
+            'Chittoor', 'Cuddalore', 'Dakshina Kannada', 'Darbhanga',
+            'Darjeeling', 'Dausa', 'Dehradun', 'Dhanbad', 'Dharwad',
+            'Dibrugarh', 'Dindigul', 'Dumka', 'Durg', 'Eluru',
+            'Ernakulam', 'Faridabad', 'Fatehpur Sikri', 'Firozpur',
+            'Gandhinagar', 'Gaya', 'Ghaziabad', 'Ghazipur', 'Gonda',
+            'Gorakhpur', 'Gulbarga', 'Guntur', 'Gurdaspur', 'Guwahati',
+            'Gwalior', 'Hajipur', 'Haridwar', 'Hassan', 'Haveri',
+            'Hazaribagh', 'Hisar', 'Hoshiarpur', 'Hyderabad', 'Idukki',
+            'Indore', 'Jabalpur', 'Jadavpur', 'Jaipur', 'Jaipur Rural',
+            'Jalandhar', 'Jalgaon', 'Jammu', 'Jamnagar', 'Jamshedpur',
+            'Jaunpur', 'Jhansi', 'Jodhpur', 'Junagadh', 'Kairana',
+            'Kakinada', 'Kalahandi', 'Kannur', 'Kanpur', 'Kanyakumari',
+            'Karnal', 'Karur', 'Katihar', 'Kendrapara', 'Khajuraho',
+            'Khandwa', 'Kheda', 'Kolkata Dakshin', 'Kolkata Uttar',
+            'Kollam', 'Koppal', 'Kota', 'Kottayam', 'Kozhikode',
+            'Kurnool', 'Kurukshetra', 'Latur', 'Lucknow', 'Ludhiana',
+            'Machilipatnam', 'Madurai', 'Dharwad', 'Mainpuri',
+            'Malappuram', 'Mathura', 'Meerut', 'Mirzapur', 'Mumbai North',
+            'Mumbai North Central', 'Mumbai North East', 'Mumbai North West',
+            'Mumbai South', 'Mumbai South Central', 'Muzaffarpur', 'Mysore',
+            'Nagpur', 'Nalgonda', 'Nanded', 'Nashik', 'Navsari',
+            'Nellore', 'New Delhi', 'Nizamabad', 'North Goa',
+            'North West Delhi', 'Ongole', 'Palakkad', 'Udupi',
+            'Patiala', 'Patna Sahib', 'Peddapalle', 'Perambalur',
+            'Phulpur', 'Pilibhit', 'Pondicherry', 'Porbandar',
+            'Pratapgarh', 'Pune', 'Puri', 'Purnia', 'Raebareli',
+            'Raichur', 'Raipur', 'Rajahmundry', 'Rajkot', 'Rampur',
+            'Ranchi', 'Ratlam', 'Ratnagiri', 'Rewa', 'Rohtak',
+            'Sagar', 'Saharanpur', 'Salem', 'Sambalpur', 'Sangli',
+            'Sangrur', 'Saran', 'Satara', 'Udupi', 'Secunderabad',
+            'Shillong', 'Shimla', 'Shimoga', 'Silchar', 'Siliguri',
+            'Sitapur', 'Solapur', 'Sonipat', 'Srikakulam', 'Srinagar',
+            'Sultanpur', 'Surat', 'Thane', 'Thanjavur',
+            'Thiruvananthapuram', 'Thoothukudi', 'Thrissur',
+            'Tiruchirappalli', 'Tirunelveli', 'Tirupati', 'Tumkur',
+            'Udaipur', 'Udhampur', 'Ujjain', 'Vadodara',
+            'Vaishali', 'Varanasi', 'Vellore', 'Vidisha',
+            'Vijayawada', 'Visakhapatnam', 'Warangal', 'Wayanad'
         ].sort();
     }
 
@@ -208,7 +208,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-        async function initCoalition() {
+    async function initCoalition() {
         const container = document.getElementById('coalition-parties');
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
@@ -225,24 +225,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!Array.isArray(all)) throw new Error('Parties response is not an array');
                 const partyList = all.filter(p => p.type === 'party');
                 console.log('[loadSides] Parties from server:', JSON.stringify(partyList.map(p => ({ id: p.id, name: p.name, side: p.side }))));
+
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
                 partyList.forEach(p => { nameToId[p.name] = p.id; });
 
-                // Fallback: if server returned all opposition, restore from localStorage
+                // Fallback: if server returned all null/opposition, check localStorage
                 if (rulingSet.size === 0 && partyList.length > 0) {
                     const saved = localStorage.getItem('adhikar_coalition');
                     if (saved) {
-                        const parsed = JSON.parse(saved);
-                        const storedRuling = new Set(parsed.rulingNames || []);
-                        const exists = [...storedRuling].every(n => partyList.some(p => p.name === n));
-                        if (exists && storedRuling.size > 0) {
-                            rulingSet = storedRuling;
-                            console.log('[loadSides] Restored coalition from localStorage:', [...rulingSet]);
-                        }
+                        try {
+                            const parsed = JSON.parse(saved);
+                            const storedRuling = new Set(parsed.rulingNames || []);
+                            // Verify these parties still exist in the current list
+                            const validNames = [...storedRuling].filter(n => partyList.some(p => p.name === n));
+                            if (validNames.length > 0) {
+                                rulingSet = new Set(validNames);
+                                console.log('[loadSides] Restored coalition from localStorage:', [...rulingSet]);
+                            }
+                        } catch (e) { console.warn('Corrupt adhikar_coalition in localStorage'); }
                     }
                 }
-            } catch (e) { console.error('loadSides error:', e); rulingSet = new Set(); nameToId = {}; }
+            } catch (e) {
+                console.error('loadSides error:', e);
+                rulingSet = new Set();
+                nameToId = {};
+                // Final desperation: check localStorage if even the network call failed
+                const saved = localStorage.getItem('adhikar_coalition');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        rulingSet = new Set(parsed.rulingNames || []);
+                    } catch (e) { }
+                }
+            }
         }
 
         async function loadLock() {
@@ -251,11 +267,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const state = await res.json();
                 coalitionLocked = state.locked === true;
-                // Fallback: restore locked state from localStorage if server says unlocked
-                if (!coalitionLocked && localStorage.getItem('adhikar_coalition')) {
-                    coalitionLocked = true;
-                }
-            } catch { coalitionLocked = !!localStorage.getItem('adhikar_coalition'); }
+            } catch {
+                // If server fetch fails, fallback to local storage only if it exists
+                coalitionLocked = !!localStorage.getItem('adhikar_coalition');
+            }
         }
 
         const noConfidenceBtn = document.createElement('button');
@@ -384,7 +399,7 @@ document.addEventListener('DOMContentLoaded', () => {
             finally { noConfidenceBtn.disabled = false; noConfidenceBtn.textContent = '⚖ No Confidence Motion'; }
         };
     }
-async function initLeadership() {
+    async function initLeadership() {
         const grid = document.getElementById('leadership-grid');
         const saveBtn = document.getElementById('leadership-save-btn');
         if (!grid) return;
@@ -512,11 +527,11 @@ async function initLeadership() {
                         <div class="delegate-meta">
                             <span class="meta-pill college-pill">${escapeHtml(d.college)}</span>
                             ${assigned
-                                ? `<span class="meta-pill constituency-pill">${escapeHtml(constituency)}</span>
+                    ? `<span class="meta-pill constituency-pill">${escapeHtml(constituency)}</span>
                                    <span class="meta-pill party-pill">${escapeHtml(party)}</span>
                                    <span class="meta-pill committee-pill">${escapeHtml(committee)}</span>`
-                                : `<span class="meta-pill unassigned-pill">Unassigned</span>`
-                            }
+                    : `<span class="meta-pill unassigned-pill">Unassigned</span>`
+                }
                         </div>
                     </div>
                     <div class="card-action">
@@ -838,7 +853,7 @@ async function initLeadership() {
                     d.assigned_party = party;
                     d.assigned_committee = committee;
                 }
-            } catch {}
+            } catch { }
         }
 
         renderCards();
@@ -898,7 +913,7 @@ async function initLeadership() {
                 });
                 changes.push({ name: d.name, old: oldConstituencies[d.id], new: newC });
                 d.assigned_constituency = newC;
-            } catch {}
+            } catch { }
         }
 
         if (changes.length) {
