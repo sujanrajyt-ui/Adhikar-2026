@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
-        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'New Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
+        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'New Gen Leaders (C)': 'party_c', 'Next Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
         let rulingSet = new Set();
 
         async function loadSides() {
