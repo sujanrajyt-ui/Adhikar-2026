@@ -244,7 +244,10 @@
         document.getElementById('coalition-save-btn').onclick = async () => {
             const counts = {};
             parties.forEach(p => counts[p.name] = 0);
-            delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
+            delegates.forEach(d => {
+                const p = PARTY_NAME_MAP[d.assigned_party] || d.assigned_party || '';
+                if (p) counts[p] = (counts[p] || 0) + 1;
+            });
             const totalRuling = parties.filter(p => rulingSet.has(p.name)).reduce((s, p) => s + (counts[p.name] || 0), 0);
             const total = Object.values(counts).reduce((s, c) => s + c, 0);
             const magic = Math.floor(total / 2) + 1;
