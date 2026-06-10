@@ -71,7 +71,9 @@
 
         function partyClass(party) {
             if (!party) return '';
-            return 'pf-' + party.toLowerCase().replace(/\s+/g, '-');
+            const match = party.match(/\((\w)\)$/);
+            const suffix = match ? match[1].toLowerCase() : party.toLowerCase().replace(/\s+/g, '-');
+            return 'pf-party-' + suffix;
         }
 
         let refreshInterval = null;
