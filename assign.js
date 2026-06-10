@@ -225,40 +225,52 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!Array.isArray(all)) throw new Error('Parties response is not an array');
                 const partyList = all.filter(p => p.type === 'party');
 
-                rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
                 partyList.forEach(p => { if (p.name) nameToId[p.name] = p.id; });
 
-                console.log('[loadSides] Synced from server, ruling:', Array.from(rulingSet));
-
-                // Always override with localStorage if available
                 const saved = localStorage.getItem('adhikar_coalition');
                 if (saved) {
                     try {
                         const parsed = JSON.parse(saved);
-                        const storedRuling = new Set(parsed.rulingNames || []);
-                        const validNames = [...storedRuling].filter(n => partyList.some(p => p.name === n));
-                        if (validNames.length > 0) {
+                        if (parsed.locked === true) {
+                            const validNames = (parsed.rulingNames || []).filter(n =>
+                                partyList.some(p => p.name === n)
+                            );
                             rulingSet = new Set(validNames);
-                            console.log('[loadSides] Overrode from localStorage:', [...rulingSet]);
+                            coalitionLocked = true;
+                            console.log('[loadSides] Restored locked coalition from localStorage:', [...rulingSet]);
+                            return;
                         }
-                    } catch (e) { console.warn('Corrupt adhikar_coalition in localStorage'); }
+                    } catch (e) {
+                        console.warn('Corrupt adhikar_coalition in localStorage');
+                        localStorage.removeItem('adhikar_coalition');
+                    }
                 }
+
+                rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
+                console.log('[loadSides] Loaded from server:', [...rulingSet]);
+
             } catch (e) {
                 console.error('loadSides error:', e);
-                // Fallback: try localStorage when server fails
                 const saved = localStorage.getItem('adhikar_coalition');
                 if (saved) {
                     try {
                         const parsed = JSON.parse(saved);
                         rulingSet = new Set(parsed.rulingNames || []);
-                        console.log('[loadSides] Restored from localStorage after error:', [...rulingSet]);
-                    } catch (e) { }
+                        if (parsed.locked === true) coalitionLocked = true;
+                        console.log('[loadSides] Restored from localStorage after server error:', [...rulingSet]);
+                    } catch (e) {
+                        localStorage.removeItem('adhikar_coalition');
+                    }
                 }
             }
         }
-
+        
         async function loadLock() {
+            if (coalitionLocked) {
+                console.log('[loadLock] Skipping — already locked by localStorage');
+                return;
+            }
             try {
                 const res = await fetch(`${API_BASE}/coalition-lock?t=${Date.now()}`);
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -330,7 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
             noConfidenceBtn.style.display = coalitionLocked ? 'inline-block' : 'none';
         }
 
-        await Promise.all([loadSides(), loadLock()]);
+        await loadSides();
+        await loadLock();
         renderHTML();
 
         saveBtn.onclick = async () => {
@@ -347,27 +360,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const rulingIds = parties.filter(p => rulingSet.has(p)).map(p => nameToId[p] || p);
             saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
 
-            // Always save to localStorage first
             localStorage.setItem('adhikar_coalition', JSON.stringify({
+                locked: true,
                 rulingNames: parties.filter(p => rulingSet.has(p)),
                 rulingIds: rulingIds
             }));
+
             coalitionLocked = true;
             showToast('Coalition saved and locked', 'success');
             renderHTML();
             initLeadership();
 
-            // Best-effort server save in background
             try {
-                const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-                    body: JSON.stringify({
-                        ruling_names: parties.filter(p => rulingSet.has(p)),
-                        ruling_ids: rulingIds
+                const [coalRes, lockRes] = await Promise.all([
+                    fetch(`${API_BASE}/admin/parties/coalition`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                        body: JSON.stringify({
+                            ruling_names: parties.filter(p => rulingSet.has(p)),
+                            ruling_ids: rulingIds
+                        })
+                    }),
+                    fetch(`${API_BASE}/admin/coalition-lock`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                        body: JSON.stringify({ locked: true })
                     })
-                });
-                if (!res.ok) console.error('Coalition server save failed:', await res.text());
+                ]);
+                if (!coalRes.ok) console.error('Coalition server save failed:', await coalRes.text());
+                if (!lockRes.ok) console.error('Lock server save failed:', await lockRes.text());
             } catch (e) { console.error('Coalition server save error:', e); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
         };
