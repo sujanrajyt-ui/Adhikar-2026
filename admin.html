@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coalition Admin | ADHIKAR'26</title>
+    <link rel="icon" type="image/x-icon" href="assets/logo.png">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assign.css">
+    <style>
+        body { background: #2e0810 !important; color: #ece2cf !important; margin: 0; }
+        .scores-header { background: #4a1019 !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
+        #page-loader { background: #2e0810 !important; }
+        .admin-panel { max-width: 600px; margin: 2rem auto; }
+        .party-chip { font-size: 0.9rem; padding: 8px 14px; }
+        .majority-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin: 8px 0; }
+        .majority-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+        .stat-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: rgba(255,255,255,0.5); padding: 2px 0; }
+        .stat-row .num { font-weight: 700; color: #fff; }
+        .admin-footer { margin-top: 3rem; text-align: center; font-size: 0.7rem; color: rgba(255,255,255,0.15); }
+        .admin-footer a { color: var(--gold); text-decoration: none; }
+    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="page-loader" class="page-loader">
+        <div class="loader-logo">
+            <img src="assets/logo.png" alt="Adhikar">
+        </div>
+    </div>
+
+    <header class="scores-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <img src="assets/logo.png" alt="Adhikar">
+                <span>ADHIKAR<span class="gold-text">'26</span> <span class="tabbing-badge">ADMIN</span></span>
+            </div>
+            <div id="admin-info" class="judge-info hidden">
+                <span class="judge-id-pill">Admin</span>
+                <button id="admin-logout" class="btn-ghost">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <section id="login-section" class="login-section">
+            <div class="login-card">
+                <div class="login-head">
+                    <p class="kicker kicker-gold">Admin Authentication</p>
+                    <h2>Coalition Management</h2>
+                    <p class="login-sub">Enter the admin password to manage the ruling coalition.</p>
+                </div>
+                <form id="login-form" class="login-form">
+                    <div class="field">
+                        <label for="admin-password">Admin Password</label>
+                        <input type="password" id="admin-password" placeholder="Enter admin password" required autocomplete="off">
+                    </div>
+                    <p id="login-error" class="field-error hidden"></p>
+                    <button type="submit" class="btn-primary">Unlock Panel</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="hidden admin-panel">
+            <div class="assign-panel-header">
+                <div>
+                    <h1 class="assign-panel-title">Ruling Coalition</h1>
+                    <small>Select parties to form the government. Majority required.</small>
+                </div>
+            </div>
+
+            <div class="governance-panel" style="margin-bottom:1.5rem;">
+                <div id="party-list"></div>
+                <div class="majority-bar"><div id="majority-fill" class="majority-fill" style="width:0%;background:var(--gold-gradient);"></div></div>
+                <div class="stat-row">Majority needed: <span class="num" id="magic-num">0</span></div>
+                <div class="stat-row">Government: <span class="num" id="govt-num">0</span></div>
+                <div class="stat-row" style="margin-top:6px;color:rgba(255,255,255,0.25);font-size:0.72rem;">
+                    Click a party to toggle ruling / opposition.
+                </div>
+            </div>
+
+            <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+                <button id="coalition-save-btn" class="btn-assign-all" style="padding:0.5rem 1.2rem;font-size:0.82rem;">Set Coalition</button>
+                <button id="no-confidence-btn" class="btn-assign-all" style="padding:0.5rem 1.2rem;font-size:0.82rem;color:#e74c3c;border-color:rgba(231,76,60,0.3);background:rgba(231,76,60,0.08);display:none;">No Confidence Motion</button>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="assign-toast"></div>
+
+    <div class="admin-footer">
+        <a href="/assign">Delegate Assignment</a> &middot; <a href="/">Home</a>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let adminPassword = '';
+        let parties = [];
+        let delegates = [];
+        let nameToId = {};
+        let rulingSet = new Set();
+        let coalitionLocked = false;
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        function showToast(msg, type) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.className = 'assign-toast assign-toast-' + type + ' visible';
+            setTimeout(() => el.classList.remove('visible'), 3500);
+        }
+
+        async function loadData() {
+            const [pRes, dRes, lockRes] = await Promise.all([
+                fetch(API_BASE + '/parties?t=' + Date.now()),
+                fetch(API_BASE + '/delegates?t=' + Date.now()),
+                fetch(API_BASE + '/coalition-lock?t=' + Date.now())
+            ]);
+            const allParties = await pRes.json();
+            parties = allParties.filter(p => p.type === 'party');
+            nameToId = {};
+            parties.forEach(p => { if (p.name) nameToId[p.name] = p.id; });
+
+            const saved = localStorage.getItem('adhikar_coalition');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed.locked === true) {
+                        const validNames = (parsed.rulingNames || []).filter(n => parties.some(p => p.name === n));
+                        rulingSet = new Set(validNames);
+                        coalitionLocked = true;
+                        render();
+                        return;
+                    }
+                } catch (e) {
+                    localStorage.removeItem('adhikar_coalition');
+                }
+            }
+
+            rulingSet = new Set(parties.filter(p => p.side === 'ruling').map(p => p.name));
+            const lockState = await lockRes.json();
+            coalitionLocked = lockState.locked === true;
+            render();
+        }
+
+        function render() {
+            const counts = {};
+            parties.forEach(p => counts[p.name] = 0);
+            delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
+
+            const totalRuling = parties.filter(p => rulingSet.has(p.name)).reduce((s, p) => s + (counts[p.name] || 0), 0);
+            const total = Object.values(counts).reduce((s, c) => s + c, 0);
+            const magic = Math.floor(total / 2) + 1;
+
+            const fill = document.getElementById('majority-fill');
+            const pct = total > 0 ? Math.min(100, (totalRuling / magic) * 100) : 0;
+            fill.style.width = pct + '%';
+            fill.style.background = totalRuling >= magic ? 'linear-gradient(90deg, #27ae60, #2ecc71)' : 'var(--gold-gradient)';
+            document.getElementById('magic-num').textContent = magic;
+            document.getElementById('govt-num').textContent = totalRuling;
+            document.getElementById('govt-num').style.color = totalRuling >= magic ? '#2ecc71' : 'var(--gold)';
+
+            let html = '<div class="party-chip-grid">';
+            parties.forEach(p => {
+                const isRuling = rulingSet.has(p.name);
+                const sideClass = isRuling ? 'ruling' : 'opposition';
+                const lockedClass = coalitionLocked ? 'coalition-chip-locked' : '';
+                html += '<div class="party-chip ' + sideClass + ' ' + lockedClass + '" data-party="' + escapeHtml(p.name) + '">'
+                    + escapeHtml(p.name)
+                    + ' <span class="chip-count">(' + (counts[p.name] || 0) + ')</span>'
+                    + '</div>';
+            });
+            html += '</div>';
+            document.getElementById('party-list').innerHTML = html;
+
+            document.querySelectorAll('.party-chip').forEach(chip => {
+                chip.onclick = () => {
+                    if (coalitionLocked) return;
+                    const p = chip.dataset.party;
+                    if (rulingSet.has(p)) rulingSet.delete(p);
+                    else rulingSet.add(p);
+                    render();
+                };
+            });
+
+            document.getElementById('coalition-save-btn').style.display = coalitionLocked ? 'none' : 'inline-block';
+            document.getElementById('no-confidence-btn').style.display = coalitionLocked ? 'inline-block' : 'none';
+        }
+
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const pw = document.getElementById('admin-password').value.trim();
+            if (!pw) return;
+            try {
+                const res = await fetch(API_BASE + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pw })
+                });
+                if (!res.ok) throw new Error('Invalid');
+                adminPassword = pw;
+                document.getElementById('login-section').classList.add('hidden');
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('admin-info').classList.remove('hidden');
+                document.getElementById('page-loader').classList.add('hidden');
+                await loadData();
+            } catch {
+                document.getElementById('login-error').textContent = 'Invalid password';
+                document.getElementById('login-error').classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('admin-logout').onclick = () => {
+            adminPassword = '';
+            document.getElementById('admin-panel').classList.add('hidden');
+            document.getElementById('admin-info').classList.add('hidden');
+            document.getElementById('login-section').classList.remove('hidden');
+            document.getElementById('admin-password').value = '';
+        };
+
+        document.getElementById('coalition-save-btn').onclick = async () => {
+            const counts = {};
+            parties.forEach(p => counts[p.name] = 0);
+            delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
+            const totalRuling = parties.filter(p => rulingSet.has(p.name)).reduce((s, p) => s + (counts[p.name] || 0), 0);
+            const total = Object.values(counts).reduce((s, c) => s + c, 0);
+            const magic = Math.floor(total / 2) + 1;
+            if (totalRuling < magic) {
+                showToast('Government needs at least ' + magic + ' delegates (has ' + totalRuling + '). Cannot form government.', 'error');
+                return;
+            }
+
+            const rulingNames = parties.filter(p => rulingSet.has(p.name)).map(p => p.name);
+            const rulingIds = parties.filter(p => rulingSet.has(p.name)).map(p => nameToId[p.name] || p.name);
+
+            localStorage.setItem('adhikar_coalition', JSON.stringify({
+                locked: true,
+                rulingNames: rulingNames,
+                rulingIds: rulingIds
+            }));
+
+            coalitionLocked = true;
+            showToast('Coalition saved and locked', 'success');
+            render();
+
+            try {
+                const [coalRes, lockRes] = await Promise.all([
+                    fetch(API_BASE + '/admin/parties/coalition', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                        body: JSON.stringify({ ruling_names: rulingNames, ruling_ids: rulingIds })
+                    }),
+                    fetch(API_BASE + '/admin/coalition-lock', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                        body: JSON.stringify({ locked: true })
+                    })
+                ]);
+                if (!coalRes.ok) console.error('Coalition save failed:', await coalRes.text());
+                if (!lockRes.ok) console.error('Lock save failed:', await lockRes.text());
+            } catch (e) {
+                console.error('Server save error:', e);
+            }
+        };
+
+        document.getElementById('no-confidence-btn').onclick = async () => {
+            if (!confirm('File a No Confidence Motion? This will reset the coalition.')) return;
+            const btn = document.getElementById('no-confidence-btn');
+            btn.disabled = true; btn.textContent = 'Filing...';
+            try {
+                const res = await fetch(API_BASE + '/admin/parties/no-confidence', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword }
+                });
+                if (!res.ok) throw new Error('Failed');
+                coalitionLocked = false;
+                rulingSet = new Set();
+                localStorage.removeItem('adhikar_coalition');
+                showToast('No Confidence Motion passed. Coalition reset.', 'success');
+                render();
+            } catch {
+                showToast('Failed to file motion', 'error');
+            } finally {
+                btn.disabled = false; btn.textContent = 'No Confidence Motion';
+            }
+        };
+
+        document.getElementById('page-loader').classList.add('hidden');
+    </script>
+</body>
+</html>

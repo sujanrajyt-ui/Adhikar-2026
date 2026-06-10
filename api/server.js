@@ -433,6 +433,18 @@ app.get('/api/coalition-lock', async (req, res) => {
   }
 });
 
+app.post('/api/admin/coalition-lock', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const result = await db.setCoalitionLock(req.body.locked === true);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // Debug: dump raw party data from DB
 app.get('/api/debug/parties', async (req, res) => {
   if (req.query.key !== process.env.ADMIN_PASSWORD) return res.status(403).json({ detail: 'Forbidden' });
@@ -1167,6 +1179,10 @@ app.get('/leaderboard', (req, res) => {
 
 app.get('/assign', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'assign.html'));
+});
+
+app.get('/coalition', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'admin.html'));
 });
 
 
