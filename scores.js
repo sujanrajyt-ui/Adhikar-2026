@@ -1,3 +1,11 @@
+const PARTY_NAME_MAP = {
+    'A': 'Rashtriya Yuva Pragati Manch (A)',
+    'B': 'Yuva Drishti Party (B)',
+    'C': 'New Gen Leaders (C)',
+    'D': 'Catalyst Party (D)',
+    'E': 'Visionary Party (E)'
+};
+
 const API_BASE = '/api';
 let currentJudge = sessionStorage.getItem('adhikar_judge') || null;
 let currentSession = null;
@@ -181,7 +189,7 @@ function renderCoalition() {
 
     const counts = {};
     allDelegates.forEach(d => {
-        const p = d.assigned_party || 'Unassigned';
+        const p = PARTY_NAME_MAP[d.assigned_party] || d.assigned_party || 'Unassigned';
         counts[p] = (counts[p] || 0) + 1;
     });
 
@@ -329,11 +337,12 @@ function renderDelegates() {
         return;
     }
     const query = (delegateSearch ? delegateSearch.value : '').toLowerCase();
-    const filtered = allDelegates.filter(d =>
-        d.name.toLowerCase().includes(query) ||
-        (d.assigned_party && d.assigned_party.toLowerCase().includes(query)) ||
-        (d.assigned_committee && d.assigned_committee.toLowerCase().includes(query))
-    );
+    const filtered = allDelegates.filter(d => {
+        const party = PARTY_NAME_MAP[d.assigned_party] || d.assigned_party || '';
+        return d.name.toLowerCase().includes(query) ||
+            party.toLowerCase().includes(query) ||
+            (d.assigned_committee && d.assigned_committee.toLowerCase().includes(query));
+    });
 
     if (filtered.length === 0) {
         delegateList.innerHTML = '<div class="empty-state"><p>No delegates found for this session.</p></div>';
@@ -369,7 +378,7 @@ function renderDelegates() {
             <h3>${escapeHtml(d.name)}</h3>
             <div class="delegate-meta">
               ${d.assigned_constituency ? `<span class="meta-pill meta-constituency">${escapeHtml(d.assigned_constituency)}</span>` : ''}
-              ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(d.assigned_party)}</span>` : ''}
+              ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(PARTY_NAME_MAP[d.assigned_party] || d.assigned_party)}</span>` : ''}
               ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
               ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
               ${d.elected_role ? `<span class="meta-pill" style="border-color:var(--gold); border-style:dashed;">${escapeHtml(d.elected_role)}</span>` : ''}
@@ -607,11 +616,12 @@ let attendanceTimer = null;
 
 function renderAttendance() {
     const query = (delegateSearch ? delegateSearch.value : '').toLowerCase();
-    const filtered = allDelegates.filter(d =>
-        d.name.toLowerCase().includes(query) ||
-        (d.assigned_party && d.assigned_party.toLowerCase().includes(query)) ||
-        (d.assigned_committee && d.assigned_committee.toLowerCase().includes(query))
-    );
+    const filtered = allDelegates.filter(d => {
+        const party = PARTY_NAME_MAP[d.assigned_party] || d.assigned_party || '';
+        return d.name.toLowerCase().includes(query) ||
+            party.toLowerCase().includes(query) ||
+            (d.assigned_committee && d.assigned_committee.toLowerCase().includes(query));
+    });
 
     if (filtered.length === 0) {
         delegateList.innerHTML = '<div class="empty-state"><p>No delegates found.</p></div>';
@@ -646,7 +656,7 @@ function renderAttendance() {
                             <div>
                                 <div class="attn-item-name" style="font-size:1.1rem; font-weight:700;">${escapeHtml(d.name)}</div>
                                 <div class="attn-item-meta" style="display:flex; gap:6px; margin-top:4px;">
-                                    ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(d.assigned_party)}</span>` : ''}
+                                    ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(PARTY_NAME_MAP[d.assigned_party] || d.assigned_party)}</span>` : ''}
                                     ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
                                 </div>
                             </div>
