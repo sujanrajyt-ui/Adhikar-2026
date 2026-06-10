@@ -31,7 +31,7 @@ if (typeof emailjs !== 'undefined') {
 const AWARDS = [
   {
     title: "General Championship Award",
-    desc: "Awarded to the institution with the most delegates and highest total points across all sessions.",
+    desc: "Winner: Institution with the highest total points across all sessions. 1st Runner-up: Second highest. 2nd Runner-up: Third highest. Tiebreaker: Most registered delegates.",
     isGrand: true
   },
   { title: "Best Student Speaker", desc: "Highest overall parliamentary performer." },
@@ -85,7 +85,7 @@ function formatDate(iso) {
 
 /* ============ Render static content ============ */
 const AWARD_DESCS = {
-  "General Championship Award": "Awarded to the institution with the most delegates and highest total points across all sessions — a measure of institutional engagement and excellence.",
+  "General Championship Award": "Winner: Institution with the highest total points across all sessions. 1st Runner-up: Second highest. 2nd Runner-up: Third highest. Tiebreaker: Most registered delegates.",
   "Best Student Speaker": "Highest overall parliamentary performer.",
   "Exceptional Debater": "Focuses on argumentation and rebuttal mastery.",
   "Asset of the Ruling Government": "Best defender of government policies and strategy.",
