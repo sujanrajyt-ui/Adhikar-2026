@@ -342,24 +342,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             const rulingIds = parties.filter(p => rulingSet.has(p)).map(p => nameToId[p] || p);
             saveBtn.disabled = true; saveBtn.textContent = 'Saving...';
+
+            // Always save to localStorage first
+            localStorage.setItem('adhikar_coalition', JSON.stringify({
+                rulingNames: parties.filter(p => rulingSet.has(p)),
+                rulingIds: rulingIds
+            }));
+            coalitionLocked = true;
+            showToast('Coalition saved and locked', 'success');
+            renderHTML();
+            initLeadership();
+
+            // Best-effort server save in background
             try {
                 const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
                     body: JSON.stringify({ ruling_ids: rulingIds })
                 });
-                const body = await res.json();
-                if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
-                console.log('[Coalition] Save response sides:', JSON.stringify(body.sides));
-                coalitionLocked = true;
-                localStorage.setItem('adhikar_coalition', JSON.stringify({
-                    rulingNames: parties.filter(p => rulingSet.has(p)),
-                    rulingIds: rulingIds
-                }));
-                showToast('Coalition saved and locked', 'success');
-                renderHTML();
-                initLeadership();
-            } catch (e) { console.error('Coalition save error:', e); showToast('Failed: ' + (e.message || e), 'error'); alert('ERROR: ' + (e.message || e)); }
+                if (!res.ok) console.error('Coalition server save failed:', await res.text());
+            } catch (e) { console.error('Coalition server save error:', e); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
         };
 
