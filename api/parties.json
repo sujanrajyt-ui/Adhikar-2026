@@ -3,35 +3,35 @@
     "id": "party_a",
     "name": "Rashtriya Yuva Pragati Manch (A)",
     "type": "party",
-    "side": null,
+    "side": "ruling",
     "created_at": "2026-06-09T00:00:00.000Z"
   },
   {
     "id": "party_b",
     "name": "Yuva Drishti Party (B)",
     "type": "party",
-    "side": null,
+    "side": "ruling",
     "created_at": "2026-06-09T00:00:00.000Z"
   },
   {
     "id": "party_c",
     "name": "New Gen Leaders (C)",
     "type": "party",
-    "side": null,
+    "side": "ruling",
     "created_at": "2026-06-09T00:00:00.000Z"
   },
   {
     "id": "party_d",
     "name": "Catalyst Party (D)",
     "type": "party",
-    "side": null,
+    "side": "opposition",
     "created_at": "2026-06-09T00:00:00.000Z"
   },
   {
     "id": "party_e",
     "name": "Navpeedhi Bharat Party (E)",
     "type": "party",
-    "side": null,
+    "side": "opposition",
     "created_at": "2026-06-09T00:00:00.000Z"
   },
   {

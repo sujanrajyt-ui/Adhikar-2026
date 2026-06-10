@@ -153,7 +153,7 @@ function renderPodium(data) {
             <div class="podium-rank rank-${d.rank}">${d.rank}</div>
             <div class="podium-box">
                 <div class="podium-name">${escapeHtml(d.name)}</div>
-                <div class="podium-meta">${escapeHtml(d.portfolio || 'Delegate')}</div>
+                <div class="podium-meta">${escapeHtml(d.portfolio || d.elected_role || 'General Delegate')}</div>
                 <div class="podium-score">${getDisplayScore(d, awardSelector.value)}</div>
             </div>
         </div>
@@ -167,17 +167,18 @@ function renderTable(data, filter) {
     }
 
     const rows = data.map((d, index) => `
-        <tr class="${index < 3 ? 'podium-row' : ''}">
-            <td><span class="rank-num">#${index + 1}</span></td>
+        <tr class="leaderboard-row">
+            <td><span class="row-rank">#${index + 1}</span></td>
             <td>
-                <div class="delegate-name">${escapeHtml(d.name)}</div>
+                <div class="row-name">${escapeHtml(d.name)}</div>
                 <div class="delegate-sub">${escapeHtml(d.elected_role || 'General Delegate')}</div>
             </td>
-            <td>
-                <div class="delegate-sub">${escapeHtml(d.committee || 'All Members')} | ${escapeHtml(d.party || 'Independent')}</div>
+            <td class="hide-mobile">
+                <div class="delegate-sub">${escapeHtml(d.committee || 'All Members')}</div>
+                <div class="podium-meta" style="font-size:0.7rem; margin-top:2px;">${escapeHtml(d.party || 'Independent')}</div>
             </td>
-            <td class="text-right">
-                <div class="score-value">${getDisplayScore(d, filter)}</div>
+            <td>
+                <div class="row-score">${getDisplayScore(d, filter)}</div>
             </td>
         </tr>
     `).join('');

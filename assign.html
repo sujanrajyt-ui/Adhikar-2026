@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,15 +8,15 @@
     <link rel="icon" type="image/x-icon" href="assets/logo.png">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="assign.css">
-    <style>
-        body { background: #2e0810 !important; color: #ece2cf !important; margin: 0; }
-        .scores-header { background: #4a1019 !important; border-bottom: 1px solid rgba(255,255,255,0.08) !important; }
-        #page-loader { background: #2e0810 !important; }
-    </style>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="assign.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap"
+        rel="stylesheet">
 </head>
+
 <body>
     <div id="page-loader" class="page-loader">
         <div class="loader-logo">
@@ -42,12 +43,14 @@
                 <div class="login-head">
                     <p class="kicker kicker-gold">Admin Authentication</p>
                     <h2>Delegate Assignment</h2>
-                    <p class="login-sub">Enter the admin password to assign constituency, party & committee to delegates.</p>
+                    <p class="login-sub">Enter the admin password to assign constituency, party & committee to
+                        delegates.</p>
                 </div>
                 <form id="login-form" class="login-form">
                     <div class="field">
                         <label for="admin-password">Admin Password</label>
-                        <input type="password" id="admin-password" placeholder="Enter admin password" required autocomplete="off">
+                        <input type="password" id="admin-password" placeholder="Enter admin password" required
+                            autocomplete="off">
                     </div>
                     <p id="login-error" class="field-error hidden"></p>
                     <button type="submit" class="btn-primary">Unlock Panel</button>
@@ -70,10 +73,16 @@
                     <span class="assign-stat">Unassigned <strong class="red" id="unassigned-count">0</strong></span>
                 </div>
                 <div class="assign-toolbar-right">
-                    <button id="export-excel-btn" class="btn-assign-all" style="color:#3498db;border-color:rgba(52,152,219,0.2);background:rgba(52,152,219,0.08);" title="Export assignments to Excel">Export Excel</button>
-                    <button id="assign-unassigned-btn" class="btn-assign-all" title="Assign only unassigned delegates">Assign Unassigned</button>
-                    <button id="assign-all-btn" class="btn-assign-all" title="Assign all delegates (overwrites existing)">Assign All</button>
-                    <button id="reassign-all-btn" class="btn-assign-all" style="color:#e74c3c;border-color:rgba(231,76,60,0.2);background:rgba(231,76,60,0.08);" title="Reassign all delegates with new constituencies">Reassign All</button>
+                    <button id="export-excel-btn" class="btn-assign-all"
+                        style="color:#3498db;border-color:rgba(52,152,219,0.2);background:rgba(52,152,219,0.08);"
+                        title="Export assignments to Excel">Export Excel</button>
+                    <button id="assign-unassigned-btn" class="btn-assign-all"
+                        title="Assign only unassigned delegates">Assign Unassigned</button>
+                    <button id="assign-all-btn" class="btn-assign-all"
+                        title="Assign all delegates (overwrites existing)">Assign All</button>
+                    <button id="reassign-all-btn" class="btn-assign-all"
+                        style="color:#e74c3c;border-color:rgba(231,76,60,0.2);background:rgba(231,76,60,0.08);"
+                        title="Reassign all delegates with new constituencies">Reassign All</button>
                     <select id="filter-party" class="filter-select">
                         <option value="all">All Parties</option>
                     </select>
@@ -102,16 +111,26 @@
 
             <div class="assign-governance">
                 <div class="governance-panel">
-                    <h4 class="dash-title" style="color:#d4af37;">Coalition</h4>
-                    <p class="governance-desc">Check ruling parties. Unchecked become opposition.</p>
+                    <h4 class="dash-title" style="color:var(--gold);">Coalition Management</h4>
+                    <p class="governance-desc">Toggle parties to form the government. Majority is required.</p>
                     <div id="coalition-parties" class="coalition-parties"></div>
-                    <button id="coalition-save-btn" class="btn-assign-all" style="margin-top:0.5rem;font-size:0.78rem;padding:0.3rem 0.8rem;">Set Coalition</button>
+
+                    <div class="majority-meter">
+                        <div id="majority-fill" class="majority-fill"></div>
+                    </div>
+                    <div id="majority-stats" class="majority-info">
+                        Majority needed: <span id="magic-num">0</span> · Govt: <span id="govt-num">0</span>
+                    </div>
+
+                    <button id="coalition-save-btn" class="btn-assign-all" style="margin-top:1.5rem;">Set
+                        Coalition</button>
                 </div>
                 <div class="governance-panel" style="flex:2;">
-                    <h4 class="dash-title" style="color:#d4af37;">Leadership</h4>
-                    <p class="governance-desc">Assign roles to delegates. Only verified delegates with assigned parties appear.</p>
+                    <h4 class="dash-title" style="color:var(--gold);">Parliamentary Leadership</h4>
+                    <p class="governance-desc">Assign top-tier parliamentary roles to verified delegates.</p>
                     <div class="leadership-grid" id="leadership-grid"></div>
-                    <button id="leadership-save-btn" class="btn-assign-all" style="margin-top:0.5rem;font-size:0.78rem;padding:0.3rem 0.8rem;">Save Leadership</button>
+                    <button id="leadership-save-btn" class="btn-assign-all" style="margin-top:1.5rem;">Save
+                        Leadership</button>
                 </div>
             </div>
 
@@ -150,4 +169,5 @@
     </script>
     <script src="assign.js?v=5"></script>
 </body>
+
 </html>

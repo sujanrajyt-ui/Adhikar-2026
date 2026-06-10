@@ -224,40 +224,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const all = await res.json();
                 if (!Array.isArray(all)) throw new Error('Parties response is not an array');
                 const partyList = all.filter(p => p.type === 'party');
-                console.log('[loadSides] Parties from server:', JSON.stringify(partyList.map(p => ({ id: p.id, name: p.name, side: p.side }))));
 
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
-                partyList.forEach(p => { nameToId[p.name] = p.id; });
+                partyList.forEach(p => { if (p.name) nameToId[p.name] = p.id; });
 
-                // Fallback: if server returned all null/opposition, check localStorage
-                if (rulingSet.size === 0 && partyList.length > 0) {
-                    const saved = localStorage.getItem('adhikar_coalition');
-                    if (saved) {
-                        try {
-                            const parsed = JSON.parse(saved);
-                            const storedRuling = new Set(parsed.rulingNames || []);
-                            // Verify these parties still exist in the current list
-                            const validNames = [...storedRuling].filter(n => partyList.some(p => p.name === n));
-                            if (validNames.length > 0) {
-                                rulingSet = new Set(validNames);
-                                console.log('[loadSides] Restored coalition from localStorage:', [...rulingSet]);
-                            }
-                        } catch (e) { console.warn('Corrupt adhikar_coalition in localStorage'); }
-                    }
-                }
+                console.log('[loadSides] Synced from server, ruling:', Array.from(rulingSet));
             } catch (e) {
                 console.error('loadSides error:', e);
-                rulingSet = new Set();
-                nameToId = {};
-                // Final desperation: check localStorage if even the network call failed
-                const saved = localStorage.getItem('adhikar_coalition');
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        rulingSet = new Set(parsed.rulingNames || []);
-                    } catch (e) { }
-                }
+                showToast('Failed to sync sides from server', 'error');
             }
         }
 
@@ -267,9 +242,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const state = await res.json();
                 coalitionLocked = state.locked === true;
-            } catch {
-                // If server fetch fails, fallback to local storage only if it exists
-                coalitionLocked = !!localStorage.getItem('adhikar_coalition');
+            } catch (e) {
+                console.error('loadLock error:', e);
             }
         }
 
@@ -284,58 +258,51 @@ document.addEventListener('DOMContentLoaded', () => {
             const counts = {};
             parties.forEach(p => counts[p] = 0);
             delegates.forEach(d => { if (d.assigned_party) counts[d.assigned_party] = (counts[d.assigned_party] || 0) + 1; });
-            const rawParties = {};
-            delegates.forEach(d => { if (d.assigned_party) rawParties[d.assigned_party] = (rawParties[d.assigned_party] || 0) + 1; });
-            const otherParties = Object.keys(rawParties).filter(p => !parties.includes(p));
 
             const ruling = parties.filter(p => rulingSet.has(p));
-            const opposition = parties.filter(p => !rulingSet.has(p));
             const totalRuling = ruling.reduce((s, p) => s + counts[p], 0);
-            const totalOpp = opposition.reduce((s, p) => s + counts[p], 0);
             const total = Object.values(counts).reduce((s, c) => s + c, 0);
             const magic = Math.floor(total / 2) + 1;
 
-            let html = '<div class="coalition-blocks">';
-            html += '<div class="coalition-block coalition-gov">';
-            html += '<div class="coalition-block-head">GOVERNMENT <span class="coalition-count">' + totalRuling + ' delegates</span></div>';
-            html += '<div class="coalition-block-body">';
-            if (!ruling.length) html += '<div class="coalition-empty">Click a party below to add</div>';
-            ruling.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-gov' + (coalitionLocked ? ' coalition-chip-locked' : '') + '" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span>' + (coalitionLocked ? '' : ' <span class="chip-toggle">→ Opp</span>') + '</div>';
-            });
-            html += '</div></div>';
-            html += '<div class="coalition-block coalition-opp">';
-            html += '<div class="coalition-block-head">OPPOSITION <span class="coalition-count">' + totalOpp + ' delegates</span></div>';
-            html += '<div class="coalition-block-body">';
-            if (!opposition.length) html += '<div class="coalition-empty">No opposition parties</div>';
-            opposition.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-opp' + (coalitionLocked ? ' coalition-chip-locked' : '') + '" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span>' + (coalitionLocked ? '' : ' <span class="chip-toggle">→ Gov</span>') + '</div>';
-            });
-            html += '</div></div>';
-            html += '</div>';
-
-            const meetsMajority = totalRuling >= magic;
-            html += '<div class="coalition-magic">';
-            html += 'Majority needed: <strong>' + magic + '</strong> &middot; Govt: <strong style="color:' + (meetsMajority ? '#2ecc71' : '#e74c3c') + ';">' + totalRuling + '</strong>';
-            if (!meetsMajority) html += ' <span style="color:#e74c3c;">(needs ' + (magic - totalRuling) + ' more)</span>';
-            html += '</div>';
-
-            if (coalitionLocked) {
-                html += '<div class="coalition-locked-msg">🔒 Coalition is locked. Parties cannot be toggled.</div>';
+            // Update Majority Meter & Stats
+            const fill = document.getElementById('majority-fill');
+            const magicEl = document.getElementById('magic-num');
+            const govtEl = document.getElementById('govt-num');
+            if (fill) {
+                const pct = total > 0 ? Math.min(100, (totalRuling / magic) * 100) : 0;
+                fill.style.width = pct + '%';
+                fill.style.background = totalRuling >= magic ? 'linear-gradient(90deg, #27ae60, #2ecc71)' : 'var(--gold-gradient)';
             }
+            if (magicEl) magicEl.textContent = magic;
+            if (govtEl) {
+                govtEl.textContent = totalRuling;
+                govtEl.style.color = totalRuling >= magic ? '#2ecc71' : 'var(--gold)';
+            }
+
+            let html = '<div class="party-chip-grid">';
+            parties.forEach(p => {
+                const isRuling = rulingSet.has(p);
+                const sideClass = isRuling ? 'ruling' : 'opposition';
+                const lockedClass = coalitionLocked ? 'coalition-chip-locked' : '';
+                html += `
+                <div class="party-chip ${sideClass} ${lockedClass}" data-party="${p}">
+                    ${escapeHtml(p)}
+                    <span class="chip-count">(${counts[p]})</span>
+                </div>`;
+            });
+            html += '</div>';
 
             container.innerHTML = html;
 
-            if (!coalitionLocked) {
-                container.querySelectorAll('.coalition-chip').forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        const party = chip.dataset.party;
-                        if (rulingSet.has(party)) rulingSet.delete(party);
-                        else rulingSet.add(party);
-                        renderHTML();
-                    });
-                });
-            }
+            container.querySelectorAll('.party-chip').forEach(chip => {
+                chip.onclick = () => {
+                    if (coalitionLocked) return;
+                    const p = chip.dataset.party;
+                    if (rulingSet.has(p)) rulingSet.delete(p);
+                    else rulingSet.add(p);
+                    renderHTML();
+                };
+            });
 
             saveBtn.style.display = coalitionLocked ? 'none' : 'inline-block';
             noConfidenceBtn.style.display = coalitionLocked ? 'inline-block' : 'none';
@@ -1029,7 +996,7 @@ document.addEventListener('DOMContentLoaded', () => {
         showToast('Session expired. Please login again.', 'error');
     }
 
-    function showToast(msg, type) {
+    function showToast(msg, type = 'success') {
         const existing = document.querySelector('.assign-toast');
         if (existing) existing.remove();
         const toast = document.createElement('div');
@@ -1039,8 +1006,8 @@ document.addEventListener('DOMContentLoaded', () => {
         requestAnimationFrame(() => toast.classList.add('visible'));
         setTimeout(() => {
             toast.classList.remove('visible');
-            setTimeout(() => toast.remove(), 300);
-        }, 2500);
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
     }
 
     window.loadDelegates = loadDelegates;

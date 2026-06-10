@@ -195,15 +195,15 @@ function renderCoalition() {
         coalitionInfo.innerHTML = `
             <div class="coal-flat-list">
                 ${sorted.map(p => {
-                    const count = counts[p.name] || 0;
-                    const pct = total > 0 ? Math.round(count / total * 100) : 0;
-                    return `
+            const count = counts[p.name] || 0;
+            const pct = total > 0 ? Math.round(count / total * 100) : 0;
+            return `
                         <div class="coal-party coal-flat">
                             <span class="coal-party-name">${escapeHtml(p.name)}</span>
                             <span class="coal-party-count">${count} <small>${pct}%</small></span>
                         </div>
                     `;
-                }).join('')}
+        }).join('')}
             </div>
             <div class="coal-total-row">
                 <span><strong>Total</strong></span>
@@ -372,7 +372,7 @@ function renderDelegates() {
               ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(d.assigned_party)}</span>` : ''}
               ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
               ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
-              ${d.elected_role ? `<span class="role-badge-mini">${escapeHtml(d.elected_role)}</span>` : ''}
+              ${d.elected_role ? `<span class="meta-pill" style="border-color:var(--gold); border-style:dashed;">${escapeHtml(d.elected_role)}</span>` : ''}
             </div>
           </div>
           <div class="score-badge-wrap">
@@ -384,7 +384,7 @@ function renderDelegates() {
           <div class="criteria-row">
             ${criteriaHtml}
           </div>
-          <button class="inline-save-btn" id="save-btn-${d.id}" onclick="handleInlineSave('${d.id}')">
+          <button class="btn-primary" id="save-btn-${d.id}" onclick="handleInlineSave('${d.id}')" style="margin-top:0;">
             Submit Scores
           </button>
         </div>
@@ -453,7 +453,7 @@ async function handleInlineSave(delegateId) {
         }
 
         const responses = await Promise.all(submissions.map(s =>
-            fetch(`${API_BASE}/scores/submit`, {
+            fetch(`${API_BASE} /scores/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(s)
@@ -463,7 +463,7 @@ async function handleInlineSave(delegateId) {
         for (const res of responses) {
             if (!res.ok) {
                 const errorText = await res.text();
-                throw new Error(`Server ${res.status}: ${errorText}`);
+                throw new Error(`Server ${res.status}: ${errorText} `);
             }
         }
 
@@ -531,7 +531,7 @@ function updateProgress() {
         circle.setAttribute('stroke-dasharray', circumference);
         circle.setAttribute('stroke-dashoffset', circumference - (pct / 100) * circumference);
     }
-    if (pctText) pctText.textContent = `${Math.round(pct)}%`;
+    if (pctText) pctText.textContent = `${Math.round(pct)}% `;
 }
 
 function focusNextDelegate(currentId) {
@@ -635,25 +635,23 @@ function renderAttendance() {
                 <button class="attn-btn attn-btn-none" onclick="markAllAttendance(false)" title="Mark all absent (A key)">✗ All Absent</button>
             </div>
         </div>
-        <div class="attn-list">
-            ${filtered.map((d, idx) => {
-                const present = getAttendanceStatus(d);
-                return `
+            <div class="attn-list">
+                ${filtered.map((d, idx) => {
+        const present = getAttendanceStatus(d);
+        return `
                     <div class="attn-item ${present ? 'attn-item-present' : 'attn-item-absent'}" 
                          data-id="${d.id}" style="animation-delay: ${idx * 0.03}s">
                         <div class="attn-item-info">
-                            <span class="attn-item-icon">${present ? '✓' : '○'}</span>
+                            <span class="attn-item-icon" style="background:rgba(255,255,255,0.05); color:white; border:1px solid var(--glass-border);">${present ? '✓' : '○'}</span>
                             <div>
-                                <div class="attn-item-name">${escapeHtml(d.name)}</div>
-                                <div class="attn-item-meta">
-                                    ${d.assigned_constituency ? `<span>${escapeHtml(d.assigned_constituency)}</span>` : ''}
-                                    ${d.assigned_party ? `<span>${escapeHtml(d.assigned_party)}</span>` : ''}
-                                    ${d.assigned_committee ? `<span>${escapeHtml(d.assigned_committee)}</span>` : ''}
-                                    ${d.portfolio ? `<span class="gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
+                                <div class="attn-item-name" style="font-size:1.1rem; font-weight:700;">${escapeHtml(d.name)}</div>
+                                <div class="attn-item-meta" style="display:flex; gap:6px; margin-top:4px;">
+                                    ${d.assigned_party ? `<span class="meta-pill">${escapeHtml(d.assigned_party)}</span>` : ''}
+                                    ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
                                 </div>
                             </div>
                         </div>
-                        <div class="attn-item-toggles">
+                        <div class="attn-item-toggles" style="display:flex; gap:10px;">
                             <button class="attn-toggle ${present ? 'attn-toggle-active attn-toggle-yes' : 'attn-toggle-yes'}" 
                                     onclick="handleAttendanceToggle('${d.id}', true, this)">
                                 ✓ Present
@@ -665,9 +663,9 @@ function renderAttendance() {
                         </div>
                     </div>
                 `;
-            }).join('')}
-        </div>
-    `;
+    }).join('')}
+            </div>
+        `;
 
     updateAttendanceStats();
 }
