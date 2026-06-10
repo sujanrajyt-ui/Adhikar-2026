@@ -219,17 +219,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
         async function loadSides() {
             try {
-                const all = await fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json());
+                const res = await fetch(`${API_BASE}/parties?t=${Date.now()}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const all = await res.json();
+                if (!Array.isArray(all)) throw new Error('Parties response is not an array');
                 const partyList = all.filter(p => p.type === 'party');
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
                 nameToId = {};
                 partyList.forEach(p => { nameToId[p.name] = p.id; });
-            } catch { rulingSet = new Set(); nameToId = {}; }
+            } catch (e) { console.error('loadSides error:', e); rulingSet = new Set(); nameToId = {}; }
         }
 
         async function loadLock() {
             try {
-                const state = await fetch(`${API_BASE}/coalition-lock?t=${Date.now()}`).then(r => r.json());
+                const res = await fetch(`${API_BASE}/coalition-lock?t=${Date.now()}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const state = await res.json();
                 coalitionLocked = state.locked === true;
             } catch { coalitionLocked = false; }
         }
@@ -324,12 +329,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
                     body: JSON.stringify({ ruling_ids: rulingIds })
                 });
-                if (!res.ok) throw new Error('Failed');
+                const body = await res.json();
+                if (!res.ok) throw new Error(body.detail || `HTTP ${res.status}`);
                 coalitionLocked = true;
                 showToast('Coalition saved and locked', 'success');
                 renderHTML();
                 initLeadership();
-            } catch { showToast('Failed to save coalition', 'error'); }
+            } catch (e) { console.error('Coalition save error:', e); showToast('Failed to save coalition', 'error'); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
         };
 

@@ -399,10 +399,13 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
   const { ruling_ids } = req.body;
   if (!Array.isArray(ruling_ids)) return res.status(400).json({ detail: 'ruling_ids array required' });
   try {
+    console.log('[Coalition] Setting coalition with ruling_ids:', JSON.stringify(ruling_ids));
     await db.setCoalition(ruling_ids);
     await db.setCoalitionLock(true);
+    console.log('[Coalition] Coalition saved successfully');
     res.json({ success: true });
   } catch (err) {
+    console.error('[Coalition] Error saving coalition:', err);
     res.status(500).json({ detail: err.message });
   }
 });
@@ -423,6 +426,17 @@ app.get('/api/coalition-lock', async (req, res) => {
   try {
     const state = await db.getCoalitionLock();
     res.json(state);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+// Debug: dump raw party data from DB
+app.get('/api/debug/parties', async (req, res) => {
+  if (req.query.key !== process.env.ADMIN_PASSWORD) return res.status(403).json({ detail: 'Forbidden' });
+  try {
+    const raw = await db.getParties();
+    res.json(raw.map(p => ({ id: p.id, name: p.name, side: p.side, type: p.type })));
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
