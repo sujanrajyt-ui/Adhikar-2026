@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json())
                 ]);
 
-                const partyList = allParties.filter(p => p.type === 'party');
+                const partyList = allParties.filter(p => p.type === 'party').map(p => ({ ...p, name: PARTY_NAME_MAP[p.name] || p.name }));
                 const rulingPartyNames = partyList.filter(p => p.side === 'ruling').map(p => p.name);
                 const oppPartyNames = partyList.filter(p => p.side === 'opposition').map(p => p.name);
 
