@@ -510,6 +510,7 @@ module.exports = {
 
   async getParties() {
     if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
       const [partiesRes, configRes] = await Promise.all([
         pool.query('SELECT * FROM parties ORDER BY type, name'),
         pool.query("SELECT value FROM app_config WHERE key = 'coalition_ruling_ids'")
@@ -560,6 +561,7 @@ module.exports = {
 
   async setCoalition(rulingIds) {
     if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
       await pool.query(
         `INSERT INTO app_config (key, value) VALUES ('coalition_ruling_ids', $1)
          ON CONFLICT (key) DO UPDATE SET value = $1`,
@@ -959,6 +961,7 @@ module.exports = {
 
   async resetCoalition() {
     if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
       await pool.query("DELETE FROM app_config WHERE key = 'coalition_ruling_ids'");
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
