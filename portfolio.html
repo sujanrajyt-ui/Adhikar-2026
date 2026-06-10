@@ -62,6 +62,21 @@
     <script>
         const API_BASE = '/api';
 
+        const PARTY_NAME_MAP = {
+            'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+            'Party B': 'Yuva Drishti Party (B)',
+            'Party C': 'Next Gen Leaders (C)',
+            'Party D': 'Catalyst Party (D)',
+            'Party E': 'Navpeedhi Bharat Party (E)',
+        };
+        const COMM_NAME_MAP = {
+            'Committee A': 'EDUCATION',
+            'Committee B': 'FINANCE',
+            'Committee C': 'HOME AFFAIRS',
+            'Committee D': 'HEALTH',
+            'Committee E': 'JUSTICE',
+        };
+
         function escapeHtml(str) {
             if (!str) return '';
             const div = document.createElement('div');
@@ -78,6 +93,12 @@
 
         let refreshInterval = null;
 
+        function normalizeDelegate(d) {
+            if (PARTY_NAME_MAP[d.assigned_party]) d.assigned_party = PARTY_NAME_MAP[d.assigned_party];
+            if (COMM_NAME_MAP[d.assigned_committee]) d.assigned_committee = COMM_NAME_MAP[d.assigned_committee];
+            return d;
+        }
+
         async function load() {
             const container = document.getElementById('pf-content');
             const ts = document.getElementById('pf-timestamp');
@@ -90,7 +111,9 @@
 
                 if (!delegatesRes.ok) throw new Error('Failed to load');
 
-                const delegates = await delegatesRes.json();
+                let delegates = await delegatesRes.json();
+                delegates.forEach(normalizeDelegate);
+
                 const partyItems = partiesRes.ok ? await partiesRes.json() : [];
                 const partyNames = partyItems.filter(p => p.type === 'party').map(p => p.name);
 
