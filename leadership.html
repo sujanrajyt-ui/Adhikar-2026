@@ -364,6 +364,13 @@
         <div id="opp-grid" class="leaders-grid">
             <div class="empty-state">Loading...</div>
         </div>
+
+        <!-- Neutral / Unaffiliated -->
+        <div class="section-divider" id="neutral-section" style="display:none;">
+            <span class="section-icon">⚖️</span>
+            <span class="section-title">Neutral / Chair</span>
+        </div>
+        <div id="neutral-grid" class="leaders-grid" style="display:none;"></div>
     </main>
 
     <footer style="max-width:1100px;margin:0 auto;padding:1.5rem;text-align:center;color:rgba(255,255,255,0.3);font-size:0.75rem;">
@@ -378,10 +385,9 @@
                 ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
         }
 
-        function makeCard(role, person) {
+        function makeTopCard(person, side) {
             if (!person) return '';
-            const isGov = role === 'Prime Minister' || role === 'Deputy Prime Minister' || role.startsWith('Minister');
-            const side = isGov ? 'ruling' : 'opposition';
+            const role = person.elected_role || 'Member of Parliament';
             const isHighlight = role === 'Prime Minister' || role === 'Leader of Opposition';
             return `
                 <div class="leader-card ${isHighlight ? 'card-highlight' : ''}">
@@ -392,8 +398,29 @@
                     <div class="name">${escapeHtml(person.name)}</div>
                     <div class="meta">
                         ${person.party ? `<span><span class="meta-label">Party:</span> ${escapeHtml(person.party)}</span>` : ''}
+                        ${person.college ? `<span><span class="meta-label">College:</span> ${escapeHtml(person.college)}</span>` : ''}
                     </div>
-                    <span class="side-badge side-${side}">${isGov ? 'Ruling' : 'Opposition'}</span>
+                    <span class="side-badge side-${side}">${side === 'ruling' ? 'Ruling' : 'Opposition'}</span>
+                </div>
+            `;
+        }
+
+        function makeDelegateCard(person, side) {
+            if (!person) return '';
+            const role = person.elected_role || 'Member of Parliament';
+            return `
+                <div class="leader-card">
+                    <div class="role-tag">
+                        <span class="role-dot dot-${side}"></span>
+                        ${escapeHtml(role)}
+                    </div>
+                    <div class="name">${escapeHtml(person.name)}</div>
+                    <div class="meta">
+                        ${person.party ? `<span><span class="meta-label">Party:</span> ${escapeHtml(person.party)}</span>` : ''}
+                        ${person.college ? `<span><span class="meta-label">College:</span> ${escapeHtml(person.college)}</span>` : ''}
+                        ${person.committee ? `<span><span class="meta-label">Committee:</span> ${escapeHtml(person.committee)}</span>` : ''}
+                    </div>
+                    <span class="side-badge side-${side}">${side === 'ruling' ? 'Ruling' : 'Opposition'}</span>
                 </div>
             `;
         }
@@ -404,25 +431,77 @@
                 if (loader) loader.classList.add('hidden');
             };
             try {
-                const res = await fetch(`${API_BASE}/leadership`);
-                const data = await res.json();
+                const [leadershipRes, leaderboardRes] = await Promise.all([
+                    fetch(`${API_BASE}/leadership`),
+                    fetch(`${API_BASE}/public/leaderboard`)
+                ]);
+                const leadership = await leadershipRes.json();
+                const leaderboard = await leaderboardRes.json();
+
                 const govEl = document.getElementById('gov-grid');
                 const oppEl = document.getElementById('opp-grid');
+                const neutralEl = document.getElementById('neutral-grid');
+                const neutralSection = document.getElementById('neutral-section');
 
+                const usedIds = new Set();
+
+                // Build government section
                 const govCards = [];
-                if (data.pm) govCards.push(makeCard('Prime Minister', data.pm));
-                if (data.dpm) govCards.push(makeCard('Deputy Prime Minister', data.dpm));
-                if (data.ministers) {
-                    for (const [key, val] of Object.entries(data.ministers)) {
-                        if (val) govCards.push(makeCard(`Minister of ${key}`, val));
+
+                // Top leadership
+                if (leadership.pm) {
+                    const p = { ...leadership.pm, elected_role: 'Prime Minister' };
+                    govCards.push(makeTopCard(p, 'ruling'));
+                    usedIds.add(leadership.pm.id);
+                }
+                if (leadership.dpm) {
+                    const p = { ...leadership.dpm, elected_role: 'Deputy Prime Minister' };
+                    govCards.push(makeTopCard(p, 'ruling'));
+                    usedIds.add(leadership.dpm.id);
+                }
+                if (leadership.ministers) {
+                    for (const [portfolio, val] of Object.entries(leadership.ministers)) {
+                        if (val && !usedIds.has(val.id)) {
+                            const p = { ...val, elected_role: `Minister of ${portfolio}` };
+                            govCards.push(makeTopCard(p, 'ruling'));
+                            usedIds.add(val.id);
+                        }
                     }
                 }
-                govEl.innerHTML = govCards.length ? govCards.join('') : '<div class="empty-state">No government leadership assigned yet.</div>';
 
+                // All remaining ruling delegates
+                const rulingDelegates = leaderboard.filter(d => d.side === 'ruling' && !usedIds.has(d.id));
+                rulingDelegates.forEach(d => govCards.push(makeDelegateCard(d, 'ruling')));
+
+                govEl.innerHTML = govCards.length ? govCards.join('') : '<div class="empty-state">No government delegates assigned yet.</div>';
+
+                // Build opposition section
                 const oppCards = [];
-                if (data.lop) oppCards.push(makeCard('Leader of Opposition', data.lop));
-                if (data.dep_lop) oppCards.push(makeCard('Deputy Leader of Opposition', data.dep_lop));
-                oppEl.innerHTML = oppCards.length ? oppCards.join('') : '<div class="empty-state">No opposition leadership assigned yet.</div>';
+
+                if (leadership.lop) {
+                    const p = { ...leadership.lop, elected_role: 'Leader of Opposition' };
+                    oppCards.push(makeTopCard(p, 'opposition'));
+                    usedIds.add(leadership.lop.id);
+                }
+                if (leadership.dep_lop) {
+                    const p = { ...leadership.dep_lop, elected_role: 'Deputy Leader of Opposition' };
+                    oppCards.push(makeTopCard(p, 'opposition'));
+                    usedIds.add(leadership.dep_lop.id);
+                }
+
+                // All remaining opposition delegates
+                const oppDelegates = leaderboard.filter(d => d.side === 'opposition' && !usedIds.has(d.id));
+                oppDelegates.forEach(d => oppCards.push(makeDelegateCard(d, 'opposition')));
+
+                oppEl.innerHTML = oppCards.length ? oppCards.join('') : '<div class="empty-state">No opposition delegates assigned yet.</div>';
+
+                // Neutral delegates
+                const neutralDelegates = leaderboard.filter(d => !d.side || d.side === 'neutral');
+                if (neutralDelegates.length) {
+                    neutralSection.style.display = '';
+                    neutralEl.style.display = '';
+                    neutralEl.innerHTML = neutralDelegates.map(d => makeDelegateCard(d, 'neutral')).join('');
+                }
 
                 hideLoader();
             } catch (err) {

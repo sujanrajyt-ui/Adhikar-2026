@@ -215,6 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'New Gen Leaders (C)': 'party_c', 'Next Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
         let rulingSet = new Set();
+        let coalitionLocked = false;
 
         async function loadSides() {
             try {
@@ -223,6 +224,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
             } catch { rulingSet = new Set(); }
         }
+
+        async function loadLock() {
+            try {
+                const state = await fetch(`${API_BASE}/coalition-lock?t=${Date.now()}`).then(r => r.json());
+                coalitionLocked = state.locked === true;
+            } catch { coalitionLocked = false; }
+        }
+
+        const noConfidenceBtn = document.createElement('button');
+        noConfidenceBtn.id = 'no-confidence-btn';
+        noConfidenceBtn.className = 'btn-assign-all';
+        noConfidenceBtn.style.cssText = 'margin-top:0.5rem;font-size:0.78rem;padding:0.3rem 0.8rem;color:#e74c3c;border-color:rgba(231,76,60,0.3);background:rgba(231,76,60,0.08);display:none;';
+        noConfidenceBtn.textContent = '⚖ No Confidence Motion';
+        saveBtn.parentNode.appendChild(noConfidenceBtn);
 
         function renderHTML() {
             const counts = {};
@@ -245,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '<div class="coalition-block-body">';
             if (!ruling.length) html += '<div class="coalition-empty">Click a party below to add</div>';
             ruling.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-gov" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">→ Opp</span></div>';
+                html += '<div class="coalition-chip coalition-chip-gov' + (coalitionLocked ? ' coalition-chip-locked' : '') + '" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span>' + (coalitionLocked ? '' : ' <span class="chip-toggle">→ Opp</span>') + '</div>';
             });
             html += '</div></div>';
             html += '<div class="coalition-block coalition-opp">';
@@ -253,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
             html += '<div class="coalition-block-body">';
             if (!opposition.length) html += '<div class="coalition-empty">No opposition parties</div>';
             opposition.forEach(p => {
-                html += '<div class="coalition-chip coalition-chip-opp" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span> <span class="chip-toggle">→ Gov</span></div>';
+                html += '<div class="coalition-chip coalition-chip-opp' + (coalitionLocked ? ' coalition-chip-locked' : '') + '" data-party="' + escapeHtml(p) + '">' + escapeHtml(p) + ' <span class="chip-count">' + counts[p] + '</span>' + (coalitionLocked ? '' : ' <span class="chip-toggle">→ Gov</span>') + '</div>';
             });
             html += '</div></div>';
             html += '</div>';
@@ -264,19 +279,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!meetsMajority) html += ' <span style="color:#e74c3c;">(needs ' + (magic - totalRuling) + ' more)</span>';
             html += '</div>';
 
+            if (coalitionLocked) {
+                html += '<div class="coalition-locked-msg">🔒 Coalition is locked. Parties cannot be toggled.</div>';
+            }
+
             container.innerHTML = html;
 
-            container.querySelectorAll('.coalition-chip').forEach(chip => {
-                chip.addEventListener('click', () => {
-                    const party = chip.dataset.party;
-                    if (rulingSet.has(party)) rulingSet.delete(party);
-                    else rulingSet.add(party);
-                    renderHTML();
+            if (!coalitionLocked) {
+                container.querySelectorAll('.coalition-chip').forEach(chip => {
+                    chip.addEventListener('click', () => {
+                        const party = chip.dataset.party;
+                        if (rulingSet.has(party)) rulingSet.delete(party);
+                        else rulingSet.add(party);
+                        renderHTML();
+                    });
                 });
-            });
+            }
+
+            saveBtn.style.display = coalitionLocked ? 'none' : 'inline-block';
+            noConfidenceBtn.style.display = coalitionLocked ? 'inline-block' : 'none';
         }
 
-        await loadSides();
+        await Promise.all([loadSides(), loadLock()]);
         renderHTML();
 
         saveBtn.onclick = async () => {
@@ -299,10 +323,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({ ruling_ids: rulingIds })
                 });
                 if (!res.ok) throw new Error('Failed');
-                showToast('Coalition saved', 'success');
+                coalitionLocked = true;
+                showToast('Coalition saved and locked', 'success');
+                renderHTML();
                 initLeadership();
             } catch { showToast('Failed to save coalition', 'error'); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Set Coalition'; }
+        };
+
+        noConfidenceBtn.onclick = async () => {
+            if (!confirm('File a No Confidence Motion? This will reset the coalition and allow parties to be reassigned.')) return;
+            noConfidenceBtn.disabled = true; noConfidenceBtn.textContent = 'Filing...';
+            try {
+                const res = await fetch(`${API_BASE}/admin/parties/no-confidence`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword }
+                });
+                if (!res.ok) throw new Error('Failed');
+                coalitionLocked = false;
+                rulingSet = new Set();
+                showToast('No Confidence Motion passed. Coalition reset.', 'success');
+                await loadSides();
+                renderHTML();
+            } catch { showToast('Failed to file motion', 'error'); }
+            finally { noConfidenceBtn.disabled = false; noConfidenceBtn.textContent = '⚖ No Confidence Motion'; }
         };
     }
 async function initLeadership() {

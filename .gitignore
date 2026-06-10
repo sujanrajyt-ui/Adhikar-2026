@@ -4,6 +4,7 @@ jspm_packages/
 
 # Local databases & local files
 data.json
+coalition_lock.json
 db.sqlite
 db.sqlite-journal
 

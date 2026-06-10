@@ -11,6 +11,7 @@ const AWARDS_FILE = path.join(__dirname, 'awards.json');
 const LEADERSHIP_FILE = path.join(__dirname, 'leadership.json');
 const SESSIONS_FILE = path.join(__dirname, 'sessions.json');
 const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
+const COALITION_LOCK_FILE = path.join(__dirname, 'coalition_lock.json');
 
 
 
@@ -189,6 +190,14 @@ async function init() {
       ];
       fs.writeFileSync(SESSIONS_FILE, JSON.stringify(defaultSessions, null, 2), 'utf-8');
     }
+    if (!fs.existsSync(COALITION_LOCK_FILE)) {
+      fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
+    }
+  }
+
+  // Coalition lock file for both modes
+  if (!fs.existsSync(COALITION_LOCK_FILE)) {
+    fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
   }
 
   // Always ensure safety log exists (Safety First)
@@ -878,6 +887,34 @@ module.exports = {
       const entry = { pm: pm || '', dpm: dpm || '', lop: lop || '', dep_lop: dep_lop || '', ministers: ministers || {} };
       fs.writeFileSync(LEADERSHIP_FILE, JSON.stringify(entry, null, 2), 'utf-8');
     }
+    return { success: true };
+  },
+
+  // ============ Coalition Lock ============
+
+  async getCoalitionLock() {
+    try {
+      const raw = fs.readFileSync(COALITION_LOCK_FILE, 'utf-8');
+      return JSON.parse(raw);
+    } catch {
+      return { locked: false };
+    }
+  },
+
+  async setCoalitionLock(locked) {
+    fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked }), 'utf-8');
+    return { locked };
+  },
+
+  async resetCoalition() {
+    if (isPg) {
+      await pool.query("UPDATE parties SET side = NULL WHERE type = 'party'");
+    } else {
+      const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      list.forEach(p => { if (p.type === 'party') p.side = null; });
+      fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
+    }
+    fs.writeFileSync(COALITION_LOCK_FILE, JSON.stringify({ locked: false }), 'utf-8');
     return { success: true };
   }
 };

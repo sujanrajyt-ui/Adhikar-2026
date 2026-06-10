@@ -460,6 +460,23 @@ body {
     font-size: 0.72rem;
     background: rgba(255,255,255,0.03);
 }
+.coalition-chip-locked {
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+.coalition-chip-locked:hover {
+    background: inherit !important;
+    border-color: inherit !important;
+}
+.coalition-locked-msg {
+    margin-top: 6px;
+    font-size: 0.68rem;
+    color: #f39c12;
+    background: rgba(243,156,18,0.08);
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-align: center;
+}
 .leadership-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

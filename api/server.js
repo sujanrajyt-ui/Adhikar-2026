@@ -400,7 +400,29 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
   if (!Array.isArray(ruling_ids)) return res.status(400).json({ detail: 'ruling_ids array required' });
   try {
     await db.setCoalition(ruling_ids);
+    await db.setCoalitionLock(true);
     res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.post('/api/admin/parties/no-confidence', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    await db.resetCoalition();
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
+app.get('/api/coalition-lock', async (req, res) => {
+  try {
+    const state = await db.getCoalitionLock();
+    res.json(state);
   } catch (err) {
     res.status(500).json({ detail: err.message });
   }
@@ -414,7 +436,7 @@ app.get('/api/leadership', async (req, res) => {
     const regs = await db.getAll();
     const enrich = (id) => {
       const d = regs.find(r => r.id === id);
-      return d ? { id: d.id, name: d.name, party: d.assigned_party } : null;
+      return d ? { id: d.id, name: d.name, party: d.assigned_party, college: d.college } : null;
     };
     const result = {
       pm: enrich(data.pm),
