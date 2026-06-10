@@ -103,6 +103,19 @@
         let rulingSet = new Set();
         let coalitionLocked = false;
 
+        const PARTY_NAME_MAP = {
+            'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+            'Party B': 'Yuva Drishti Party (B)',
+            'Party C': 'New Gen Leaders (C)',
+            'Party D': 'Catalyst Party (D)',
+            'Party E': 'Navpeedhi Bharat Party (E)',
+            'Next Gen Leaders (C)': 'New Gen Leaders (C)',
+        };
+
+        function mapName(name) {
+            return PARTY_NAME_MAP[name] || name;
+        }
+
         function escapeHtml(str) {
             if (!str) return '';
             const div = document.createElement('div');
@@ -124,9 +137,12 @@
                 fetch(API_BASE + '/coalition-lock?t=' + Date.now())
             ]);
             const allParties = await pRes.json();
-            parties = allParties.filter(p => p.type === 'party');
+            parties = allParties.filter(p => p.type === 'party').map(p => ({ ...p, name: mapName(p.name) }));
             nameToId = {};
             parties.forEach(p => { if (p.name) nameToId[p.name] = p.id; });
+
+            const allDelegates = await dRes.json();
+            delegates = allDelegates.map(d => ({ ...d, assigned_party: mapName(d.assigned_party) }));
 
             const saved = localStorage.getItem('adhikar_coalition');
             if (saved) {
