@@ -113,7 +113,11 @@ function renderAwards() {
       const hasRealScores = top3.some(d => (d.totalScore || 0) > 0);
       const podiumLabels = ["Champion", "1st Runner-up", "2nd Runner-up"];
       const medalEmojis = ["🥇", "🥈", "🥉"];
-      grid.innerHTML = (awards.length ? awards : AWARDS).map((a, i) => {
+      let displayAwards = awards.length ? awards : AWARDS;
+      if (!displayAwards.some(a => CHAMPIONSHIP_AWARDS.includes(a.name || a.title))) {
+        displayAwards = [{ name: 'General Championship Award', desc: '', isGrand: true }, ...displayAwards];
+      }
+      grid.innerHTML = displayAwards.map((a, i) => {
         const isGrand = CHAMPIONSHIP_AWARDS.includes(a.name || a.title);
         const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
@@ -146,8 +150,12 @@ function renderAwards() {
     </article>`;
       }).join("");
     })
-    .catch(() => {
-      grid.innerHTML = AWARDS.map((a, i) => `
+    .catch((err) => {
+      let fallback = AWARDS;
+      if (!fallback.some(a => a.isGrand)) {
+        fallback = [{ title: 'General Championship Award', desc: '', isGrand: true }, ...fallback];
+      }
+      grid.innerHTML = fallback.map((a, i) => `
         <article class="award-card anim-border ${a.isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
           <div class="award-head">
             <div class="award-icon">${trophySVG}</div>

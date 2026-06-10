@@ -734,9 +734,31 @@ module.exports = {
   async getAwards() {
     if (isPg) {
       const res = await pool.query('SELECT * FROM awards ORDER BY created_at ASC');
-      // If table empty, might need to seed it once
       if (res.rowCount === 0) {
-        // Manual seeding logic omitted for brevity, assuming standard setup
+        const defaults = [
+          { id: 'awd_general', name: 'General Championship Award', criteria_ids: [], requires_role: '', requires_side: '' },
+          { id: 'awd_speaker', name: 'Best Student Speaker', criteria_ids: [], requires_role: 'Speaker, Deputy Speaker, Secretary General, Marshal', requires_side: '' },
+          { id: 'awd_debater', name: 'Exceptional Debater', criteria_ids: [], requires_role: '', requires_side: '' },
+          { id: 'awd_ruling', name: 'Asset of the Ruling Government', criteria_ids: [], requires_role: 'Prime Minister, Deputy Prime Minister, Minister, Leader of the House', requires_side: 'ruling' },
+          { id: 'awd_opposition', name: 'Asset of the Opposition', criteria_ids: [], requires_role: 'Leader of Opposition, Deputy Leader of Opposition, Whip', requires_side: 'opposition' },
+          { id: 'awd_leader', name: 'Best Leader of the House', criteria_ids: [], requires_role: 'Prime Minister, Deputy Prime Minister, Leader of the House, Leader of Opposition', requires_side: '' },
+          { id: 'awd_minister', name: 'Best Minister', criteria_ids: [], requires_role: 'Minister', requires_side: '' },
+          { id: 'awd_creative', name: 'Most Creative Mind', criteria_ids: [], requires_role: '', requires_side: '' },
+          { id: 'awd_orator', name: 'Best Orator', criteria_ids: [], requires_role: '', requires_side: '' },
+          { id: 'awd_policy', name: 'Distinguished Policy Advocate', criteria_ids: [], requires_role: '', requires_side: '' },
+          { id: 'awd_presence', name: 'Most Impactful Presence', criteria_ids: [], requires_role: '', requires_side: '' }
+        ];
+        for (const a of defaults) {
+          await pool.query(
+            `INSERT INTO awards (id, name, criteria_ids, requires_side, requires_role, created_at) VALUES ($1,$2,$3,$4,$5,$6)`,
+            [a.id, a.name, JSON.stringify(a.criteria_ids), a.requires_side || null, a.requires_role, new Date().toISOString()]
+          );
+        }
+        const seeded = await pool.query('SELECT * FROM awards ORDER BY created_at ASC');
+        return seeded.rows.map(r => ({
+          ...r,
+          criteria_ids: typeof r.criteria_ids === 'string' ? JSON.parse(r.criteria_ids) : r.criteria_ids
+        }));
       }
       return res.rows.map(r => ({
         ...r,
