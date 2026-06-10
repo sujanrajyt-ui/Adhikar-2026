@@ -373,7 +373,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res = await fetch(`${API_BASE}/admin/parties/coalition`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
-                    body: JSON.stringify({ ruling_ids: rulingIds })
+                    body: JSON.stringify({
+                        ruling_names: parties.filter(p => rulingSet.has(p)),
+                        ruling_ids: rulingIds
+                    })
                 });
                 if (!res.ok) console.error('Coalition server save failed:', await res.text());
             } catch (e) { console.error('Coalition server save error:', e); }

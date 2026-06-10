@@ -516,10 +516,11 @@ module.exports = {
         pool.query("SELECT value FROM app_config WHERE key = 'coalition_ruling_ids'")
       ]);
       const parties = partiesRes.rows;
-      const rulingIds = configRes.rows.length > 0 ? JSON.parse(configRes.rows[0].value) : [];
+      const rulingNames = configRes.rows.length > 0 ? JSON.parse(configRes.rows[0].value) : [];
       for (const p of parties) {
         if (p.type === 'party') {
-          p.side = rulingIds.includes(p.id) ? 'ruling' : 'opposition';
+          // Check if party name is in the ruling list
+          p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
         }
       }
       return parties;
@@ -559,18 +560,18 @@ module.exports = {
     }
   },
 
-  async setCoalition(rulingIds) {
+  async setCoalition(rulingNames) {
     if (isPg) {
       await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
       await pool.query(
         `INSERT INTO app_config (key, value) VALUES ('coalition_ruling_ids', $1)
          ON CONFLICT (key) DO UPDATE SET value = $1`,
-        [JSON.stringify(rulingIds)]
+        [JSON.stringify(rulingNames)]
       );
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
       list.forEach(p => {
-        if (p.type === 'party') p.side = rulingIds.includes(p.id) ? 'ruling' : 'opposition';
+        if (p.type === 'party') p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
       });
       fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
     }
