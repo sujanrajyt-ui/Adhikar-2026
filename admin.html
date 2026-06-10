@@ -13,6 +13,16 @@
         #page-loader { background: #2e0810 !important; }
         .admin-panel { max-width: 600px; margin: 2rem auto; }
         .party-chip { font-size: 0.9rem; padding: 8px 14px; }
+        .party-chip-inner { display: flex; align-items: center; gap: 6px; }
+        .party-side-toggle { cursor: pointer; font-size: 0.65rem; padding: 2px 6px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: inherit; flex-shrink: 0; transition: 0.15s; }
+        .party-side-toggle:hover { border-color: rgba(255,255,255,0.4); }
+        .party-edit-btn { cursor: pointer; font-size: 0.75rem; padding: 1px 5px; border-radius: 3px; border: none; background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.5); flex-shrink: 0; transition: 0.15s; }
+        .party-edit-btn:hover { background: rgba(255,255,255,0.18); color: #fff; }
+        .party-name-text { flex: 1; min-width: 0; }
+        .party-rename-input { flex: 1; min-width: 0; background: rgba(0,0,0,0.3); border: 1px solid var(--gold); border-radius: 4px; color: #fff; padding: 4px 8px; font-size: 0.85rem; outline: none; }
+        .party-rename-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .party-rename-save { cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 3px; border: none; background: #27ae60; color: #fff; }
+        .party-rename-cancel { cursor: pointer; font-size: 0.7rem; padding: 2px 8px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.2); background: transparent; color: rgba(255,255,255,0.6); }
         .majority-bar { height: 8px; border-radius: 4px; background: rgba(255,255,255,0.08); overflow: hidden; margin: 8px 0; }
         .majority-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
         .stat-row { display: flex; justify-content: space-between; font-size: 0.78rem; color: rgba(255,255,255,0.5); padding: 2px 0; }
@@ -77,7 +87,7 @@
                 <div class="stat-row">Majority needed: <span class="num" id="magic-num">0</span></div>
                 <div class="stat-row">Government: <span class="num" id="govt-num">0</span></div>
                 <div class="stat-row" style="margin-top:6px;color:rgba(255,255,255,0.25);font-size:0.72rem;">
-                    Click a party to toggle ruling / opposition.
+                    Use <b>R/O</b> to toggle side &bull; <b>✎</b> to rename party
                 </div>
             </div>
 
@@ -175,6 +185,8 @@
             render();
         }
 
+        let editingId = null;
+
         function render() {
             const counts = {};
             parties.forEach(p => counts[p.name] = 0);
@@ -197,20 +209,81 @@
                 const isRuling = rulingSet.has(p.name);
                 const sideClass = isRuling ? 'ruling' : 'opposition';
                 const lockedClass = coalitionLocked ? 'coalition-chip-locked' : '';
-                html += '<div class="party-chip ' + sideClass + ' ' + lockedClass + '" data-party="' + escapeHtml(p.name) + '">'
-                    + escapeHtml(p.name)
-                    + ' <span class="chip-count">(' + (counts[p.name] || 0) + ')</span>'
-                    + '</div>';
+                const sideLabel = isRuling ? 'R' : 'O';
+                const isEditing = editingId === p.id;
+
+                html += '<div class="party-chip ' + sideClass + ' ' + lockedClass + '" data-party="' + escapeHtml(p.name) + '">';
+                html += '<div class="party-chip-inner">';
+
+                if (!coalitionLocked) {
+                    html += '<button class="party-side-toggle" data-side-toggle="' + escapeHtml(p.name) + '" title="Toggle ruling/opposition">' + sideLabel + '</button>';
+                }
+
+                if (isEditing) {
+                    html += '<input class="party-rename-input" id="rename-input" type="text" value="' + escapeHtml(p.name) + '" data-original="' + escapeHtml(p.name) + '">';
+                    html += '<div class="party-rename-actions">';
+                    html += '<button class="party-rename-save" data-rename-save="' + escapeHtml(p.id) + '">Save</button>';
+                    html += '<button class="party-rename-cancel" data-rename-cancel="1">Cancel</button>';
+                    html += '</div>';
+                } else {
+                    html += '<span class="party-name-text">' + escapeHtml(p.name) + '</span>';
+                    html += '<span class="chip-count">(' + (counts[p.name] || 0) + ')</span>';
+                    html += '<button class="party-edit-btn" data-edit="' + escapeHtml(p.id) + '" title="Rename party">✎</button>';
+                }
+
+                html += '</div>';
+                html += '</div>';
             });
             html += '</div>';
             document.getElementById('party-list').innerHTML = html;
 
-            document.querySelectorAll('.party-chip').forEach(chip => {
-                chip.onclick = () => {
+            document.querySelectorAll('[data-side-toggle]').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
                     if (coalitionLocked) return;
-                    const p = chip.dataset.party;
+                    const p = btn.dataset.sideToggle;
                     if (rulingSet.has(p)) rulingSet.delete(p);
                     else rulingSet.add(p);
+                    render();
+                };
+            });
+
+            document.querySelectorAll('[data-edit]').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (coalitionLocked) return;
+                    editingId = btn.dataset.edit;
+                    render();
+                };
+            });
+
+            document.querySelectorAll('[data-rename-save]').forEach(btn => {
+                btn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const partyId = btn.dataset.renameSave;
+                    const input = document.getElementById('rename-input');
+                    const newName = input ? input.value.trim() : '';
+                    const oldName = input ? input.dataset.original : '';
+                    if (!newName || newName === oldName) { editingId = null; render(); return; }
+                    try {
+                        const res = await fetch(API_BASE + '/admin/parties/' + encodeURIComponent(partyId), {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+                            body: JSON.stringify({ name: newName })
+                        });
+                        if (!res.ok) { showToast('Rename failed', 'error'); editingId = null; render(); return; }
+                        editingId = null;
+                        showToast('Party renamed to "' + newName + '"', 'success');
+                        // Reload to sync delegates' assigned_party
+                        await loadData();
+                    } catch { showToast('Rename failed', 'error'); editingId = null; render(); }
+                };
+            });
+
+            document.querySelectorAll('[data-rename-cancel]').forEach(btn => {
+                btn.onclick = (e) => {
+                    e.stopPropagation();
+                    editingId = null;
                     render();
                 };
             });
