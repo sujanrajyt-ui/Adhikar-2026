@@ -496,8 +496,8 @@ module.exports = {
     }
   },
 
-  async createParty({ name, type, side, description }) {
-    const id = 'P-' + Date.now().toString(36).toUpperCase();
+  async createParty({ name, type, side, description, id: givenId }) {
+    const id = givenId || 'P-' + Date.now().toString(36).toUpperCase();
     const now = new Date().toISOString();
     const entry = { id, name, type, side: side || null, description: description || '', created_at: now };
     if (isPg) {

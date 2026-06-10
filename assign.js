@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
-        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'New Gen Leaders (C)': 'party_c', 'Next Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
+        let nameToId = {};
         let rulingSet = new Set();
         let coalitionLocked = false;
 
@@ -222,7 +222,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const all = await fetch(`${API_BASE}/parties?t=${Date.now()}`).then(r => r.json());
                 const partyList = all.filter(p => p.type === 'party');
                 rulingSet = new Set(partyList.filter(p => p.side === 'ruling').map(p => p.name));
-            } catch { rulingSet = new Set(); }
+                nameToId = {};
+                partyList.forEach(p => { nameToId[p.name] = p.id; });
+            } catch { rulingSet = new Set(); nameToId = {}; }
         }
 
         async function loadLock() {
