@@ -190,9 +190,15 @@ function applyLocalCoalitionSides(parties) {
         if (!raw) return;
         const data = JSON.parse(raw);
         if (data.locked && Array.isArray(data.rulingNames)) {
+            let rulingNames = data.rulingNames.filter(n => parties.some(p => p.name === n));
+            if (rulingNames.length === 0 && data.rulingIds?.length > 0) {
+                rulingNames = data.rulingIds
+                    .map(id => { const p = parties.find(x => x.id === id); return p ? p.name : null; })
+                    .filter(Boolean);
+            }
             parties.forEach(p => {
                 if (p.type === 'party') {
-                    p.side = data.rulingNames.includes(p.name) ? 'ruling' : 'opposition';
+                    p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
                 }
             });
         }

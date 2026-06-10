@@ -396,10 +396,10 @@ app.post('/api/admin/parties/coalition', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ detail: 'Forbidden' });
   }
-  const rulingList = req.body.ruling_names || req.body.ruling_ids;
+  const rulingList = req.body.ruling_ids || req.body.ruling_names;
   if (!Array.isArray(rulingList)) return res.status(400).json({ detail: 'ruling_names array required' });
   try {
-    console.log('[Coalition] Setting coalition with ruling_names:', JSON.stringify(rulingList));
+    console.log('[Coalition] Setting coalition with ruling_list:', JSON.stringify(rulingList));
     await db.setCoalition(rulingList);
     await db.setCoalitionLock(true);
     const ver = await db.getParties();

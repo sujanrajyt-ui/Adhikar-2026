@@ -149,11 +149,20 @@
                 try {
                     const parsed = JSON.parse(saved);
                     if (parsed.locked === true) {
-                        const validNames = (parsed.rulingNames || []).filter(n => parties.some(p => p.name === n));
-                        rulingSet = new Set(validNames);
-                        coalitionLocked = true;
-                        render();
-                        return;
+                        let validNames = (parsed.rulingNames || []).filter(n => parties.some(p => p.name === n));
+                        if (validNames.length === 0 && parsed.rulingIds?.length > 0) {
+                            validNames = parsed.rulingIds
+                                .map(id => { const p = parties.find(x => x.id === id); return p ? p.name : null; })
+                                .filter(Boolean);
+                        }
+                        if (validNames.length > 0 || !parsed.rulingNames || parsed.rulingNames.length === 0) {
+                            rulingSet = new Set(validNames);
+                            coalitionLocked = true;
+                            render();
+                            return;
+                        }
+                        // Names don't match current parties — stale localStorage, fall through to server
+                        localStorage.removeItem('adhikar_coalition');
                     }
                 } catch (e) {
                     localStorage.removeItem('adhikar_coalition');
