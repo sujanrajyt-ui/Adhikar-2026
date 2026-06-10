@@ -109,6 +109,7 @@ function renderAwards() {
         const role = (d.elected_role || "").toLowerCase();
         return !["speaker", "deputy speaker", "secretary general", "marshal"].some(r => role.includes(r));
       }).sort((a, b) => b.totalScore - a.totalScore).slice(0, 3);
+      const hasRealScores = top3.some(d => (d.totalScore || 0) > 0);
       const podiumLabels = ["Champion", "1st Runner-up", "2nd Runner-up"];
       const medalEmojis = ["🥇", "🥈", "🥉"];
       grid.innerHTML = (awards.length ? awards : AWARDS).map((a, i) => {
@@ -116,15 +117,21 @@ function renderAwards() {
         const sideBadge = a.requires_side ? `<span class="award-badge side-badge-${a.requires_side}">${a.requires_side}</span>` : '';
         const roleBadge = a.requires_role ? `<span class="award-badge role-badge">${a.requires_role}</span>` : '';
         let podiumHtml = "";
-        if (isGrand && top3.length) {
-          podiumHtml = `<div class="gc-podium">${top3.map((d, pi) => `
-            <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"}">
-              <span class="gc-medal">${medalEmojis[pi]}</span>
-              <span class="gc-label">${podiumLabels[pi]}</span>
-              <span class="gc-name">${escapeHtml(d.name)}</span>
-              <span class="gc-score">${(d.totalScore || 0).toFixed(1)}</span>
-            </div>
-          `).join("")}</div>`;
+        if (isGrand) {
+          if (top3.length && hasRealScores) {
+            podiumHtml = `<div class="gc-podium">${top3.map((d, pi) => `
+              <div class="gc-podium-item gc-${["gold", "silver", "bronze"][pi] || "bronze"} gc-anim gc-anim-${pi + 1}">
+                ${pi === 0 ? '<div class="gc-crown">👑</div>' : ''}
+                <span class="gc-medal">${medalEmojis[pi]}</span>
+                <span class="gc-label">${podiumLabels[pi]}</span>
+                <span class="gc-name">${escapeHtml(d.name)}</span>
+                <span class="gc-affil">${escapeHtml(d.college || d.party || d.committee || '')}</span>
+                <span class="gc-score"><span class="gc-score-label">Score</span> ${(d.totalScore || 0).toFixed(1)}</span>
+              </div>
+            `).join("")}</div>`;
+          } else if (top3.length) {
+            podiumHtml = `<div class="gc-podium"><div class="gc-pending"><span class="gc-pending-icon">🏆</span><span class="gc-pending-text">Awaiting Results</span><span class="gc-pending-sub">Scores are being tabulated — check back after the sessions.</span></div></div>`;
+          }
         }
         return `<article class="award-card anim-border ${isGrand ? 'card-grand' : ''}" data-testid="award-card-${i}">
       <div class="award-head">
@@ -567,11 +574,7 @@ function setStep(n) {
 }
 
 function openRegisterOverlay() {
-  const overlay = document.getElementById("register-overlay");
-  overlay.classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-  setStep(1);
-  document.getElementById("form-err").classList.remove("visible");
+  showToast("Registrations are now closed. Thank you for your interest!", "info");
 }
 
 function closeRegisterOverlay() {

@@ -48,6 +48,9 @@ function getUroPayHeaders() {
 
 // 1. Submit Registration Form
 app.post('/api/registrations', async (req, res) => {
+  // Registrations are closed
+  return res.status(403).json({ detail: "Registrations are now closed. Thank you for your interest!" });
+
   const { name, email, phone, parent_name, parent_phone, year, college, role_preference, notes } = req.body;
   console.log("[API] Registration request received:", { name, email, phone, parent_name, parent_phone });
 
@@ -307,7 +310,7 @@ app.get('/api/parties', async (req, res) => {
       const defaults = [
         { id: 'party_a', name: 'Rashtriya Yuva Pragati Manch (A)', type: 'party', side: null },
         { id: 'party_b', name: 'Yuva Drishti Party (B)', type: 'party', side: null },
-        { id: 'party_c', name: 'Next Gen Leaders (C)', type: 'party', side: null },
+        { id: 'party_c', name: 'New Gen Leaders (C)', type: 'party', side: null },
         { id: 'party_d', name: 'Catalyst Party (D)', type: 'party', side: null },
         { id: 'party_e', name: 'Navpeedhi Bharat Party (E)', type: 'party', side: null },
         { id: 'com_education', name: 'EDUCATION', type: 'committee' },
@@ -891,6 +894,7 @@ app.get('/api/public/leaderboard', async (req, res) => {
       return {
         id: d.id,
         name: d.name,
+        college: d.college,
         party: d.assigned_party,
         side: side,
         committee: d.assigned_committee,

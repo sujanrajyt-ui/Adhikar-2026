@@ -151,7 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function loadParties() {
-        parties = ['Rashtriya Yuva Pragati Manch (A)', 'Yuva Drishti Party (B)', 'Next Gen Leaders (C)', 'Catalyst Party (D)', 'Navpeedhi Bharat Party (E)'];
+        parties = ['Rashtriya Yuva Pragati Manch (A)', 'Yuva Drishti Party (B)', 'New Gen Leaders (C)', 'Catalyst Party (D)', 'Navpeedhi Bharat Party (E)'];
         const sel = filterParty;
         sel.innerHTML = '<option value="all">All Parties</option>' +
             parties.map(p => `<option value="${p}">${p}</option>`).join('');
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const PARTY_NAME_MAP = {
         'Party A': 'Rashtriya Yuva Pragati Manch (A)',
         'Party B': 'Yuva Drishti Party (B)',
-        'Party C': 'Next Gen Leaders (C)',
+        'Party C': 'New Gen Leaders (C)',
         'Party D': 'Catalyst Party (D)',
         'Party E': 'Navpeedhi Bharat Party (E)',
     };
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const saveBtn = document.getElementById('coalition-save-btn');
         if (!container) return;
 
-        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'Next Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
+        const nameToId = { 'Rashtriya Yuva Pragati Manch (A)': 'party_a', 'Yuva Drishti Party (B)': 'party_b', 'New Gen Leaders (C)': 'party_c', 'Catalyst Party (D)': 'party_d', 'Navpeedhi Bharat Party (E)': 'party_e' };
         let rulingSet = new Set();
 
         async function loadSides() {
@@ -454,7 +454,7 @@ async function initLeadership() {
         const r = Math.random();
         if (r < 0.28) return 'Rashtriya Yuva Pragati Manch (A)';
         if (r < 0.52) return 'Yuva Drishti Party (B)';
-        if (r < 0.72) return 'Next Gen Leaders (C)';
+        if (r < 0.72) return 'New Gen Leaders (C)';
         if (r < 0.88) return 'Catalyst Party (D)';
         return 'Navpeedhi Bharat Party (E)';
     }
@@ -599,7 +599,7 @@ async function initLeadership() {
         const pcts = [
             { name: 'Rashtriya Yuva Pragati Manch (A)', pct: 0.28 },
             { name: 'Yuva Drishti Party (B)', pct: 0.24 },
-            { name: 'Next Gen Leaders (C)', pct: 0.20 },
+            { name: 'New Gen Leaders (C)', pct: 0.20 },
             { name: 'Catalyst Party (D)', pct: 0.16 },
             { name: 'Navpeedhi Bharat Party (E)', pct: 0.12 },
         ];
@@ -641,7 +641,7 @@ async function initLeadership() {
             const pcts = [
                 { name: 'Rashtriya Yuva Pragati Manch (A)', pct: 0.28 },
                 { name: 'Yuva Drishti Party (B)', pct: 0.24 },
-                { name: 'Next Gen Leaders (C)', pct: 0.20 },
+                { name: 'New Gen Leaders (C)', pct: 0.20 },
                 { name: 'Catalyst Party (D)', pct: 0.16 },
                 { name: 'Navpeedhi Bharat Party (E)', pct: 0.12 },
             ];

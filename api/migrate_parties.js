@@ -5,7 +5,7 @@ require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') }
 const MAP = {
   'Party A': 'Rashtriya Yuva Pragati Manch (A)',
   'Party B': 'Yuva Drishti Party (B)',
-  'Party C': 'Next Gen Leaders (C)',
+  'Party C': 'New Gen Leaders (C)',
   'Party D': 'Catalyst Party (D)',
   'Party E': 'Navpeedhi Bharat Party (E)',
 };

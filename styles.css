@@ -347,6 +347,14 @@ ol {
   transform: translateX(3px);
 }
 
+.btn-primary.closed,
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+  pointer-events: none;
+}
+
 .btn-ghost {
   display: inline-flex;
   align-items: center;
@@ -1631,6 +1639,78 @@ ol {
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--gold-400);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+}
+.gc-score-label {
+  font-size: 0.5rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  opacity: 0.5;
+}
+.gc-affil {
+  font-size: 0.65rem;
+  color: rgba(245, 239, 230, 0.55);
+  font-weight: 400;
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.gc-crown {
+  position: absolute;
+  top: -14px;
+  font-size: 1.3rem;
+  line-height: 1;
+  filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.5));
+  animation: gc-crown-bounce 2s ease-in-out infinite;
+}
+@keyframes gc-crown-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+.gc-podium-item {
+  position: relative;
+}
+.gc-anim {
+  animation: gc-fade-up 0.6s ease-out forwards;
+  opacity: 0;
+}
+.gc-anim-1 { animation-delay: 0.1s; }
+.gc-anim-2 { animation-delay: 0.25s; }
+.gc-anim-3 { animation-delay: 0.4s; }
+@keyframes gc-fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.gc-pending {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 2rem 1rem;
+  width: 100%;
+  text-align: center;
+}
+.gc-pending-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.3));
+}
+.gc-pending-text {
+  font-family: "Playfair Display", serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--gold-400);
+}
+.gc-pending-sub {
+  font-size: 0.8rem;
+  color: rgba(245, 239, 230, 0.5);
+  max-width: 280px;
 }
 .side-badge-ruling {
   background: rgba(46, 204, 113, 0.15);
