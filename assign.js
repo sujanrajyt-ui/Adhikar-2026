@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadCommittees();
         await loadDelegates();
         await fixDuplicateConstituencies();
-        initLeadership();
+        await initLeadership();
     }
 
     function loadConstituencies() {
@@ -301,6 +301,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 if (!res.ok) throw new Error('Failed');
                 showToast('Leadership saved', 'success');
+                // Re-render to reflect saved selections
+                await renderLeadership();
             } catch { showToast('Failed to save leadership', 'error'); }
             finally { saveBtn.disabled = false; saveBtn.textContent = 'Save Leadership'; }
         };
