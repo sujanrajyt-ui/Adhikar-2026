@@ -5125,7 +5125,8 @@ body:hover #cursor-spotlight {
 }
 
 .admin-modal-form input,
-.admin-modal-form select {
+.admin-modal-form select,
+.admin-modal-form textarea {
   width: 100%;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -5136,7 +5137,8 @@ body:hover #cursor-spotlight {
   transition: border-color 0.2s;
 }
 
-.admin-modal-form input:focus {
+.admin-modal-form input:focus,
+.admin-modal-form textarea:focus {
   border-color: var(--gold-500);
   outline: none;
 }

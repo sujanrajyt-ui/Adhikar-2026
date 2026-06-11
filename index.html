@@ -1245,32 +1245,86 @@
         <!-- Edit Delegate Modal -->
         <div class="admin-modal hidden" id="admin-edit-modal">
           <div class="admin-modal-overlay"></div>
-          <div class="admin-modal-content">
+          <div class="admin-modal-content" style="max-width: 720px;">
             <header class="admin-modal-header">
               <h3>Edit Delegate Details</h3>
               <button class="admin-modal-close" id="admin-edit-close">&times;</button>
             </header>
             <form id="admin-edit-form" class="admin-modal-form">
               <input type="hidden" id="edit-reg-id" />
-              <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Modify basic demographics for <span
+              <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Modify details for <span
                   id="edit-reg-id-display" style="color:var(--gold-400); font-weight: 700;"></span></p>
-              <div class="field-grid" style="grid-template-columns: 1fr; gap: 1rem;">
-                <label class="field">
-                  <span class="field-label"
-                    style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.25rem;">Full Name</span>
-                  <input type="text" id="edit-reg-name" required style="width: 100%;" />
+              <div class="field-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <label class="field field-wide">
+                  <span class="field-label">Full Name</span>
+                  <input type="text" id="edit-reg-name" required />
                 </label>
                 <label class="field">
-                  <span class="field-label"
-                    style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.25rem;">Institution /
-                    College</span>
-                  <input type="text" id="edit-reg-college" required style="width: 100%;" />
+                  <span class="field-label">Email</span>
+                  <input type="email" id="edit-reg-email" />
                 </label>
                 <label class="field">
-                  <span class="field-label"
-                    style="font-size: 0.75rem; color: #bca0a0; display: block; margin-bottom: 0.25rem;">Elected
-                    Parliamentary Role</span>
-                  <select id="edit-reg-elected-role" style="width: 100%;">
+                  <span class="field-label">Phone</span>
+                  <input type="tel" id="edit-reg-phone" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Parent / Guardian Name</span>
+                  <input type="text" id="edit-reg-parent-name" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Parent / Guardian Phone</span>
+                  <input type="tel" id="edit-reg-parent-phone" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Year of Study</span>
+                  <select id="edit-reg-year">
+                    <option value="">Select…</option>
+                    <option>9th Standard</option>
+                    <option>10th Standard</option>
+                    <option>11th Standard</option>
+                    <option>12th Standard</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Role Preference</span>
+                  <select id="edit-reg-role-preference">
+                    <option>No Preference</option>
+                    <option>Ruling Government</option>
+                    <option>Opposition</option>
+                  </select>
+                </label>
+                <label class="field field-wide">
+                  <span class="field-label">College / Institution</span>
+                  <input type="text" id="edit-reg-college" required />
+                </label>
+                <label class="field">
+                  <span class="field-label">Portfolio / Title</span>
+                  <input type="text" id="edit-reg-portfolio" placeholder="e.g. Prime Minister" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Assigned Party</span>
+                  <input type="text" id="edit-reg-party" placeholder="e.g. Rashtriya Yuva Pragati Manch (A)" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Assigned Committee</span>
+                  <input type="text" id="edit-reg-committee" placeholder="e.g. EDUCATION" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Assigned Constituency</span>
+                  <input type="text" id="edit-reg-constituency" placeholder="e.g. Mumbai South" />
+                </label>
+                <label class="field">
+                  <span class="field-label">Status</span>
+                  <select id="edit-reg-status">
+                    <option value="pending">Pending</option>
+                    <option value="payment_claimed">Payment Claimed</option>
+                    <option value="verified">Verified</option>
+                    <option value="rejected">Rejected</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span class="field-label">Elected Parliamentary Role</span>
+                  <select id="edit-reg-elected-role">
                     <option value="">None (Standard Delegate)</option>
                     <optgroup label="Government Leadership">
                       <option>Prime Minister</option>
@@ -1286,6 +1340,10 @@
                       <option>Deputy Leader of Opposition</option>
                     </optgroup>
                   </select>
+                </label>
+                <label class="field field-wide">
+                  <span class="field-label">Notes</span>
+                  <textarea id="edit-reg-notes" rows="3" placeholder="Dietary restrictions, accessibility needs, etc."></textarea>
                 </label>
               </div>
               <button type="submit" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>

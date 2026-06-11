@@ -1040,7 +1040,7 @@ function renderRows() {
       <td>${formatDate(r.created_at)}</td>
       <td>
         <div class="td-actions">
-          <button class="action-btn edit-btn" data-action="edit" title="Edit name/college">Edit</button>
+          <button class="action-btn edit-btn" data-action="edit" title="Edit all delegate details">Edit</button>
           ${r.status !== "verified" ? `<button class="action-btn action-verify" data-action="verified">Verify</button>` : ""}
           ${r.status !== "rejected" ? `<button class="action-btn action-reject" data-action="rejected">Reject</button>` : ""}
           <button class="action-btn action-delete" data-action="delete">Delete</button>
@@ -1362,17 +1362,30 @@ function openEditModal(id) {
   const reg = lastRegistrations.find(r => r.id === id);
   if (!reg) return;
 
-  const idInput = document.getElementById("edit-reg-id");
-  const idDisplay = document.getElementById("edit-reg-id-display");
-  const nameInput = document.getElementById("edit-reg-name");
-  const collegeInput = document.getElementById("edit-reg-college");
+  const setVal = (elId, val) => {
+    const el = document.getElementById(elId);
+    if (el) el.value = val ?? "";
+  };
 
-  if (idInput) idInput.value = id;
+  setVal("edit-reg-id", id);
+  const idDisplay = document.getElementById("edit-reg-id-display");
   if (idDisplay) idDisplay.textContent = id;
-  if (nameInput) nameInput.value = reg.name;
-  if (collegeInput) collegeInput.value = reg.college;
-  const roleInput = document.getElementById("edit-reg-elected-role");
-  if (roleInput) roleInput.value = reg.elected_role || "";
+
+  setVal("edit-reg-name", reg.name);
+  setVal("edit-reg-email", reg.email);
+  setVal("edit-reg-phone", reg.phone);
+  setVal("edit-reg-parent-name", reg.parent_name);
+  setVal("edit-reg-parent-phone", reg.parent_phone);
+  setVal("edit-reg-year", reg.year);
+  setVal("edit-reg-college", reg.college);
+  setVal("edit-reg-role-preference", reg.role_preference);
+  setVal("edit-reg-portfolio", reg.portfolio);
+  setVal("edit-reg-party", reg.assigned_party);
+  setVal("edit-reg-committee", reg.assigned_committee);
+  setVal("edit-reg-constituency", reg.assigned_constituency);
+  setVal("edit-reg-status", reg.status);
+  setVal("edit-reg-elected-role", reg.elected_role || "");
+  setVal("edit-reg-notes", reg.notes);
 
   document.getElementById("admin-edit-modal")?.classList.remove("hidden");
 }
@@ -1389,12 +1402,33 @@ async function handleSaveEdit(e) {
   btn.textContent = "Saving…";
 
   try {
-    const elected_role = document.getElementById("edit-reg-elected-role").value;
+    const getVal = (elId) => {
+      const el = document.getElementById(elId);
+      return el ? el.value : "";
+    };
+
+    const body = {
+      name,
+      college,
+      email: getVal("edit-reg-email"),
+      phone: getVal("edit-reg-phone"),
+      parent_name: getVal("edit-reg-parent-name"),
+      parent_phone: getVal("edit-reg-parent-phone"),
+      year: getVal("edit-reg-year"),
+      role_preference: getVal("edit-reg-role-preference"),
+      portfolio: getVal("edit-reg-portfolio"),
+      assigned_party: getVal("edit-reg-party"),
+      assigned_committee: getVal("edit-reg-committee"),
+      assigned_constituency: getVal("edit-reg-constituency"),
+      status: getVal("edit-reg-status"),
+      elected_role: getVal("edit-reg-elected-role"),
+      notes: getVal("edit-reg-notes"),
+    };
 
     const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json", ...adminHeaders() },
-      body: JSON.stringify({ name, college, elected_role }),
+      body: JSON.stringify(body),
     });
     if (!res.ok) throw new Error("Edit failed");
     showToast("✓ Record updated");
