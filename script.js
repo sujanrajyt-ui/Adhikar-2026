@@ -1358,9 +1358,12 @@ async function handleManualAdd(e) {
   }
 }
 
+let _editOriginalReg = null;
+
 function openEditModal(id) {
   const reg = lastRegistrations.find(r => r.id === id);
   if (!reg) return;
+  _editOriginalReg = reg;
 
   const setVal = (elId, val) => {
     const el = document.getElementById(elId);
@@ -1390,11 +1393,27 @@ function openEditModal(id) {
   document.getElementById("admin-edit-modal")?.classList.remove("hidden");
 }
 
+const _EDIT_FIELDS = [
+  ["edit-reg-name", "name"],
+  ["edit-reg-college", "college"],
+  ["edit-reg-email", "email"],
+  ["edit-reg-phone", "phone"],
+  ["edit-reg-parent-name", "parent_name"],
+  ["edit-reg-parent-phone", "parent_phone"],
+  ["edit-reg-year", "year"],
+  ["edit-reg-role-preference", "role_preference"],
+  ["edit-reg-portfolio", "portfolio"],
+  ["edit-reg-party", "assigned_party"],
+  ["edit-reg-committee", "assigned_committee"],
+  ["edit-reg-constituency", "assigned_constituency"],
+  ["edit-reg-status", "status"],
+  ["edit-reg-elected-role", "elected_role"],
+  ["edit-reg-notes", "notes"],
+];
+
 async function handleSaveEdit(e) {
   e.preventDefault();
   const id = document.getElementById("edit-reg-id").value;
-  const name = document.getElementById("edit-reg-name").value.trim();
-  const college = document.getElementById("edit-reg-college").value.trim();
 
   const btn = e.target.querySelector('button[type="submit"]');
   btn.disabled = true;
@@ -1402,28 +1421,21 @@ async function handleSaveEdit(e) {
   btn.textContent = "Saving…";
 
   try {
-    const getVal = (elId) => {
+    const body = {};
+    for (const [elId, key] of _EDIT_FIELDS) {
       const el = document.getElementById(elId);
-      return el ? el.value : "";
-    };
+      const newVal = el ? el.value : "";
+      const oldVal = (_editOriginalReg && _editOriginalReg[key]) ?? "";
+      if (newVal !== oldVal) {
+        body[key] = newVal;
+      }
+    }
 
-    const body = {
-      name,
-      college,
-      email: getVal("edit-reg-email"),
-      phone: getVal("edit-reg-phone"),
-      parent_name: getVal("edit-reg-parent-name"),
-      parent_phone: getVal("edit-reg-parent-phone"),
-      year: getVal("edit-reg-year"),
-      role_preference: getVal("edit-reg-role-preference"),
-      portfolio: getVal("edit-reg-portfolio"),
-      assigned_party: getVal("edit-reg-party"),
-      assigned_committee: getVal("edit-reg-committee"),
-      assigned_constituency: getVal("edit-reg-constituency"),
-      status: getVal("edit-reg-status"),
-      elected_role: getVal("edit-reg-elected-role"),
-      notes: getVal("edit-reg-notes"),
-    };
+    if (Object.keys(body).length === 0) {
+      showToast("No changes detected");
+      closeAdminModals();
+      return;
+    }
 
     const res = await fetch(`${API_BASE}/admin/registrations/${id}`, {
       method: "PATCH",
