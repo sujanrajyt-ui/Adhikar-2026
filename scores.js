@@ -470,7 +470,7 @@ async function handleInlineSave(delegateId) {
         }
 
         const responses = await Promise.all(submissions.map(s =>
-            fetch(`${API_BASE} /scores/submit`, {
+            fetch(`${API_BASE}/scores/submit`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(s)
