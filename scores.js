@@ -184,27 +184,6 @@ async function loadParties() {
     }
 }
 
-function applyLocalCoalitionSides(parties) {
-    try {
-        const raw = localStorage.getItem('adhikar_coalition');
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        if (data.locked && Array.isArray(data.rulingNames)) {
-            let rulingNames = data.rulingNames.filter(n => parties.some(p => p.name === n));
-            if (rulingNames.length === 0 && data.rulingIds?.length > 0) {
-                rulingNames = data.rulingIds
-                    .map(id => { const p = parties.find(x => x.id === id); return p ? p.name : null; })
-                    .filter(Boolean);
-            }
-            parties.forEach(p => {
-                if (p.type === 'party') {
-                    p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
-                }
-            });
-        }
-    } catch (e) {}
-}
-
 function renderCoalition() {
     if (!coalitionInfo) return;
 
@@ -215,7 +194,6 @@ function renderCoalition() {
     });
 
     const parties = allParties.filter(p => p.type === 'party');
-    applyLocalCoalitionSides(parties);
     const total = allDelegates.length;
     const hasSides = parties.some(p => p.side && p.side !== 'neutral');
 
