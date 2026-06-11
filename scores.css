@@ -747,6 +747,20 @@ h3 {
     font-weight: 600;
 }
 
+.meta-side-ruling {
+    border-color: rgba(78, 205, 196, 0.4);
+    background: rgba(78, 205, 196, 0.1);
+    color: #4ecdc4;
+    font-weight: 700;
+}
+
+.meta-side-opposition {
+    border-color: rgba(255, 107, 107, 0.4);
+    background: rgba(255, 107, 107, 0.1);
+    color: #ff6b6b;
+    font-weight: 700;
+}
+
 .meta-unassigned {
     border-color: rgba(231, 76, 60, 0.2);
     background: rgba(231, 76, 60, 0.06);

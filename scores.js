@@ -3,7 +3,7 @@ const PARTY_NAME_MAP = {
     'B': 'Yuva Drishti Party (B)',
     'C': 'New Gen Leaders (C)',
     'D': 'Catalyst Party (D)',
-    'E': 'Visionary Party (E)'
+    'E': 'Navpeedhi Bharat Party (E)'
 };
 
 const API_BASE = '/api';
@@ -345,6 +345,13 @@ function renderCriteria() {
   `).join('');
 }
 
+function getDelegateSide(delegate) {
+    const partyName = PARTY_NAME_MAP[delegate.assigned_party] || delegate.assigned_party;
+    if (!partyName || !allParties) return null;
+    const party = allParties.find(p => p.name === partyName && p.type === 'party');
+    return party ? (party.side || null) : null;
+}
+
 function renderDelegates() {
     if (!delegateList) return;
     // Hide criteria sidebar in Roll Call mode
@@ -404,6 +411,7 @@ function renderDelegates() {
               ${d.assigned_committee ? `<span class="meta-pill">${escapeHtml(d.assigned_committee)}</span>` : ''}
               ${d.portfolio ? `<span class="meta-pill gold-text">${escapeHtml(d.portfolio)}</span>` : ''}
               ${d.elected_role ? `<span class="meta-pill" style="border-color:var(--gold); border-style:dashed;">${escapeHtml(d.elected_role)}</span>` : ''}
+              ${getDelegateSide(d) === 'ruling' ? '<span class="meta-pill meta-side-ruling">GOVERNMENT</span>' : getDelegateSide(d) === 'opposition' ? '<span class="meta-pill meta-side-opposition">OPPOSITION</span>' : ''}
             </div>
           </div>
           <div class="score-badge-wrap">

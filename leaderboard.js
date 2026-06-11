@@ -85,7 +85,11 @@ function renderLeaderboard() {
                 let roleMatch = true;
                 if (reqRole) {
                     const roles = reqRole.split(',').map(r => r.trim().toLowerCase());
-                    roleMatch = roles.some(r => userRole.includes(r) || r.includes(userRole) && userRole.length > 3);
+                    roleMatch = roles.some(r => {
+                        if (userRole === r) return true;
+                        if (r === 'minister' && userRole.startsWith('minister of')) return true;
+                        return false;
+                    });
                 }
 
                 let sideMatch = true;

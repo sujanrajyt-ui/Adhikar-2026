@@ -924,6 +924,23 @@ module.exports = {
 
   async setLeadership(data) {
     const { pm, dpm, lop, dep_lop, ministers } = data;
+    // Map leadership keys to display role names for syncing to delegate records
+    const roleMap = {
+      pm: 'Prime Minister',
+      dpm: 'Deputy Prime Minister',
+      lop: 'Leader of Opposition',
+      dep_lop: 'Deputy Leader of Opposition',
+    };
+    const updates = [];
+    if (pm) updates.push({ id: pm, role: roleMap.pm });
+    if (dpm) updates.push({ id: dpm, role: roleMap.dpm });
+    if (lop) updates.push({ id: lop, role: roleMap.lop });
+    if (dep_lop) updates.push({ id: dep_lop, role: roleMap.dep_lop });
+    if (ministers) {
+      for (const [key, val] of Object.entries(ministers)) {
+        if (val) updates.push({ id: val, role: `Minister of ${key}` });
+      }
+    }
     if (isPg) {
       await pool.query('DELETE FROM leadership');
       const inserts = [];
@@ -937,9 +954,22 @@ module.exports = {
         }
       }
       await Promise.all(inserts);
+      // Sync elected_role to delegate records for leaderboard
+      for (const u of updates) {
+        await pool.query('UPDATE registrations SET elected_role = $1 WHERE id = $2', [u.role, u.id]);
+      }
     } else {
       const entry = { pm: pm || '', dpm: dpm || '', lop: lop || '', dep_lop: dep_lop || '', ministers: ministers || {} };
       fs.writeFileSync(LEADERSHIP_FILE, JSON.stringify(entry, null, 2), 'utf-8');
+      // Sync elected_role to delegate records for leaderboard
+      const list = readData();
+      for (const u of updates) {
+        const idx = list.findIndex(r => r.id === u.id);
+        if (idx > -1) {
+          list[idx].elected_role = u.role;
+        }
+      }
+      writeData(list);
     }
     return { success: true };
   },

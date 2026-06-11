@@ -998,6 +998,7 @@ function renderRows() {
           <optgroup label="Government">
             <option ${r.elected_role === 'Prime Minister' ? 'selected' : ''}>Prime Minister</option>
             <option ${r.elected_role === 'Deputy Prime Minister' ? 'selected' : ''}>Deputy Prime Minister</option>
+            <option ${r.elected_role === 'Leader of the House' ? 'selected' : ''}>Leader of the House</option>
             <option ${r.elected_role === 'Minister of EDUCATION' ? 'selected' : ''}>Minister of EDUCATION</option>
             <option ${r.elected_role === 'Minister of FINANCE' ? 'selected' : ''}>Minister of FINANCE</option>
             <option ${r.elected_role === 'Minister of HOME AFFAIRS' ? 'selected' : ''}>Minister of HOME AFFAIRS</option>
@@ -1007,6 +1008,7 @@ function renderRows() {
           <optgroup label="Opposition">
             <option ${r.elected_role === 'Leader of Opposition' ? 'selected' : ''}>Leader of Opposition</option>
             <option ${r.elected_role === 'Deputy Leader of Opposition' ? 'selected' : ''}>Deputy Leader of Opposition</option>
+            <option ${r.elected_role === 'Whip' ? 'selected' : ''}>Whip</option>
           </optgroup>
         </select>
       </div>
