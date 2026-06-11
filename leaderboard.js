@@ -80,7 +80,6 @@ function renderLeaderboard() {
             data = data.filter(d => {
                 const userRole = (d.elected_role || "").toLowerCase();
                 const userSide = (d.side || "").toLowerCase();
-                const sideText = (userSide + " " + (d.party || "") + " " + userRole).toLowerCase();
 
                 let roleMatch = true;
                 if (reqRole) {
@@ -94,16 +93,9 @@ function renderLeaderboard() {
 
                 let sideMatch = true;
                 if (reqSide) {
-                    if (reqSide === 'ruling') {
-                        sideMatch = sideText.includes('ruling') || sideText.includes('gov') || sideText.includes('treasury');
-                    } else if (reqSide === 'opposition') {
-                        sideMatch = sideText.includes('opposition');
-                    } else {
-                        sideMatch = sideText.includes(reqSide);
-                    }
+                    sideMatch = userSide === reqSide;
                 }
 
-                // Both role AND side must match when both are specified
                 if (reqSide && reqRole) {
                     return roleMatch && sideMatch;
                 } else if (reqSide) {
