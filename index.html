@@ -1245,16 +1245,16 @@
         <!-- Edit Delegate Modal -->
         <div class="admin-modal hidden" id="admin-edit-modal">
           <div class="admin-modal-overlay"></div>
-          <div class="admin-modal-content" style="max-width: 720px;">
+          <div class="admin-modal-content" style="max-width: 720px; display: flex; flex-direction: column; padding: 2rem 2rem 0;">
             <header class="admin-modal-header">
               <h3>Edit Delegate Details</h3>
               <button class="admin-modal-close" id="admin-edit-close">&times;</button>
             </header>
-            <form id="admin-edit-form" class="admin-modal-form">
+            <form id="admin-edit-form" class="admin-modal-form" style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
               <input type="hidden" id="edit-reg-id" />
               <p class="muted" style="font-size: 0.8rem; margin-bottom: 1rem;">Modify details for <span
                   id="edit-reg-id-display" style="color:var(--gold-400); font-weight: 700;"></span></p>
-              <div class="field-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="field-grid scrol-fields" style="grid-template-columns: 1fr 1fr; gap: 1rem; overflow-y: auto; flex: 1; min-height: 0; padding-bottom: 1rem;">
                 <label class="field field-wide">
                   <span class="field-label">Full Name</span>
                   <input type="text" id="edit-reg-name" required />
@@ -1346,7 +1346,9 @@
                   <textarea id="edit-reg-notes" rows="3" placeholder="Additional notes..."></textarea>
                 </label>
               </div>
-              <button type="submit" class="btn-primary" style="margin-top: 1.5rem; width: 100%;">Save Changes</button>
+              <div style="position: sticky; bottom: 0; background: var(--maroon-900); padding: 1rem 0 2rem; border-top: 1px solid rgba(255,255,255,0.08); margin: 0 -2rem; padding-left: 2rem; padding-right: 2rem;">
+                <button type="submit" class="btn-primary" style="width: 100%;">Save Changes</button>
+              </div>
             </form>
           </div>
         </div>
