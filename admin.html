@@ -165,7 +165,7 @@
                                 .map(id => { const p = parties.find(x => x.id === id); return p ? p.name : null; })
                                 .filter(Boolean);
                         }
-                        if (validNames.length > 0 || !parsed.rulingNames || parsed.rulingNames.length === 0) {
+                        if (validNames.length > 0) {
                             rulingSet = new Set(validNames);
                             coalitionLocked = true;
                             render();
