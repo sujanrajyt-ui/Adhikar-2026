@@ -266,7 +266,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 html += '<div class="leadership-field"><label>Deputy LOP</label><select id="ldr-dep_lop">' + opt(oppEligible, leadership.dep_lop?.id, 'Select Dep LOP') + '</select></div>';
 
                 ministerRoles.forEach(mr => {
-                    const eligibleMinisters = eligible.filter(d => d.assigned_committee === mr.key);
+                    const eligibleMinisters = eligible;
                     const current = leadership.ministers?.[mr.key]?.id || '';
                     const safeKey = mr.key.replace(/[^a-zA-Z0-9_-]/g, '_');
                     html += `<div class="leadership-field"><label>${escapeHtml(mr.label)}</label><select id="ldr-m-${safeKey}" data-minister-key="${escapeHtml(mr.key)}">${opt(eligibleMinisters, current, 'Select Minister')}</select></div>`;
