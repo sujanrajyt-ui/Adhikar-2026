@@ -375,15 +375,15 @@ app.delete('/api/admin/parties/:id', async (req, res) => {
   res.json({ success: true });
 });
 
-// Admin: rename a party/committee (updates all delegates too)
+// Admin: rename a party/committee or update its side (updates all delegates too)
 app.patch('/api/admin/parties/:id', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
     return res.status(403).json({ detail: 'Forbidden' });
   }
-  const { name } = req.body;
-  if (!name || !name.trim()) return res.status(400).json({ detail: 'New name is required' });
+  const { name, side } = req.body;
+  if ((!name || !name.trim()) && side === undefined) return res.status(400).json({ detail: 'Name or side required' });
   try {
-    const result = await db.renameParty(req.params.id, name.trim());
+    const result = await db.renameParty(req.params.id, name ? name.trim() : null, side);
     if (!result) return res.status(404).json({ detail: 'Not found' });
     res.json(result);
   } catch (err) {

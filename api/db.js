@@ -581,31 +581,41 @@ module.exports = {
     return { success: true };
   },
 
-  async renameParty(id, newName) {
+  async renameParty(id, newName, side) {
     if (isPg) {
-      const oldRes = await pool.query('SELECT name FROM parties WHERE id = $1', [id]);
+      const oldRes = await pool.query('SELECT name, side FROM parties WHERE id = $1', [id]);
       if (oldRes.rows.length === 0) return null;
       const oldName = oldRes.rows[0].name;
-      await pool.query('UPDATE parties SET name = $1 WHERE id = $2', [newName, id]);
-      await pool.query('UPDATE registrations SET assigned_party = $1 WHERE assigned_party = $2', [newName, oldName]);
-      return { id, name: newName };
+      if (newName && newName !== oldName) {
+        await pool.query('UPDATE parties SET name = $1 WHERE id = $2', [newName, id]);
+        await pool.query('UPDATE registrations SET assigned_party = $1 WHERE assigned_party = $2', [newName, oldName]);
+      }
+      if (side !== undefined) {
+        await pool.query('UPDATE parties SET side = $1 WHERE id = $2', [side || null, id]);
+      }
+      return { id, name: newName || oldName };
     } else {
       const list = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
       const party = list.find(p => p.id === id);
       if (!party) return null;
       const oldName = party.name;
-      party.name = newName;
+      if (newName && newName !== oldName) {
+        party.name = newName;
+        const regs = readData();
+        let changed = 0;
+        regs.forEach(r => {
+          if (r.assigned_party === oldName) {
+            r.assigned_party = newName;
+            changed++;
+          }
+        });
+        if (changed > 0) writeData(regs);
+      }
+      if (side !== undefined) {
+        party.side = side || null;
+      }
       fs.writeFileSync(PARTIES_FILE, JSON.stringify(list, null, 2), 'utf-8');
-      const regs = readData();
-      let changed = 0;
-      regs.forEach(r => {
-        if (r.assigned_party === oldName) {
-          r.assigned_party = newName;
-          changed++;
-        }
-      });
-      if (changed > 0) writeData(regs);
-      return { id, name: newName, updated_delegates: changed };
+      return { id, name: newName || party.name, side: party.side };
     }
   },
 

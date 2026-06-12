@@ -227,6 +227,7 @@ function initPartiesAdmin() {
             <em style="opacity:.6;font-size:.8rem;"> — ${p.type}${p.side ? ' · ' + p.side : ''}</em>
           </span>
           <span class="party-admin-actions">
+            ${p.type === 'party' ? `<button class="party-side-btn" data-id="${p.id}" data-side="${p.side || ''}" title="Toggle ruling/opposition">${p.side === 'ruling' ? 'R' : 'O'}</button>` : ''}
             <button class="party-rename-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" title="Rename">✎</button>
             <button class="party-del-btn" data-id="${p.id}" title="Delete">✕</button>
           </span>
@@ -242,6 +243,21 @@ function initPartiesAdmin() {
             await Promise.all([loadList(), renderParties(), loadPartiesCache()]);
             showToast('Deleted');
           } catch { showToast('Failed to delete', 'error'); btn.disabled = false; }
+        });
+      });
+      listEl.querySelectorAll('.party-side-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const newSide = btn.dataset.side === 'ruling' ? 'opposition' : 'ruling';
+          btn.disabled = true;
+          try {
+            await fetch(`${API_BASE}/admin/parties/${btn.dataset.id}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+              body: JSON.stringify({ side: newSide })
+            });
+            await Promise.all([loadList(), renderParties(), loadPartiesCache()]);
+            showToast(`Toggled to ${newSide}`, 'success');
+          } catch { showToast('Failed to toggle side', 'error'); btn.disabled = false; }
         });
       });
       listEl.querySelectorAll('.party-rename-btn').forEach(btn => {
