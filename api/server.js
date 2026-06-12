@@ -994,6 +994,40 @@ app.get('/api/public/leaderboard', async (req, res) => {
   }
 });
 
+// Public: get institutions (college) with delegate members grouped
+const INSTITUTION_ALIAS = {
+  'KLE CC': 'KLE CC',
+  'KLE COMMERCE': 'KLE Commerce',
+  'KLE Commerce': 'KLE Commerce',
+  'KLE': 'KLE',
+};
+
+app.get('/api/institutions', async (req, res) => {
+  try {
+    const all = await db.getAll();
+    const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
+    // Normalize college names and group
+    const groups = {};
+    verified.forEach(d => {
+      let name = (d.college || '').trim();
+      if (!name) name = 'Unspecified';
+      // Simple grouping: take first word for commonization
+      const prefix = name.split(/[\s,-]+/)[0].toUpperCase();
+      if (['KLE'].includes(prefix)) name = prefix;
+      if (!groups[name]) groups[name] = [];
+      groups[name].push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
+    });
+    const result = Object.entries(groups).map(([institution, members]) => ({
+      institution,
+      count: members.length,
+      members
+    })).sort((a, b) => b.count - a.count);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 app.get('/api/public/leadership', async (req, res) => {
   try {
     const [all, parties] = await Promise.all([db.getAll(), db.getParties()]);
@@ -1197,6 +1231,10 @@ app.get('/scores', (req, res) => {
 
 app.get('/leaderboard', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'leaderboard.html'));
+});
+
+app.get('/institution', (req, res) => {
+  res.sendFile(path.join(__dirname, '..', 'institution.html'));
 });
 
 app.get('/assign', (req, res) => {
