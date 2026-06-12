@@ -592,6 +592,20 @@ module.exports = {
       }
       if (side !== undefined) {
         await pool.query('UPDATE parties SET side = $1 WHERE id = $2', [side || null, id]);
+        // Also sync the coalition config so getParties() doesn't override this change
+        const effectiveName = newName || oldName;
+        const coalRes = await pool.query("SELECT value FROM app_config WHERE key = 'coalition_ruling_ids'");
+        let rulingNames = coalRes.rows.length > 0 ? JSON.parse(coalRes.rows[0].value) : [];
+        if (side === 'ruling' && !rulingNames.includes(effectiveName)) {
+          rulingNames.push(effectiveName);
+        } else if (side === 'opposition') {
+          rulingNames = rulingNames.filter(n => n !== effectiveName);
+        }
+        await pool.query(
+          `INSERT INTO app_config (key, value) VALUES ('coalition_ruling_ids', $1)
+           ON CONFLICT (key) DO UPDATE SET value = $1`,
+          [JSON.stringify(rulingNames)]
+        );
       }
       return { id, name: newName || oldName };
     } else {
