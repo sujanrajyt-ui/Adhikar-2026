@@ -404,6 +404,33 @@ app.post('/api/admin/parties/normalize', async (req, res) => {
   }
 });
 
+// Admin: get/set institution groups (raw college name → group name)
+app.get('/api/admin/institution-groups', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const groups = await db.getInstitutionGroups();
+    const all = await db.getAll();
+    const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
+    const colleges = [...new Set(verified.map(r => r.college || '').filter(Boolean))].sort();
+    res.json({ groups, colleges });
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+app.put('/api/admin/institution-groups', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const result = await db.setInstitutionGroups(req.body);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // Admin: set ruling coalition (which parties form govt, rest become opposition)
 app.post('/api/admin/parties/coalition', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
@@ -995,34 +1022,19 @@ app.get('/api/public/leaderboard', async (req, res) => {
 });
 
 // Public: get institutions (college) with delegate members grouped
-const SUFFIXES = new Set(['COLLEGE', 'SCHOOL', 'PU', 'JUNIOR', 'DEGREE', 'UNIVERSITY', 'INSTITUTE', 'ACADEMY', 'HIGH', 'PRIMARY', 'SECONDARY', 'COMMERCE', 'SCIENCE', 'ARTS']);
-const COMMON_WORDS = new Set(['THE', 'OF', 'AND', '&', 'AT', 'IN', 'FOR']);
-
 app.get('/api/institutions', async (req, res) => {
   try {
-    const all = await db.getAll();
+    const [all, customGroups] = await Promise.all([db.getAll(), db.getInstitutionGroups()]);
     const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
-    // Normalize college names by extracting a common base key
     const groups = {};
     verified.forEach(d => {
-      let name = (d.college || '').trim();
-      if (!name) name = 'Unspecified';
-      // Build normalized key: take first significant word(s)
-      const parts = name.split(/[\s,/-]+/).filter(Boolean);
-      let key = parts[0] ? parts[0].toUpperCase().replace(/\./g, '') : '';
-      // If second part is not a suffix/stop-word, include it
-      if (parts.length > 1) {
-        const second = parts[1].toUpperCase().replace(/\./g, '');
-        if (!SUFFIXES.has(second) && !COMMON_WORDS.has(second)) key += ' ' + parts[1];
-      }
-      if (!groups[key]) groups[key] = [];
-      groups[key].push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
+      const raw = (d.college || '').trim();
+      const name = raw || 'Unspecified';
+      const key = customGroups[name] || name;
+      if (!groups[key]) groups[key] = { institution: key, members: [] };
+      groups[key].members.push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
     });
-    const result = Object.entries(groups).map(([institution, members]) => ({
-      institution,
-      count: members.length,
-      members
-    })).sort((a, b) => b.count - a.count);
+    const result = Object.values(groups).map(g => ({ ...g, count: g.members.length })).sort((a, b) => b.count - a.count);
     res.json(result);
   } catch (err) {
     res.status(500).json({ detail: err.message });

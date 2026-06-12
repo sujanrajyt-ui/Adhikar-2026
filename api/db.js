@@ -12,6 +12,7 @@ const LEADERSHIP_FILE = path.join(__dirname, 'leadership.json');
 const SESSIONS_FILE = path.join(__dirname, 'sessions.json');
 const LOG_FILE = path.join(__dirname, '..', 'scores_log.csv');
 const COALITION_LOCK_FILE = path.join(__dirname, 'coalition_lock.json');
+const INST_GROUPS_FILE = path.join(__dirname, 'institution_groups.json');
 
 
 
@@ -1139,6 +1140,31 @@ module.exports = {
         partyCount: list.filter(p => p.type === 'party').length
       };
     }
+  },
+
+  async getInstitutionGroups() {
+    if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+      const res = await pool.query("SELECT value FROM app_config WHERE key = 'institution_groups'");
+      return res.rows.length > 0 ? JSON.parse(res.rows[0].value) : {};
+    }
+    try {
+      return JSON.parse(fs.readFileSync(INST_GROUPS_FILE, 'utf-8'));
+    } catch { return {}; }
+  },
+
+  async setInstitutionGroups(groups) {
+    if (isPg) {
+      await pool.query(`CREATE TABLE IF NOT EXISTS app_config (key TEXT PRIMARY KEY, value TEXT NOT NULL)`);
+      await pool.query(
+        `INSERT INTO app_config (key, value) VALUES ('institution_groups', $1)
+         ON CONFLICT (key) DO UPDATE SET value = $1`,
+        [JSON.stringify(groups)]
+      );
+    } else {
+      fs.writeFileSync(INST_GROUPS_FILE, JSON.stringify(groups, null, 2), 'utf-8');
+    }
+    return groups;
   }
 };
 

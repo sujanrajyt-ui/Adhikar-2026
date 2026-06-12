@@ -1051,6 +1051,14 @@
               <div id="criteria-admin-list" class="parties-admin-list"></div>
             </div>
 
+            <div class="parties-admin-panel">
+              <h3 class="parties-admin-title" style="color: var(--gold-400);">Institution Groups</h3>
+              <p class="coalition-desc">Merge colleges/schools into custom groups for the /institution page.</p>
+              <button id="inst-load-btn" class="btn-primary" style="padding:0.3rem 1rem;font-size:0.8rem;" onclick="initInstitutionGroups()">Load Institutions</button>
+              <div id="inst-admin-list" class="parties-admin-list" style="margin-top:0.8rem;"></div>
+              <button id="inst-save-btn" class="btn-primary" style="margin-top:0.5rem;padding:0.3rem 1rem;font-size:0.8rem;display:none;" onclick="saveInstitutionGroups()">Save Groups</button>
+            </div>
+
             <!-- Mock Parliament Scoring Framework Overview -->
             <div class="parties-admin-panel"
               style="grid-column: span 2; background: rgba(0,0,0,0.2); border: 1px solid rgba(212, 175, 55, 0.1);">

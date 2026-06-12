@@ -304,6 +304,53 @@ function initPartiesAdmin() {
   loadList();
 }
 
+async function initInstitutionGroups() {
+  const container = document.getElementById('inst-admin-list');
+  const saveBtn = document.getElementById('inst-save-btn');
+  if (!container) return;
+  container.innerHTML = '<p style="opacity:.5;font-size:.85rem;">Loading...</p>';
+  try {
+    const res = await fetch(`${API_BASE}/admin/institution-groups`, {
+      headers: { 'X-Admin-Password': adminPassword }
+    });
+    if (!res.ok) throw new Error('Forbidden');
+    const data = await res.json();
+    window._instGroups = data.groups || {};
+    const cols = data.colleges || [];
+    if (!cols.length) { container.innerHTML = '<p style="opacity:.5;font-size:.85rem;">No verified delegates with college data.</p>'; return; }
+    let html = cols.map(c => {
+      const val = window._instGroups[c] || '';
+      return `<div style="display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;">
+        <span style="flex:1;color:rgba(255,255,255,0.7);">${escapeHtml(c)}</span>
+        <input class="inst-group-input" data-raw="${escapeHtml(c)}" type="text" value="${escapeHtml(val)}" placeholder="Group name" style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,83,0.2);border-radius:4px;color:#fff;padding:3px 8px;font-size:0.8rem;width:200px;outline:none;" />
+      </div>`;
+    }).join('');
+    container.innerHTML = html;
+    saveBtn.style.display = 'inline-block';
+  } catch {
+    container.innerHTML = '<p style="opacity:.5;font-size:.85rem;">Failed to load. Are you logged in as admin?</p>';
+  }
+}
+
+async function saveInstitutionGroups() {
+  const inputs = document.querySelectorAll('.inst-group-input');
+  const groups = {};
+  inputs.forEach(inp => {
+    const raw = inp.getAttribute('data-raw');
+    const val = inp.value.trim();
+    if (val) groups[raw] = val;
+  });
+  try {
+    const res = await fetch(`${API_BASE}/admin/institution-groups`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Admin-Password': adminPassword },
+      body: JSON.stringify(groups)
+    });
+    if (!res.ok) throw new Error('Failed');
+    showToast('Institution groups saved!', 'success');
+  } catch { showToast('Failed to save', 'error'); }
+}
+
 function renderCoalition(all) {
   const container = document.getElementById('coalition-parties');
   const saveBtn = document.getElementById('coalition-save-btn');
