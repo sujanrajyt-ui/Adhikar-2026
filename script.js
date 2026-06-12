@@ -317,19 +317,46 @@ async function initInstitutionGroups() {
     const data = await res.json();
     window._instGroups = data.groups || {};
     const cols = data.colleges || [];
-    if (!cols.length) { container.innerHTML = '<p style="opacity:.5;font-size:.85rem;">No verified delegates with college data.</p>'; return; }
-    let html = cols.map(c => {
-      const val = window._instGroups[c] || '';
-      return `<div style="display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;">
-        <span style="flex:1;color:rgba(255,255,255,0.7);">${escapeHtml(c)}</span>
-        <input class="inst-group-input" data-raw="${escapeHtml(c)}" type="text" value="${escapeHtml(val)}" placeholder="Group name" style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,83,0.2);border-radius:4px;color:#fff;padding:3px 8px;font-size:0.8rem;width:200px;outline:none;" />
-      </div>`;
-    }).join('');
-    container.innerHTML = html;
+    // Merge any custom entries from saved groups that aren't in the college list
+    for (const raw of Object.keys(window._instGroups)) {
+      if (!cols.includes(raw)) cols.push(raw);
+    }
+    renderInstRows(container, cols);
     saveBtn.style.display = 'inline-block';
   } catch {
     container.innerHTML = '<p style="opacity:.5;font-size:.85rem;">Failed to load. Are you logged in as admin?</p>';
   }
+}
+
+function renderInstRows(container, cols) {
+  const addRow = (raw) => {
+    const val = window._instGroups[raw] || '';
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;';
+    div.innerHTML = `<span style="flex:1;color:rgba(255,255,255,0.7);">${escapeHtml(raw)}</span>
+      <input class="inst-group-input" data-raw="${escapeHtml(raw)}" type="text" value="${escapeHtml(val)}" placeholder="Group name" style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,83,0.2);border-radius:4px;color:#fff;padding:3px 8px;font-size:0.8rem;width:200px;outline:none;" />
+      <button onclick="this.closest('div').remove()" style="background:none;border:none;color:#b85562;cursor:pointer;font-size:1rem;" title="Remove">&times;</button>`;
+    container.appendChild(div);
+  };
+  container.innerHTML = '';
+  cols.forEach(c => addRow(c));
+  // Add a button to add a custom institution
+  const addBtn = document.createElement('div');
+  addBtn.style.cssText = 'margin-top:0.5rem;';
+  addBtn.innerHTML = '<button onclick="addInstRow()" style="background:rgba(212,168,83,0.1);border:1px dashed rgba(212,168,83,0.3);border-radius:6px;color:var(--gold-400);padding:0.3rem 1rem;font-size:0.8rem;cursor:pointer;">+ Add Institution</button>';
+  container.appendChild(addBtn);
+}
+
+function addInstRow() {
+  const container = document.getElementById('inst-admin-list');
+  const raw = prompt('Enter the institution name as it appears in delegate data:');
+  if (!raw || !raw.trim()) return;
+  const div = document.createElement('div');
+  div.style.cssText = 'display:flex;gap:6px;align-items:center;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-size:0.82rem;';
+  div.innerHTML = `<span style="flex:1;color:rgba(255,255,255,0.7);">${escapeHtml(raw.trim())}</span>
+    <input class="inst-group-input" data-raw="${escapeHtml(raw.trim())}" type="text" value="" placeholder="Group name" style="background:rgba(0,0,0,0.3);border:1px solid rgba(212,168,83,0.2);border-radius:4px;color:#fff;padding:3px 8px;font-size:0.8rem;width:200px;outline:none;" />
+    <button onclick="this.closest('div').remove()" style="background:none;border:none;color:#b85562;cursor:pointer;font-size:1rem;" title="Remove">&times;</button>`;
+  container.insertBefore(div, container.lastElementChild);
 }
 
 async function saveInstitutionGroups() {

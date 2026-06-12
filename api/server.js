@@ -1027,6 +1027,11 @@ app.get('/api/institutions', async (req, res) => {
     const [all, customGroups] = await Promise.all([db.getAll(), db.getInstitutionGroups()]);
     const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
     const groups = {};
+    const groupNames = new Set(Object.values(customGroups));
+    // Include empty custom groups so /institution shows them even with 0 members
+    for (const name of groupNames) {
+      if (!groups[name]) groups[name] = { institution: name, members: [] };
+    }
     verified.forEach(d => {
       const raw = (d.college || '').trim();
       const name = raw || 'Unspecified';
