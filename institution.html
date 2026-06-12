@@ -86,14 +86,18 @@
         const res = await fetch(`${API_BASE}/institutions`);
         const data = await res.json();
         const total = data.reduce((s, g) => s + g.count, 0);
+        const totalPts = data.reduce((s, g) => s + (g.totalPoints || 0), 0);
         document.getElementById('total-info').style.display = 'inline-block';
-        document.getElementById('total-info').textContent = `${data.length} institutions · ${total} delegates`;
+        document.getElementById('total-info').textContent = `${data.length} institutions · ${total} delegates · ${totalPts} total pts`;
         const grid = document.getElementById('inst-grid');
         grid.innerHTML = data.map(g => `
           <div class="inst-card">
             <div class="inst-header" onclick="this.nextElementSibling.classList.toggle('open')">
               <span class="inst-name">${escapeHtml(g.institution)}</span>
-              <span class="inst-count">${g.count}</span>
+              <span style="display:flex;gap:0.8rem;align-items:center;">
+                <span style="color:var(--gold-400);font-size:0.8rem;font-weight:600;">${g.totalPoints || 0} pts</span>
+                <span class="inst-count">${g.count}</span>
+              </span>
             </div>
             <div class="inst-body">
               ${g.members.map(m => `
@@ -103,6 +107,7 @@
                     ${m.year ? `<span class="meta-tag">${escapeHtml(m.year)}</span>` : ''}
                     ${m.party ? `<span class="meta-tag">${escapeHtml(m.party)}</span>` : ''}
                     ${m.committee ? `<span class="meta-tag">${escapeHtml(m.committee)}</span>` : ''}
+                    ${m.totalScore !== undefined ? `<span class="meta-tag" style="color:var(--gold-400);">${m.totalScore} pts</span>` : ''}
                   </span>
                 </div>
               `).join('')}

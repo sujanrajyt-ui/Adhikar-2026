@@ -1021,14 +1021,21 @@ app.get('/api/public/leaderboard', async (req, res) => {
   }
 });
 
-// Public: get institutions (college) with delegate members grouped
+// Public: get institutions (college) with delegate members grouped and total scores
 app.get('/api/institutions', async (req, res) => {
   try {
-    const [all, customGroups] = await Promise.all([db.getAll(), db.getInstitutionGroups()]);
+    const [all, customGroups, rawCriteria, rawScores] = await Promise.all([
+      db.getAll(), db.getInstitutionGroups(), db.getCriteria(), db.getAllScores()
+    ]);
     const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
+
+    // Build scorable criteria (exclude attendance)
+    const criteriaMap = {};
+    rawCriteria.forEach(c => { if (c.id && c.id !== 'attendance') criteriaMap[c.id] = c; });
+    const scorableSessions = ['QH', 'ZH', 'MR', 'SS', 'BP', 'FSH', 'ZH2', 'general'];
+
     const groups = {};
     const groupNames = new Set(Object.values(customGroups));
-    // Include empty custom groups so /institution shows them even with 0 members
     for (const name of groupNames) {
       if (!groups[name]) groups[name] = { institution: name, members: [] };
     }
@@ -1037,9 +1044,43 @@ app.get('/api/institutions', async (req, res) => {
       const name = raw || 'Unspecified';
       const key = customGroups[name] || name;
       if (!groups[key]) groups[key] = { institution: key, members: [] };
-      groups[key].members.push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
+
+      // Compute totalScore for this delegate (same logic as leaderboard)
+      const dScores = rawScores.filter(s =>
+        s.delegate_id === d.id &&
+        s.criteria_id !== 'attendance' &&
+        scorableSessions.includes(s.session_id || 'general')
+      );
+      let delegateTotal = 0;
+      Object.values(criteriaMap).forEach(c => {
+        const cMatches = dScores.filter(s => s.criteria_id === c.id);
+        if (cMatches.length === 0) return;
+        const sessionMap = {};
+        cMatches.forEach(s => {
+          const sid = s.session_id || 'general';
+          if (!sessionMap[sid]) sessionMap[sid] = [];
+          sessionMap[sid].push(s.score);
+        });
+        const sessionAvgs = Object.values(sessionMap).map(scores =>
+          scores.reduce((sum, sc) => sum + sc, 0) / scores.length
+        );
+        delegateTotal += sessionAvgs.reduce((sum, avg) => sum + avg, 0) / sessionAvgs.length;
+      });
+
+      groups[key].members.push({
+        id: d.id,
+        name: d.name,
+        year: d.year || '',
+        party: d.assigned_party || '',
+        committee: d.assigned_committee || '',
+        totalScore: parseFloat(delegateTotal.toFixed(2))
+      });
     });
-    const result = Object.values(groups).map(g => ({ ...g, count: g.members.length })).sort((a, b) => b.count - a.count);
+    const result = Object.values(groups).map(g => ({
+      ...g,
+      count: g.members.length,
+      totalPoints: parseFloat(g.members.reduce((sum, m) => sum + (m.totalScore || 0), 0).toFixed(2))
+    })).sort((a, b) => b.totalPoints - a.totalPoints);
     res.json(result);
   } catch (err) {
     res.status(500).json({ detail: err.message });
