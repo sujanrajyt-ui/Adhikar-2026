@@ -391,6 +391,19 @@ app.patch('/api/admin/parties/:id', async (req, res) => {
   }
 });
 
+// Admin: normalize party names (consolidate short-name duplicates into full names)
+app.post('/api/admin/parties/normalize', async (req, res) => {
+  if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {
+    return res.status(403).json({ detail: 'Forbidden' });
+  }
+  try {
+    const result = await db.normalizeParties();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ detail: err.message });
+  }
+});
+
 // Admin: set ruling coalition (which parties form govt, rest become opposition)
 app.post('/api/admin/parties/coalition', async (req, res) => {
   if (req.headers['x-admin-password'] !== process.env.ADMIN_PASSWORD) {

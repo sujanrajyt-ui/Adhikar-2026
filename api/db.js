@@ -581,6 +581,72 @@ module.exports = {
     return { success: true };
   },
 
+  async normalizeParties() {
+    const ALIASES = {
+      'A': 'Rashtriya Yuva Pragati Manch (A)',
+      'B': 'Yuva Drishti Party (B)',
+      'C': 'New Gen Leaders (C)',
+      'D': 'Catalyst Party (D)',
+      'E': 'Navpeedhi Bharat Party (E)',
+      'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+      'Party B': 'Yuva Drishti Party (B)',
+      'Party C': 'New Gen Leaders (C)',
+      'Party D': 'Catalyst Party (D)',
+      'Party E': 'Navpeedhi Bharat Party (E)',
+      'Next Gen Leaders (C)': 'New Gen Leaders (C)',
+    };
+    const shortNames = new Set(Object.keys(ALIASES));
+    const fullNames = new Set(Object.values(ALIASES));
+    let updated = 0;
+
+    if (isPg) {
+      // Normalize registrations
+      for (const [short, full] of Object.entries(ALIASES)) {
+        const res = await pool.query(
+          'UPDATE registrations SET assigned_party = $1 WHERE assigned_party = $2',
+          [full, short]
+        );
+        updated += res.rowCount || 0;
+      }
+      // Delete duplicate parties (short-name ones where full-name equivalent exists)
+      const existing = await pool.query('SELECT DISTINCT name FROM parties');
+      const existingNames = existing.rows.map(r => r.name);
+      const nameSet = new Set(existingNames);
+      const toDelete = existingNames.filter(n => {
+        const full = ALIASES[n];
+        return full && full !== n && nameSet.has(full);
+      });
+      for (const name of toDelete) {
+        await pool.query('DELETE FROM parties WHERE name = $1', [name]);
+      }
+      return { updated_delegates: updated, removed_parties: toDelete.length };
+    } else {
+      // Normalize data.json
+      const data = readData();
+      data.forEach(r => {
+        if (r.assigned_party && ALIASES[r.assigned_party]) {
+          r.assigned_party = ALIASES[r.assigned_party];
+          updated++;
+        }
+      });
+      if (updated > 0) writeData(data);
+      // Clean parties.json: remove short-name parties only if full-name equivalent exists
+      const parties = JSON.parse(fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]');
+      const existingNames = new Set(parties.map(p => p.name));
+      const before = parties.length;
+      const filtered = parties.filter(p => {
+        if (p.type !== 'party') return true;
+        const full = ALIASES[p.name];
+        if (full && full !== p.name && existingNames.has(full)) return false;
+        return true;
+      });
+      if (filtered.length < before) {
+        fs.writeFileSync(PARTIES_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+      }
+      return { updated_delegates: updated, removed_parties: before - filtered.length };
+    }
+  },
+
   async renameParty(id, newName, side) {
     if (isPg) {
       const oldRes = await pool.query('SELECT name, side FROM parties WHERE id = $1', [id]);

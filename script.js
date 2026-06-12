@@ -1508,12 +1508,33 @@ async function loadRecentScores() {
   }
 }
 
+const OVERVIEW_PARTY_MAP = {
+  'A': 'Rashtriya Yuva Pragati Manch (A)',
+  'B': 'Yuva Drishti Party (B)',
+  'C': 'New Gen Leaders (C)',
+  'D': 'Catalyst Party (D)',
+  'E': 'Navpeedhi Bharat Party (E)',
+  'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+  'Party B': 'Yuva Drishti Party (B)',
+  'Party C': 'New Gen Leaders (C)',
+  'Party D': 'Catalyst Party (D)',
+  'Party E': 'Navpeedhi Bharat Party (E)',
+  'Next Gen Leaders (C)': 'New Gen Leaders (C)',
+};
+
 function renderOverview() {
   const containerParties = document.getElementById("overview-parties");
   const containerComms = document.getElementById("overview-committees");
   if (!containerParties || !containerComms) return;
 
   const verified = lastRegistrations.filter(r => r.status === 'verified');
+
+  // Normalize assigned_party in place to consolidate short/full name duplicates
+  verified.forEach(r => {
+    if (r.assigned_party && OVERVIEW_PARTY_MAP[r.assigned_party]) {
+      r.assigned_party = OVERVIEW_PARTY_MAP[r.assigned_party];
+    }
+  });
 
   // Groups
   const partyGroups = {};
