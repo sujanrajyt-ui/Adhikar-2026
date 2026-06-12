@@ -769,9 +769,28 @@ let adminCollegeFilter = "all";
 let _partiesCache = null; // cached full list from /api/parties
 let showOverviewDashboard = false;
 
+const SCRIPT_PARTY_MAP = {
+  'A': 'Rashtriya Yuva Pragati Manch (A)',
+  'B': 'Yuva Drishti Party (B)',
+  'C': 'New Gen Leaders (C)',
+  'D': 'Catalyst Party (D)',
+  'E': 'Navpeedhi Bharat Party (E)',
+  'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+  'Party B': 'Yuva Drishti Party (B)',
+  'Party C': 'New Gen Leaders (C)',
+  'Party D': 'Catalyst Party (D)',
+  'Party E': 'Navpeedhi Bharat Party (E)',
+  'Next Gen Leaders (C)': 'New Gen Leaders (C)',
+};
+
 async function loadPartiesCache() {
   try {
     _partiesCache = await fetch(`${API_BASE}/parties`).then(r => r.json());
+    _partiesCache.forEach(p => {
+      if (p.type === 'party' && SCRIPT_PARTY_MAP[p.name]) {
+        p.name = SCRIPT_PARTY_MAP[p.name];
+      }
+    });
   } catch {
     _partiesCache = [];
   }

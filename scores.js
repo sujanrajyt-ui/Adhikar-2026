@@ -184,7 +184,14 @@ async function switchSession() {
 async function loadParties() {
     try {
         const res = await fetch(`${API_BASE}/parties?t=${Date.now()}`);
-        if (res.ok) allParties = await res.json();
+        if (res.ok) {
+            allParties = await res.json();
+            allParties.forEach(p => {
+                if (p.type === 'party' && PARTY_NAME_MAP[p.name]) {
+                    p.name = PARTY_NAME_MAP[p.name];
+                }
+            });
+        }
     } catch (e) {
         console.error("Failed to load parties", e);
     }
