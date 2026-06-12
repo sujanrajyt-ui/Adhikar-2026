@@ -436,7 +436,8 @@
                     fetch(`${API_BASE}/public/leaderboard`)
                 ]);
                 const leadership = await leadershipRes.json();
-                const leaderboard = await leaderboardRes.json();
+                const lbData = await leaderboardRes.json();
+                const leaderboard = lbData.leaderboard || [];
 
                 const govEl = document.getElementById('gov-grid');
                 const oppEl = document.getElementById('opp-grid');
