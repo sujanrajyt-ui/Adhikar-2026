@@ -820,6 +820,14 @@ h3 {
     text-overflow: ellipsis;
     opacity: 0.8;
 }
+.avg-ref {
+    font-size: 0.6rem;
+    color: rgba(212, 168, 83, 0.35);
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 0.2rem;
+}
 
 .inline-criteria input {
     width: 100%;

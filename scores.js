@@ -31,6 +31,7 @@ const sessionTabs = document.getElementById('session-tabs');
 const coalitionInfo = document.getElementById('coalition-info');
 let allParties = [];
 let coalitionRefreshInterval = null;
+let sessionAverages = {}; // { criteria_id: average }
 
 function showToast(msg, type = 'info') {
     const container = document.getElementById('toast-container');
@@ -324,16 +325,38 @@ async function loadDelegates() {
     const res = await fetch(`${API_BASE}/scores/delegates?judgeId=${currentJudge}&sessionId=${currentSession || ''}`);
     if (!res.ok) throw new Error("Failed to load delegates");
     allDelegates = await res.json();
+    computeSessionAverages();
+}
+
+function computeSessionAverages() {
+    sessionAverages = {};
+    allCriteria.forEach(c => {
+        const scores = [];
+        allDelegates.forEach(d => {
+            if (!d.scores) return;
+            const s = d.scores.find(s => s.criteria_id === c.id);
+            if (s && s.score !== undefined && s.score !== null && s.score !== '') {
+                scores.push(Number(s.score));
+            }
+        });
+        if (scores.length > 0) {
+            sessionAverages[c.id] = parseFloat((scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1));
+        }
+    });
 }
 
 function renderCriteria() {
     if (!criteriaList) return;
-    criteriaList.innerHTML = allCriteria.map(c => `
+    criteriaList.innerHTML = allCriteria.map(c => {
+        const avg = sessionAverages[c.id];
+        return `
     <div class="criteria-item" title="${escapeHtml(c.description)}">
       <span>${escapeHtml(c.name)}</span>
-      <span class="gold-text">${c.max_points} pts</span>
-    </div>
-  `).join('');
+      <span style="display:flex;gap:0.3rem;align-items:center;">
+        ${avg !== undefined ? `<span style="font-size:0.7rem;color:rgba(255,255,255,0.35);">avg ${avg}</span>` : ''}
+        <span class="gold-text">${c.max_points} pts</span>
+      </span>
+    </div>`; }).join('');
 }
 
 function getDelegateSide(delegate) {
@@ -377,9 +400,10 @@ function renderDelegates() {
         const criteriaHtml = allCriteria.map(c => {
             const existing = d.scores ? d.scores.find(s => s.criteria_id === c.id) : null;
             const val = existing ? existing.score : '';
+            const avg = sessionAverages[c.id];
             return `
         <div class="inline-criteria">
-          <label>${escapeHtml(c.name)} <small>/${c.max_points}</small></label>
+          <label>${escapeHtml(c.name)} <small>/${c.max_points}</small>${avg !== undefined ? ` <span class="avg-ref">avg ${avg}</span>` : ''}</label>
           <input type="number"
             id="score_${d.id}_${c.id}"
             min="0" max="${c.max_points}"
@@ -542,6 +566,8 @@ async function handleInlineSave(delegateId) {
 }
 
 function updateProgress() {
+    computeSessionAverages();
+    renderCriteria();
     const total = allDelegates.length;
     const scored = allDelegates.filter(d => d.scores && d.scores.length > 0).length;
 
