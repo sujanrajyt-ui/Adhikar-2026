@@ -995,27 +995,28 @@ app.get('/api/public/leaderboard', async (req, res) => {
 });
 
 // Public: get institutions (college) with delegate members grouped
-const INSTITUTION_ALIAS = {
-  'KLE CC': 'KLE CC',
-  'KLE COMMERCE': 'KLE Commerce',
-  'KLE Commerce': 'KLE Commerce',
-  'KLE': 'KLE',
-};
+const SUFFIXES = new Set(['COLLEGE', 'SCHOOL', 'PU', 'JUNIOR', 'DEGREE', 'UNIVERSITY', 'INSTITUTE', 'ACADEMY', 'HIGH', 'PRIMARY', 'SECONDARY', 'COMMERCE', 'SCIENCE', 'ARTS']);
+const COMMON_WORDS = new Set(['THE', 'OF', 'AND', '&', 'AT', 'IN', 'FOR']);
 
 app.get('/api/institutions', async (req, res) => {
   try {
     const all = await db.getAll();
     const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
-    // Normalize college names and group
+    // Normalize college names by extracting a common base key
     const groups = {};
     verified.forEach(d => {
       let name = (d.college || '').trim();
       if (!name) name = 'Unspecified';
-      // Simple grouping: take first word for commonization
-      const prefix = name.split(/[\s,-]+/)[0].toUpperCase();
-      if (['KLE'].includes(prefix)) name = prefix;
-      if (!groups[name]) groups[name] = [];
-      groups[name].push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
+      // Build normalized key: take first significant word(s)
+      const parts = name.split(/[\s,/-]+/).filter(Boolean);
+      let key = parts[0] ? parts[0].toUpperCase().replace(/\./g, '') : '';
+      // If second part is not a suffix/stop-word, include it
+      if (parts.length > 1) {
+        const second = parts[1].toUpperCase().replace(/\./g, '');
+        if (!SUFFIXES.has(second) && !COMMON_WORDS.has(second)) key += ' ' + parts[1];
+      }
+      if (!groups[key]) groups[key] = [];
+      groups[key].push({ id: d.id, name: d.name, year: d.year || '', party: d.assigned_party || '', committee: d.assigned_committee || '' });
     });
     const result = Object.entries(groups).map(([institution, members]) => ({
       institution,
