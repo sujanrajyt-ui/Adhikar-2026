@@ -1021,6 +1021,21 @@ app.get('/api/public/leaderboard', async (req, res) => {
   }
 });
 
+function smartInstKey(name) {
+  if (!name) return 'Unspecified';
+  const raw = name.trim();
+  const drops = new Set(['college','school','pu','junior','degree','university','institute','academy','high','primary','secondary','commerce','science','arts','english','medium','cbse','public','society','campus','of','the','&','and','at','in','for','vidyalaya','vidyanikethana','school','college','hostel']);
+  const parts = raw.split(/[\s,/-]+/).filter(Boolean);
+  if (!parts.length) return 'Unspecified';
+  let base = parts[0].replace(/\./g,'').toUpperCase();
+  // If first word is a common prefix and second word is meaningful, use both
+  if (parts.length > 1) {
+    const second = parts[1].replace(/\./g,'');
+    if (!drops.has(second.toLowerCase())) base += ' ' + second;
+  }
+  return base;
+}
+
 // Public: get institutions (college) with delegate members grouped and total scores
 app.get('/api/institutions', async (req, res) => {
   try {
@@ -1035,6 +1050,7 @@ app.get('/api/institutions', async (req, res) => {
     const scorableSessions = ['QH', 'ZH', 'MR', 'SS', 'BP', 'FSH', 'ZH2', 'general'];
 
     const groups = {};
+    // First, pre-create groups from custom group names
     const groupNames = new Set(Object.values(customGroups));
     for (const name of groupNames) {
       if (!groups[name]) groups[name] = { institution: name, members: [] };
@@ -1042,7 +1058,9 @@ app.get('/api/institutions', async (req, res) => {
     verified.forEach(d => {
       const raw = (d.college || '').trim();
       const name = raw || 'Unspecified';
-      const key = customGroups[name] || name;
+      // Priority: custom group > smart key > raw name
+      let key = customGroups[name];
+      if (!key) key = smartInstKey(name);
       if (!groups[key]) groups[key] = { institution: key, members: [] };
 
       // Compute totalScore for this delegate (same logic as leaderboard)
