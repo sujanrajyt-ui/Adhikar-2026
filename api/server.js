@@ -957,11 +957,20 @@ app.get('/api/public/leaderboard', async (req, res) => {
 
       const totalScore = Object.values(criteriaScores).reduce((sum, s) => sum + s, 0);
 
-      // Find individual side - Robust matching
-      const partyMatch = parties.find(p =>
-        p.name && d.assigned_party &&
-        p.name.trim().toLowerCase() === d.assigned_party.trim().toLowerCase()
-      );
+      // Find individual side - match via canonical name (resolve aliases)
+      const PARTY_ALIAS = {
+        'A': 'Rashtriya Yuva Pragati Manch (A)', 'B': 'Yuva Drishti Party (B)',
+        'C': 'New Gen Leaders (C)', 'D': 'Catalyst Party (D)', 'E': 'Navpeedhi Bharat Party (E)',
+        'Party A': 'Rashtriya Yuva Pragati Manch (A)', 'Party B': 'Yuva Drishti Party (B)',
+        'Party C': 'New Gen Leaders (C)', 'Party D': 'Catalyst Party (D)', 'Party E': 'Navpeedhi Bharat Party (E)',
+        'Next Gen Leaders (C)': 'New Gen Leaders (C)',
+      };
+      const canonical = (name) => {
+        const m = PARTY_ALIAS[name?.trim()];
+        return m ? m.trim().toLowerCase() : (name?.trim().toLowerCase() || '');
+      };
+      const dpCanon = canonical(d.assigned_party);
+      const partyMatch = parties.find(p => p.name && canonical(p.name) === dpCanon);
       const side = partyMatch ? partyMatch.side : null;
 
       return {
