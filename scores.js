@@ -3,7 +3,13 @@ const PARTY_NAME_MAP = {
     'B': 'Yuva Drishti Party (B)',
     'C': 'New Gen Leaders (C)',
     'D': 'Catalyst Party (D)',
-    'E': 'Navpeedhi Bharat Party (E)'
+    'E': 'Navpeedhi Bharat Party (E)',
+    'Party A': 'Rashtriya Yuva Pragati Manch (A)',
+    'Party B': 'Yuva Drishti Party (B)',
+    'Party C': 'New Gen Leaders (C)',
+    'Party D': 'Catalyst Party (D)',
+    'Party E': 'Navpeedhi Bharat Party (E)',
+    'Next Gen Leaders (C)': 'New Gen Leaders (C)',
 };
 
 const API_BASE = '/api';

@@ -517,12 +517,15 @@ module.exports = {
       ]);
       const parties = partiesRes.rows;
       const rulingNames = configRes.rows.length > 0 ? JSON.parse(configRes.rows[0].value) : [];
-      for (const p of parties) {
-        if (p.type === 'party') {
-          // Check if party name is in the ruling list
-          p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
+      // Only compute side from coalition config if one has been set
+      if (rulingNames.length > 0) {
+        for (const p of parties) {
+          if (p.type === 'party') {
+            p.side = rulingNames.includes(p.name) ? 'ruling' : 'opposition';
+          }
         }
       }
+      // Otherwise keep the stored side (as seeded or set by admin)
       return parties;
     } else {
       const raw = fs.existsSync(PARTIES_FILE) ? fs.readFileSync(PARTIES_FILE, 'utf-8') : '[]';
