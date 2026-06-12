@@ -1,8 +1,17 @@
-// Migrate old party names (Party A, Party B, etc.) to new MUN-style names
-const { Pool } = require('pg');
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+// Run: node api/migrate_parties.js
+// Normalizes all delegate assigned_party values and cleans up duplicate party entries
+const fs = require('fs');
+const path = require('path');
 
-const MAP = {
+const DATA_FILE = path.join(__dirname, 'data.json');
+const PARTIES_FILE = path.join(__dirname, 'parties.json');
+
+const PARTY_NAME_MAP = {
+  'A': 'Rashtriya Yuva Pragati Manch (A)',
+  'B': 'Yuva Drishti Party (B)',
+  'C': 'New Gen Leaders (C)',
+  'D': 'Catalyst Party (D)',
+  'E': 'Navpeedhi Bharat Party (E)',
   'Party A': 'Rashtriya Yuva Pragati Manch (A)',
   'Party B': 'Yuva Drishti Party (B)',
   'Party C': 'New Gen Leaders (C)',
@@ -11,61 +20,65 @@ const MAP = {
   'Next Gen Leaders (C)': 'New Gen Leaders (C)',
 };
 
-const COMM_MAP = {
-  'Committee A': 'EDUCATION',
-  'Committee B': 'FINANCE',
-  'Committee C': 'HOME AFFAIRS',
-  'Committee D': 'HEALTH',
-  'Committee E': 'JUSTICE',
-};
+const SHORT_IDS = new Set(['party_a', 'party_b', 'party_c', 'party_d', 'party_e']);
+const SHORT_NAMES = new Set(['Party A', 'Party B', 'Party C', 'Party D', 'Party E', 'A', 'B', 'C', 'D', 'E', 'Next Gen Leaders (C)']);
 
-async function migrate() {
-  if (!process.env.DATABASE_URL) {
-    // JSON file mode
-    const db = require('./db');
-    const all = await db.getAll();
-    let changed = 0;
-    for (const r of all) {
-      const updates = {};
-      if (MAP[r.assigned_party]) { updates.assigned_party = MAP[r.assigned_party]; }
-      if (COMM_MAP[r.assigned_committee]) { updates.assigned_committee = COMM_MAP[r.assigned_committee]; }
-      if (Object.keys(updates).length) {
-        await db.update(r.id, updates);
-        changed++;
-      }
-    }
-    console.log(`Updated ${changed} delegates in JSON file`);
-    return;
-  }
+// --- Fix parties.json ---
+if (fs.existsSync(PARTIES_FILE)) {
+  let parties = JSON.parse(fs.readFileSync(PARTIES_FILE, 'utf-8'));
+  const before = parties.length;
 
-  // PostgreSQL mode
-  const pool = new Pool({ connectionString: process.env.DATABASE_URL });
-  try {
-    const res = await pool.query('SELECT id, assigned_party, assigned_committee FROM registrations');
-    let changed = 0;
-    for (const row of res.rows) {
-      const updates = [];
-      const vals = [row.id];
-      let idx = 2;
-      if (MAP[row.assigned_party]) {
-        updates.push(`"assigned_party" = $${idx++}`);
-        vals.push(MAP[row.assigned_party]);
-      }
-      if (COMM_MAP[row.assigned_committee]) {
-        updates.push(`"assigned_committee" = $${idx++}`);
-        vals.push(COMM_MAP[row.assigned_committee]);
-      }
-      if (updates.length) {
-        updates.push(`"updated_at" = NOW()`);
-        const q = `UPDATE registrations SET ${updates.join(', ')} WHERE id = $1`;
-        await pool.query(q, vals);
-        changed++;
-      }
-    }
-    console.log(`Updated ${changed} delegates in PostgreSQL`);
-  } finally {
-    await pool.end();
+  // Map party names to full names
+  parties.forEach(p => {
+    const mapped = PARTY_NAME_MAP[p.name];
+    if (mapped) p.name = mapped;
+  });
+
+  // Remove duplicates (keep the entry that has proper name matching a known full name)
+  const seen = new Set();
+  parties = parties.filter(p => {
+    if (p.type !== 'party') return true;
+    const full = PARTY_NAME_MAP[p.name] || p.name;
+    if (seen.has(full)) return false;
+    seen.add(full);
+    return true;
+  });
+
+  // Also remove any short-name parties that weren't caught (e.g. if duplicates removed the wrong one)
+  // Keep only parties whose names match the canonical full names
+  const fullNames = new Set(Object.values(PARTY_NAME_MAP));
+  const filtered = parties.filter(p => p.type !== 'party' || fullNames.has(p.name));
+
+  if (filtered.length !== before) {
+    fs.writeFileSync(PARTIES_FILE, JSON.stringify(filtered, null, 2), 'utf-8');
+    console.log(`Parties: ${before} → ${filtered.length} (removed ${before - filtered.length} duplicates)`);
+  } else {
+    console.log('Parties: no changes needed');
   }
 }
 
-migrate().catch(err => { console.error(err); process.exit(1); });
+// --- Fix data.json (delegate assigned_party) ---
+if (fs.existsSync(DATA_FILE)) {
+  let data = JSON.parse(fs.readFileSync(DATA_FILE, 'utf-8'));
+  let changed = 0;
+
+  data.forEach(r => {
+    if (r.assigned_party && PARTY_NAME_MAP[r.assigned_party]) {
+      const mapped = PARTY_NAME_MAP[r.assigned_party];
+      if (mapped !== r.assigned_party) {
+        console.log(`  Delegate "${r.name}": "${r.assigned_party}" → "${mapped}"`);
+        r.assigned_party = mapped;
+        changed++;
+      }
+    }
+  });
+
+  if (changed > 0) {
+    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2), 'utf-8');
+    console.log(`Delegates: ${changed} updated`);
+  } else {
+    console.log('Delegates: no changes needed');
+  }
+}
+
+console.log('Done. Restart the server and refresh.');
