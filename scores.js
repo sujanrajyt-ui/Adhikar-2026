@@ -398,23 +398,39 @@ function renderDelegates() {
         const maxPoss = allCriteria.reduce((sum, c) => sum + c.max_points, 0);
         const hasScored = d.scores && d.scores.length > 0;
 
-        const criteriaHtml = allCriteria.map(c => {
-            const existing = d.scores ? d.scores.find(s => s.criteria_id === c.id) : null;
-            const val = existing ? existing.score : '';
-            const avg = sessionAverages[c.id];
+        const renderCriteriaSection = (title, items) => {
+            const itemsHtml = items.map(c => {
+                const existing = d.scores ? d.scores.find(s => s.criteria_id === c.id) : null;
+                const val = existing ? existing.score : '';
+                const avg = sessionAverages[c.id];
+                return `
+                    <div class="inline-criteria">
+                        <label>${escapeHtml(c.name)} <small>/${c.max_points}</small>${avg !== undefined ? ` <span class="avg-ref">avg ${avg}</span>` : ''}</label>
+                        <input type="number"
+                            id="score_${d.id}_${c.id}"
+                            min="0" max="${c.max_points}"
+                            value="${val}"
+                            oninput="validateInput(this, ${c.max_points})"
+                            onchange="markDirty('${d.id}')"
+                            placeholder="—">
+                    </div>
+                `;
+            }).join('');
+
             return `
-        <div class="inline-criteria">
-          <label>${escapeHtml(c.name)} <small>/${c.max_points}</small>${avg !== undefined ? ` <span class="avg-ref">avg ${avg}</span>` : ''}</label>
-          <input type="number"
-            id="score_${d.id}_${c.id}"
-            min="0" max="${c.max_points}"
-            value="${val}"
-            oninput="validateInput(this, ${c.max_points})"
-            onchange="markDirty('${d.id}')"
-            placeholder="—">
-        </div>
-      `;
-        }).join('');
+                <div class="scoring-sub-section">
+                    <h5 class="section-label">${title}</h5>
+                    <div class="criteria-row">
+                        ${itemsHtml}
+                    </div>
+                </div>
+            `;
+        };
+
+        const criteriaHtml = `
+            ${renderCriteriaSection("Content & Performance", allCriteria.slice(0, 3))}
+            ${renderCriteriaSection("Leadership & Conduct", allCriteria.slice(3))}
+        `;
 
         return `
       <div class="delegate-card" data-id="${d.id}" style="animation-delay: ${idx * 0.04}s">
@@ -436,12 +452,14 @@ function renderDelegates() {
         </div>
 
         <div class="inline-scoring-box">
-          <div class="criteria-row">
+          <div class="scoring-grid">
             ${criteriaHtml}
           </div>
-          <button class="btn-primary" id="save-btn-${d.id}" onclick="handleInlineSave('${d.id}')" style="margin-top:0;">
-            Submit Scores
-          </button>
+          <div class="scoring-actions">
+            <button class="btn-primary" id="save-btn-${d.id}" onclick="handleInlineSave('${d.id}')">
+              Submit Scores
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -967,9 +985,22 @@ function initTimer() {
     presetBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             if (btn.id === 'timer-custom') {
-                const input = prompt("Enter speaking time in minutes (e.g., 1.5 or 3):", "1");
+                const input = prompt("Enter speaking time (e.g., 2 or 1:30):", "1:00");
                 if (input === null) return;
-                const secs = Math.floor(parseFloat(input) * 60);
+
+                let secs = 0;
+                if (input.includes(':')) {
+                    const parts = input.split(':');
+                    secs = (parseInt(parts[0]) || 0) * 60 + (parseInt(parts[1]) || 0);
+                } else if (input.includes('.') && !isNaN(input)) {
+                    // If user puts 0.30, treat as 30s if they expected that, 
+                    // but standard is minutes. We'll stick to minutes for dot 
+                    // but encourage colon in the prompt.
+                    secs = Math.floor(parseFloat(input) * 60);
+                } else {
+                    secs = Math.floor(parseFloat(input) * 60);
+                }
+
                 if (isNaN(secs) || secs <= 0) {
                     showToast("Invalid time entered", "error");
                     return;

@@ -162,25 +162,64 @@ function renderTable(data, filter) {
         return;
     }
 
-    const rows = data.map((d, index) => `
-        <tr class="leaderboard-row">
-            <td><span class="row-rank">#${index + 1}</span></td>
-            <td>
-                <div class="row-name">${escapeHtml(d.name)}</div>
-                <div class="delegate-sub">${escapeHtml(d.elected_role || 'General Delegate')}</div>
-            </td>
-            <td class="hide-mobile">
-                <div class="delegate-sub">${escapeHtml(d.committee || 'All Members')}</div>
-                <div class="podium-meta" style="font-size:0.7rem; margin-top:2px;">${escapeHtml(d.party || 'Independent')}</div>
-            </td>
-            <td>
-                <div class="row-score">${getDisplayScore(d, filter)}</div>
-            </td>
-        </tr>
-    `).join('');
+    const rows = data.map((d, index) => {
+        const isOverall = filter === 'overall' || filter.startsWith('awd_');
+
+        // Breakdown content
+        const breakdownHtml = allData.criteria.map(c => {
+            const score = d.criteriaScores[c.id] || 0;
+            const pct = (score / c.max_points) * 100;
+            return `
+                <div class="breakdown-item">
+                    <div class="breakdown-label-row">
+                        <span class="breakdown-label">${escapeHtml(c.name)}</span>
+                        <span class="breakdown-value">${score.toFixed(1)}<small>/${c.max_points}</small></span>
+                    </div>
+                    <div class="breakdown-bar">
+                        <div class="breakdown-fill" style="width: ${pct}%"></div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        return `
+            <tr class="leaderboard-row" onclick="toggleDetails('${d.id}')">
+                <td><span class="row-rank">#${index + 1}</span></td>
+                <td>
+                    <div class="row-name">${escapeHtml(d.name)}</div>
+                    <div class="delegate-sub">${escapeHtml(d.elected_role || 'General Delegate')}</div>
+                </td>
+                <td class="hide-mobile">
+                    <div class="delegate-sub">${escapeHtml(d.committee || 'All Members')}</div>
+                    <div class="podium-meta" style="font-size:0.7rem; margin-top:2px;">${escapeHtml(d.party || 'Independent')}</div>
+                </td>
+                <td>
+                    <div class="row-score">
+                        ${getDisplayScore(d, filter)}
+                        <span class="detail-toggle-icon">▾</span>
+                    </div>
+                </td>
+            </tr>
+            <tr id="details-${d.id}" class="details-row hidden">
+                <td colspan="4">
+                    <div class="breakdown-container">
+                        <div class="breakdown-title">Performance Breakdown <small>(Averaged across sessions)</small></div>
+                        <div class="breakdown-grid">
+                            ${breakdownHtml}
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
 
     rankingsBody.innerHTML = rows;
 }
+
+window.toggleDetails = function (id) {
+    const el = document.getElementById(`details-${id}`);
+    if (el) el.classList.toggle('hidden');
+};
 
 function renderAwardInfo(filter) {
     const infoEl = document.getElementById('award-info-box');
