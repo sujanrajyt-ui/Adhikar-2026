@@ -1049,6 +1049,13 @@ function smartInstKey(name) {
     return 'CHINMAYA';
   }
 
+  // KLE Sub-groups (Manjunath, MR, and General)
+  if (upper.includes('KLE') || upper.includes('K.L.E')) {
+    if (upper.includes('MANJUNATH')) return 'KLE MANJUNATH';
+    if (upper.includes('MR') || upper.includes('M.R')) return 'KLE MR';
+    return 'KLE';
+  }
+
   const drops = new Set(['college', 'school', 'pu', 'junior', 'degree', 'university', 'institute', 'academy', 'high', 'primary', 'secondary', 'commerce', 'science', 'arts', 'english', 'medium', 'cbse', 'public', 'society', 'campus', 'of', 'the', '&', 'and', 'at', 'in', 'for', 'vidyalaya', 'vidyanikethana', 'school', 'college', 'hostel']);
   const parts = raw.split(/[\s,/-]+/).filter(Boolean);
   if (!parts.length) return 'Unspecified';
