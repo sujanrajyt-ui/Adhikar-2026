@@ -966,11 +966,24 @@ function initTimer() {
 
     presetBtns.forEach(btn => {
         btn.addEventListener('click', () => {
+            if (btn.id === 'timer-custom') {
+                const input = prompt("Enter speaking time in minutes (e.g., 1.5 or 3):", "1");
+                if (input === null) return;
+                const secs = Math.floor(parseFloat(input) * 60);
+                if (isNaN(secs) || secs <= 0) {
+                    showToast("Invalid time entered", "error");
+                    return;
+                }
+                lastSetTime = secs;
+                timeLeft = secs;
+            } else {
+                const seconds = parseInt(btn.dataset.time);
+                lastSetTime = seconds;
+                timeLeft = seconds;
+            }
+
             presetBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            const seconds = parseInt(btn.dataset.time);
-            lastSetTime = seconds;
-            timeLeft = seconds;
             updateDisplay(timeLeft);
             pauseTimer();
             timerWidget.classList.remove('timer-done');
