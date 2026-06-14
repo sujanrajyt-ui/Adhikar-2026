@@ -16,7 +16,28 @@
         rel="stylesheet">
 </head>
 
-<body>
+<body class="is-locked">
+    <!-- Login Overlay -->
+    <div id="leaderboard-login" class="login-overlay">
+        <div class="login-content glass-panel">
+            <h2 class="shimmer-text"
+                style="font-size: 2.5rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">Restricted
+                Access</h2>
+            <p class="hero-sub" style="font-size: 1rem; margin-bottom: 2rem; color: rgba(255,255,255,0.7);">Please enter
+                the passcode to view the live rankings.</p>
+            <div class="login-input-group" style="width: 100%; max-width: 350px;">
+                <input type="password" id="leaderboard-pass" class="award-select"
+                    style="width: 100%; text-align: center; margin-bottom: 1rem;" placeholder="••••••">
+                <button onclick="handleLogin()" class="award-select"
+                    style="width: 100%; background: var(--gold); color: var(--maroon-900); font-weight: 800;">Unlock
+                    Data</button>
+                <div id="login-error"
+                    style="color: #ff6b6b; margin-top: 1rem; font-size: 0.8rem; font-weight: 700; text-align: center; display: none;">
+                    Invalid Access Code</div>
+            </div>
+        </div>
+    </div>
+
     <!-- Loading Screen -->
     <div id="page-loader" class="page-loader">
         <div class="loader-spinner"></div>
@@ -31,7 +52,7 @@
         </div>
     </header>
 
-    <main class="container leaderboard-container">
+    <main class="container leaderboard-container" id="main-content" style="display: none;">
         <header class="leaderboard-hero">
             <span class="eyebrow eyebrow-gold">Parliamentary Standings</span>
             <h1 class="h1 shimmer-text">Leaderboard</h1>

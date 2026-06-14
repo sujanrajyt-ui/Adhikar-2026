@@ -11,37 +11,94 @@ const podiumSection = document.getElementById('podium-section');
 const rankingsBody = document.getElementById('rankings-body');
 const updateTime = document.getElementById('update-time');
 
+let leaderboardPass = localStorage.getItem('leaderboardPassword') || '';
+
 async function init() {
+    if (leaderboardPass) {
+        checkAndFetch();
+    } else {
+        showLogin();
+    }
+
+    // Auto-refresh every 60 seconds if authenticated
+    setInterval(async () => {
+        if (leaderboardPass) {
+            await fetchData();
+            renderLeaderboard();
+        }
+    }, 60000);
+}
+
+function showLogin(invalid = false) {
+    document.getElementById('leaderboard-login').style.display = 'flex';
+    document.getElementById('main-content').style.display = 'none';
+    document.body.classList.add('is-locked');
+    if (invalid) {
+        document.getElementById('login-error').style.display = 'block';
+        localStorage.removeItem('leaderboardPassword');
+        leaderboardPass = '';
+    }
+    const loader = document.getElementById('page-loader');
+    if (loader) loader.classList.add('hidden');
+}
+
+async function checkAndFetch() {
     try {
         await fetchData();
         renderCriteriaOptions();
         renderLeaderboard();
 
-        // Auto-refresh every 30 seconds
-        setInterval(async () => {
-            await fetchData();
-            renderCriteriaOptions();
-            renderLeaderboard();
-        }, 30000);
+        // Success: hide login
+        document.getElementById('leaderboard-login').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        document.body.classList.remove('is-locked');
 
-        // Hide loader
         const loader = document.getElementById('page-loader');
         if (loader) loader.classList.add('hidden');
     } catch (err) {
-        console.error("Initialization failed", err);
+        if (err.message.includes('401')) {
+            showLogin(true);
+        } else {
+            console.error("Fetch failed", err);
+        }
     }
 }
 
+window.handleLogin = async function () {
+    const pw = document.getElementById('leaderboard-pass').value.trim();
+    if (!pw) return;
+
+    try {
+        const res = await fetch('/api/leaderboard/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password: pw })
+        });
+
+        if (res.ok) {
+            leaderboardPass = pw;
+            localStorage.setItem('leaderboardPassword', pw);
+            await checkAndFetch();
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    } catch (err) {
+        alert("Server error. Please try again.");
+    }
+};
+
 async function fetchData() {
     try {
-        const res = await fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`);
+        const res = await fetch(`${API_BASE}/public/leaderboard?t=${Date.now()}`, {
+            headers: { 'X-Leaderboard-Password': leaderboardPass }
+        });
+        if (res.status === 401) throw new Error('HTTP 401');
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
         allData = data;
         updateTime.textContent = `Last updated: ${new Date().toLocaleTimeString()}`;
     } catch (err) {
-        console.error("Failed to fetch leaderboard", err);
-        rankingsBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error loading data: ${err.message}</td></tr>`;
+        throw err;
     }
 }
 
@@ -257,5 +314,8 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
+document.getElementById('leaderboard-pass')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') handleLogin();
+});
 awardSelector.addEventListener('change', renderLeaderboard);
 document.addEventListener('DOMContentLoaded', init);

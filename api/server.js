@@ -930,7 +930,21 @@ app.post('/api/scores/attendance/bulk', async (req, res) => {
 
 /* ============ Leaderboard API ============ */
 
+// Leaderboard Login
+app.post('/api/leaderboard/login', (req, res) => {
+  if (req.body.password === process.env.LEADERBOARD_PASSWORD) {
+    res.json({ success: true });
+  } else {
+    res.status(401).json({ detail: 'Invalid password' });
+  }
+});
+
 app.get('/api/public/leaderboard', async (req, res) => {
+  const incomingPw = req.headers['x-leaderboard-password'];
+  if (incomingPw !== process.env.LEADERBOARD_PASSWORD) {
+    return res.status(401).json({ detail: 'Leaderboard is protected. Please provide a password.' });
+  }
+
   res.setHeader('Cache-Control', 'no-cache');
   try {
     const [scores, registrations, rawCriteria, awards, parties] = await Promise.all([
@@ -1028,13 +1042,13 @@ app.get('/api/public/leaderboard', async (req, res) => {
 function smartInstKey(name) {
   if (!name) return 'Unspecified';
   const raw = name.trim();
-  const drops = new Set(['college','school','pu','junior','degree','university','institute','academy','high','primary','secondary','commerce','science','arts','english','medium','cbse','public','society','campus','of','the','&','and','at','in','for','vidyalaya','vidyanikethana','school','college','hostel']);
+  const drops = new Set(['college', 'school', 'pu', 'junior', 'degree', 'university', 'institute', 'academy', 'high', 'primary', 'secondary', 'commerce', 'science', 'arts', 'english', 'medium', 'cbse', 'public', 'society', 'campus', 'of', 'the', '&', 'and', 'at', 'in', 'for', 'vidyalaya', 'vidyanikethana', 'school', 'college', 'hostel']);
   const parts = raw.split(/[\s,/-]+/).filter(Boolean);
   if (!parts.length) return 'Unspecified';
-  let base = parts[0].replace(/\./g,'').toUpperCase();
+  let base = parts[0].replace(/\./g, '').toUpperCase();
   // If first word is a common prefix and second word is meaningful, use both
   if (parts.length > 1) {
-    const second = parts[1].replace(/\./g,'');
+    const second = parts[1].replace(/\./g, '');
     if (!drops.has(second.toLowerCase())) base += ' ' + second;
   }
   return base;
