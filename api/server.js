@@ -947,13 +947,15 @@ app.get('/api/public/leaderboard', async (req, res) => {
 
   res.setHeader('Cache-Control', 'no-cache');
   try {
-    const [scores, registrations, rawCriteria, awards, parties] = await Promise.all([
+    const [scores, registrations, rawCriteria, awards, parties, judges] = await Promise.all([
       db.getAllScores(),
       db.getAll(),
       db.getCriteria(),
       db.getAwards(),
-      db.getParties()
+      db.getParties(),
+      db.getJudges()
     ]);
+    const validJudgeIds = new Set(judges.map(j => j.id));
 
     // Deduplicate criteria by ID (take last entry per ID)
     // Deduplicate criteria by ID, exclude attendance
@@ -972,6 +974,7 @@ app.get('/api/public/leaderboard', async (req, res) => {
       const dScores = scores.filter(s =>
         s.delegate_id === d.id &&
         s.criteria_id !== 'attendance' &&
+        validJudgeIds.has(s.judge_id) && // Integrity Check
         scorableSessions.includes(s.session_id || 'general')
       );
       const criteriaScores = {};
@@ -1056,6 +1059,15 @@ function smartInstKey(name) {
     return 'KLE';
   }
 
+  // Other common groupings
+  if (upper.includes('JSS')) return 'JSS';
+  if (upper.includes('SDM')) return 'SDM';
+  if (upper.includes('BASEL MISSION')) return 'BASEL MISSION';
+  if (upper.includes('JOSEPH')) return 'ST JOSEPHS';
+  if (upper.includes('MAHESH')) return 'MAHESH';
+  if (upper.includes('MOUNT LITERA')) return 'MOUNT LITERA';
+  if (upper.includes('KENDRIYA VIDYALAYA') || upper.startsWith('KV')) return 'KENDRIYA VIDYALAYA (KV)';
+
   const drops = new Set(['college', 'school', 'pu', 'junior', 'degree', 'university', 'institute', 'academy', 'high', 'primary', 'secondary', 'commerce', 'science', 'arts', 'english', 'medium', 'cbse', 'public', 'society', 'campus', 'of', 'the', '&', 'and', 'at', 'in', 'for', 'vidyalaya', 'vidyanikethana', 'school', 'college', 'hostel']);
   const parts = raw.split(/[\s,/-]+/).filter(Boolean);
   if (!parts.length) return 'Unspecified';
@@ -1070,11 +1082,17 @@ function smartInstKey(name) {
 
 // Public: get institutions (college) with delegate members grouped and total scores
 app.get('/api/institutions', async (req, res) => {
+  const incomingPw = req.headers['x-leaderboard-password'];
+  if (incomingPw !== process.env.LEADERBOARD_PASSWORD) {
+    return res.status(401).json({ detail: 'Access restricted. Please provide the passcode.' });
+  }
+
   try {
-    const [all, customGroups, rawCriteria, rawScores] = await Promise.all([
-      db.getAll(), db.getInstitutionGroups(), db.getCriteria(), db.getAllScores()
+    const [all, customGroups, rawCriteria, rawScores, judges] = await Promise.all([
+      db.getAll(), db.getInstitutionGroups(), db.getCriteria(), db.getAllScores(), db.getJudges()
     ]);
     const verified = all.filter(r => (r.status || '').toLowerCase() === 'verified');
+    const validJudgeIds = new Set(judges.map(j => j.id));
 
     // Build scorable criteria (exclude attendance)
     const criteriaMap = {};
@@ -1089,7 +1107,9 @@ app.get('/api/institutions', async (req, res) => {
     }
     verified.forEach(d => {
       const raw = (d.college || '').trim();
-      const name = raw || 'Unspecified';
+      if (!raw) return; // Skip if no institution provided
+
+      const name = raw;
       // Priority: custom group > smart key > raw name
       let key = customGroups[name];
       if (!key) key = smartInstKey(name);
@@ -1099,6 +1119,7 @@ app.get('/api/institutions', async (req, res) => {
       const dScores = rawScores.filter(s =>
         s.delegate_id === d.id &&
         s.criteria_id !== 'attendance' &&
+        validJudgeIds.has(s.judge_id) && // Integrity Check
         scorableSessions.includes(s.session_id || 'general')
       );
       let delegateTotal = 0;
@@ -1130,7 +1151,10 @@ app.get('/api/institutions', async (req, res) => {
       ...g,
       count: g.members.length,
       totalPoints: parseFloat(g.members.reduce((sum, m) => sum + (m.totalScore || 0), 0).toFixed(2))
-    })).sort((a, b) => b.totalPoints - a.totalPoints);
+    }))
+      .filter(g => g.count > 0) // Remove institutions with 0 members
+      .sort((a, b) => b.totalPoints - a.totalPoints);
+
     res.json(result);
   } catch (err) {
     res.status(500).json({ detail: err.message });

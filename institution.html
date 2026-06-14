@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,84 +8,297 @@
   <link rel="icon" type="image/x-icon" href="assets/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap"
+    rel="stylesheet">
   <style>
     :root {
-      --maroon-900: #1a0a0a; --maroon-800: #2a1111; --maroon-700: #3d1a1a;
-      --gold-400: #d4a853; --gold-500: #c9973b; --cream-100: #faf5f0; --cream-300: #c9b8a3;
+      --maroon-900: #1a0a0a;
+      --maroon-800: #2a1111;
+      --maroon-700: #3d1a1a;
+      --gold-400: #d4a853;
+      --gold-500: #c9973b;
+      --cream-100: #faf5f0;
+      --cream-300: #c9b8a3;
     }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: var(--maroon-900); color: var(--cream-100);
-      font-family: 'Outfit', sans-serif; min-height: 100vh;
+      background: var(--maroon-900);
+      color: var(--cream-100);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
     }
+
+    body.is-locked {
+      overflow: hidden;
+    }
+
     body::before {
-      content: ''; position: fixed; top: -40%; left: -20%; width: 60%; height: 80%;
-      background: radial-gradient(circle, rgba(212,168,83,0.06) 0%, transparent 70%);
-      pointer-events: none; z-index: 0;
+      content: '';
+      position: fixed;
+      top: -40%;
+      left: -20%;
+      width: 60%;
+      height: 80%;
+      background: radial-gradient(circle, rgba(212, 168, 83, 0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
     }
-    .page { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; position: relative; z-index: 1; }
+
+    .page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
     h1 {
-      font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--gold-400);
-      margin-bottom: 0.5rem; text-align: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      color: var(--gold-400);
+      margin-bottom: 0.5rem;
+      text-align: center;
     }
-    .subtitle { text-align: center; color: var(--cream-300); margin-bottom: 2.5rem; font-size: 0.95rem; }
+
+    .shimmer-text {
+      background: linear-gradient(90deg, var(--gold-400), #fff, var(--gold-400));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: shine 3s linear infinite;
+    }
+
+    @keyframes shine {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--cream-300);
+      margin-bottom: 2.5rem;
+      font-size: 0.95rem;
+    }
+
     .total-badge {
-      display: inline-block; background: var(--maroon-700); color: var(--gold-400);
-      padding: 0.4rem 1.2rem; border-radius: 999px; font-size: 0.85rem; margin-bottom: 2rem;
+      display: inline-block;
+      background: var(--maroon-700);
+      color: var(--gold-400);
+      padding: 0.4rem 1.2rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
+      margin-bottom: 2rem;
     }
-    .inst-grid { display: grid; gap: 1.5rem; }
+
+    .inst-grid {
+      display: grid;
+      gap: 1.5rem;
+    }
+
     .inst-card {
-      background: var(--maroon-800); border: 1px solid rgba(212,168,83,0.12);
-      border-radius: 12px; overflow: hidden;
+      background: var(--maroon-800);
+      border: 1px solid rgba(212, 168, 83, 0.12);
+      border-radius: 12px;
+      overflow: hidden;
     }
+
     .inst-header {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 1.5rem; background: rgba(212,168,83,0.06);
-      border-bottom: 1px solid rgba(212,168,83,0.08); cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      background: rgba(212, 168, 83, 0.06);
+      border-bottom: 1px solid rgba(212, 168, 83, 0.08);
+      cursor: pointer;
     }
-    .inst-header:hover { background: rgba(212,168,83,0.1); }
-    .inst-name { font-size: 1.1rem; font-weight: 600; color: var(--cream-100); }
+
+    .inst-header:hover {
+      background: rgba(212, 168, 83, 0.1);
+    }
+
+    .inst-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--cream-100);
+    }
+
     .inst-count {
-      background: var(--gold-500); color: var(--maroon-900); font-weight: 700;
-      padding: 0.2rem 0.8rem; border-radius: 999px; font-size: 0.85rem;
+      background: var(--gold-500);
+      color: var(--maroon-900);
+      font-weight: 700;
+      padding: 0.2rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.85rem;
     }
-    .inst-body { display: none; padding: 1rem 1.5rem; }
-    .inst-body.open { display: block; }
+
+    .inst-body {
+      display: none;
+      padding: 1rem 1.5rem;
+    }
+
+    .inst-body.open {
+      display: block;
+    }
+
     .member-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 0.4rem 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.4rem 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
     }
-    .member-row:last-child { border-bottom: none; }
-    .member-name { font-size: 0.9rem; }
-    .member-meta { font-size: 0.78rem; color: var(--cream-300); display: flex; gap: 0.6rem; }
+
+    .member-row:last-child {
+      border-bottom: none;
+    }
+
+    .member-name {
+      font-size: 0.9rem;
+    }
+
+    .member-meta {
+      font-size: 0.78rem;
+      color: var(--cream-300);
+      display: flex;
+      gap: 0.6rem;
+    }
+
     .meta-tag {
-      background: var(--maroon-700); padding: 0.1rem 0.5rem; border-radius: 4px;
-      color: var(--gold-400); font-size: 0.72rem;
+      background: var(--maroon-700);
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      color: var(--gold-400);
+      font-size: 0.72rem;
     }
-    .loader { text-align: center; padding: 4rem 0; color: var(--cream-300); }
+
+    .loader {
+      text-align: center;
+      padding: 4rem 0;
+      color: var(--cream-300);
+    }
+
     .back-link {
-      display: inline-block; margin-bottom: 1.5rem; color: var(--gold-400);
-      text-decoration: none; font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: var(--gold-400);
+      text-decoration: none;
+      font-size: 0.9rem;
     }
-    .back-link:hover { text-decoration: underline; }
+
+    .back-link:hover {
+      text-decoration: underline;
+    }
+
+    /* Login Overlay */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--maroon-900);
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(20px);
+    }
+
+    .glass-panel {
+      background: rgba(42, 17, 17, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 168, 83, 0.2);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      padding: 3rem;
+    }
   </style>
 </head>
-<body>
-  <div class="page">
+
+<body class="is-locked">
+  <!-- Login Overlay -->
+  <div id="inst-login" class="login-overlay">
+    <div class="login-content glass-panel" style="text-align: center; max-width: 450px; width: 90%;">
+      <h2 class="shimmer-text"
+        style="font-size: 2.2rem; margin-bottom: 0.5rem; font-family: 'Playfair Display', serif;">Restricted Access</h2>
+      <p style="font-size: 0.9rem; margin-bottom: 2rem; color: var(--cream-300);">Please enter the passcode to view the
+        institutional standings.</p>
+      <div style="width: 100%; max-width: 350px; margin: 0 auto;">
+        <input type="password" id="inst-pass"
+          style="width: 100%; text-align: center; margin-bottom: 1rem; background: var(--maroon-700); border: 1px solid rgba(212,168,83,0.3); color: white; padding: 0.8rem; border-radius: 8px; font-family: inherit;"
+          placeholder="••••••">
+        <button onclick="handleLogin()"
+          style="width: 100%; background: var(--gold-500); color: var(--maroon-900); font-weight: 800; border: none; padding: 0.8rem; border-radius: 8px; cursor: pointer; transition: transform 0.2s;">Unlock
+          Data</button>
+        <div id="login-error"
+          style="color: #ff6b6b; margin-top: 1rem; font-size: 0.8rem; font-weight: 700; display: none;">Invalid Access
+          Code</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page" id="main-content" style="display: none;">
     <a href="/" class="back-link">&larr; Back to Home</a>
     <h1>Institutions</h1>
     <p class="subtitle">All participating colleges and schools</p>
     <div id="total-info" class="total-badge" style="display:none"></div>
-    <div id="inst-grid" class="inst-grid"><div class="loader">Loading institutions...</div></div>
+    <div id="inst-grid" class="inst-grid">
+      <div class="loader">Loading institutions...</div>
+    </div>
   </div>
   <script>
     const API_BASE = '/api';
-    function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[m]); }
+    let instPass = localStorage.getItem('leaderboardPassword') || '';
+
+    function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]); }
+
     async function init() {
+      if (instPass) {
+        await checkAndFetch();
+      } else {
+        document.getElementById('inst-login').style.display = 'flex';
+      }
+    }
+
+    async function handleLogin() {
+      const pw = document.getElementById('inst-pass').value.trim();
+      const res = await fetch('/api/leaderboard/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: pw })
+      });
+      if (res.ok) {
+        instPass = pw;
+        localStorage.setItem('leaderboardPassword', pw);
+        await checkAndFetch();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    }
+
+    async function checkAndFetch() {
       try {
-        const res = await fetch(`${API_BASE}/institutions`);
+        const res = await fetch(`${API_BASE}/institutions`, {
+          headers: { 'X-Leaderboard-Password': instPass }
+        });
+        if (res.status === 401) {
+          localStorage.removeItem('leaderboardPassword');
+          location.reload();
+          return;
+        }
         const data = await res.json();
+
+        // Hide login, show content
+        document.getElementById('inst-login').style.display = 'none';
+        document.getElementById('main-content').style.display = 'block';
+        document.body.classList.remove('is-locked');
+
         const total = data.reduce((s, g) => s + g.count, 0);
         const totalPts = data.reduce((s, g) => s + (g.totalPoints || 0), 0);
         document.getElementById('total-info').style.display = 'inline-block';
@@ -118,7 +332,12 @@
         document.getElementById('inst-grid').innerHTML = '<div class="loader">Failed to load institutions.</div>';
       }
     }
+
+    document.getElementById('inst-pass')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleLogin();
+    });
     document.addEventListener('DOMContentLoaded', init);
   </script>
 </body>
+
 </html>
