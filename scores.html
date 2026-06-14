@@ -76,6 +76,39 @@
                     <h1>Parliamentary Evaluation</h1>
                 </div>
                 <div class="head-right">
+                    <!-- Floor Timer Widget -->
+                    <div id="floor-timer" class="floor-timer">
+                        <div class="timer-main">
+                            <div id="timer-display" class="timer-display">00:00</div>
+                            <div class="timer-controls">
+                                <button id="timer-toggle" class="timer-btn-mini" title="Start/Pause">
+                                    <svg id="play-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                                        viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M8 5v14l11-7z" />
+                                    </svg>
+                                    <svg id="pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16"
+                                        height="16" viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                                    </svg>
+                                </button>
+                                <button id="timer-reset" class="timer-btn-mini" title="Reset">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"
+                                        stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                                        <path d="M3 3v5h5" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="timer-presets">
+                            <button class="preset-btn" data-time="60">1m</button>
+                            <button class="preset-btn" data-time="120">2m</button>
+                            <button class="preset-btn" data-time="300">5m</button>
+                            <button class="preset-btn" data-time="600">10m</button>
+                        </div>
+                    </div>
+
                     <!-- Progress Ring -->
                     <div class="progress-ring-wrap">
                         <div class="progress-container">
@@ -99,47 +132,46 @@
                         <input type="text" id="delegate-search" placeholder="Search by name, party, or committee...">
                     </div>
                 </div>
-            </div>
 
-            <!-- Session Tabs -->
-            <div class="session-tabs" id="session-tabs">
-                <!-- Dynamically populated -->
-            </div>
+                <!-- Session Tabs -->
+                <div class="session-tabs" id="session-tabs">
+                    <!-- Dynamically populated -->
+                </div>
 
-            <div class="dashboard-grid">
-                <aside class="sidebar">
-                    <div class="criteria-card">
-                        <h3>Scoring Criteria</h3>
-                        <p class="muted">Active evaluation metrics</p>
-                        <div id="criteria-list" class="criteria-list">
-                            <!-- Dynamically populated -->
+                <div class="dashboard-grid">
+                    <aside class="sidebar">
+                        <div class="criteria-card">
+                            <h3>Scoring Criteria</h3>
+                            <p class="muted">Active evaluation metrics</p>
+                            <div id="criteria-list" class="criteria-list">
+                                <!-- Dynamically populated -->
+                            </div>
                         </div>
-                    </div>
-                    <div class="stats-card">
-                        <h3>Progress</h3>
-                        <div class="progress-info">
-                            <span id="scored-count">0</span> / <span id="total-count">0</span> Evaluated
+                        <div class="stats-card">
+                            <h3>Progress</h3>
+                            <div class="progress-info">
+                                <span id="scored-count">0</span> / <span id="total-count">0</span> Evaluated
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div id="progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                            </div>
                         </div>
-                        <div class="progress-bar-bg">
-                            <div id="progress-fill" class="progress-bar-fill" style="width: 0%"></div>
+                        <div class="criteria-card" id="coalition-card">
+                            <h3>House Strength</h3>
+                            <p class="muted">Party-wise delegate count</p>
+                            <div id="coalition-info" class="coalition-info">
+                                <div class="coalition-loader">Loading...</div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="criteria-card" id="coalition-card">
-                        <h3>House Strength</h3>
-                        <p class="muted">Party-wise delegate count</p>
-                        <div id="coalition-info" class="coalition-info">
-                            <div class="coalition-loader">Loading...</div>
-                        </div>
-                    </div>
-                </aside>
+                    </aside>
 
-                <div class="main-content">
-                    <div id="delegate-list" class="delegate-list">
-                        <!-- Dynamically populated with inline scoring -->
-                        <div class="loader-placeholder">Loading delegates...</div>
+                    <div class="main-content">
+                        <div id="delegate-list" class="delegate-list">
+                            <!-- Dynamically populated with inline scoring -->
+                            <div class="loader-placeholder">Loading delegates...</div>
+                        </div>
                     </div>
                 </div>
-            </div>
         </section>
     </main>
 

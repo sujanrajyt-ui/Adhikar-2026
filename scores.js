@@ -356,7 +356,8 @@ function renderCriteria() {
         ${avg !== undefined ? `<span style="font-size:0.7rem;color:rgba(255,255,255,0.35);">avg ${avg}</span>` : ''}
         <span class="gold-text">${c.max_points} pts</span>
       </span>
-    </div>`; }).join('');
+    </div>`;
+    }).join('');
 }
 
 function getDelegateSide(delegate) {
@@ -864,7 +865,121 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+
+/* ========== Floor Timer Logic ========== */
+let timerInterval = null;
+let timeLeft = 0;
+let isTimerRunning = false;
+let lastSetTime = 0;
+
+function initTimer() {
+    const display = document.getElementById('timer-display');
+    const toggleBtn = document.getElementById('timer-toggle');
+    const resetBtn = document.getElementById('timer-reset');
+    const presetBtns = document.querySelectorAll('.preset-btn');
+    const playIcon = document.getElementById('play-icon');
+    const pauseIcon = document.getElementById('pause-icon');
+    const timerWidget = document.getElementById('floor-timer');
+
+    if (!display || !toggleBtn || !resetBtn) return;
+
+    function updateDisplay(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        display.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    function toggleTimer() {
+        if (isTimerRunning) {
+            pauseTimer();
+        } else {
+            if (timeLeft <= 0) return;
+            startTimer();
+        }
+    }
+
+    function startTimer() {
+        if (isTimerRunning) return;
+        isTimerRunning = true;
+        playIcon.classList.add('hidden');
+        pauseIcon.classList.remove('hidden');
+        timerWidget.classList.add('timer-running');
+        timerWidget.classList.remove('timer-done');
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            if (timeLeft < 0) timeLeft = 0;
+            updateDisplay(timeLeft);
+            if (timeLeft <= 0) {
+                completeTimer();
+            }
+        }, 1000);
+    }
+
+    function pauseTimer() {
+        isTimerRunning = false;
+        playIcon.classList.remove('hidden');
+        pauseIcon.classList.add('hidden');
+        timerWidget.classList.remove('timer-running');
+        clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+        pauseTimer();
+        timeLeft = lastSetTime;
+        updateDisplay(timeLeft);
+        timerWidget.classList.remove('timer-done');
+    }
+
+    function completeTimer() {
+        pauseTimer();
+        timerWidget.classList.add('timer-done');
+        playNotificationSound();
+        showToast("Time is up!", "warning");
+    }
+
+    function playNotificationSound() {
+        try {
+            const context = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(880, context.currentTime); // A5
+            oscillator.frequency.exponentialRampToValueAtTime(440, context.currentTime + 0.5); // A4
+
+            gain.gain.setValueAtTime(0.5, context.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, context.currentTime + 0.5);
+
+            oscillator.connect(gain);
+            gain.connect(context.destination);
+
+            oscillator.start();
+            oscillator.stop(context.currentTime + 0.5);
+        } catch (e) {
+            console.error("Audio error:", e);
+        }
+    }
+
+    toggleBtn.addEventListener('click', toggleTimer);
+    resetBtn.addEventListener('click', resetTimer);
+
+    presetBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            presetBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            const seconds = parseInt(btn.dataset.time);
+            lastSetTime = seconds;
+            timeLeft = seconds;
+            updateDisplay(timeLeft);
+            pauseTimer();
+            timerWidget.classList.remove('timer-done');
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    initTimer();
     console.log("Scoring Dashboard v4 — Sequential Session Tabs");
     initReveal();
 
