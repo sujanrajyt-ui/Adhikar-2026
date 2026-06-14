@@ -1,8 +1,8 @@
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 const express = require('express');
 const cors = require('cors');
 const crypto = require('crypto');
-const path = require('path');
 const db = require('./db');
 
 const app = express();
@@ -932,7 +932,8 @@ app.post('/api/scores/attendance/bulk', async (req, res) => {
 
 // Leaderboard Login
 app.post('/api/leaderboard/login', (req, res) => {
-  if (req.body.password === process.env.LEADERBOARD_PASSWORD) {
+  const pass = process.env.LEADERBOARD_PASSWORD || 'adhikar26';
+  if (req.body.password === pass) {
     res.json({ success: true });
   } else {
     res.status(401).json({ detail: 'Invalid password' });
@@ -940,8 +941,9 @@ app.post('/api/leaderboard/login', (req, res) => {
 });
 
 app.get('/api/public/leaderboard', async (req, res) => {
+  const pass = process.env.LEADERBOARD_PASSWORD || 'adhikar26';
   const incomingPw = req.headers['x-leaderboard-password'];
-  if (incomingPw !== process.env.LEADERBOARD_PASSWORD) {
+  if (incomingPw !== pass) {
     return res.status(401).json({ detail: 'Leaderboard is protected. Please provide a password.' });
   }
 
@@ -1082,8 +1084,9 @@ function smartInstKey(name) {
 
 // Public: get institutions (college) with delegate members grouped and total scores
 app.get('/api/institutions', async (req, res) => {
+  const pass = process.env.LEADERBOARD_PASSWORD || 'adhikar26';
   const incomingPw = req.headers['x-leaderboard-password'];
-  if (incomingPw !== process.env.LEADERBOARD_PASSWORD) {
+  if (incomingPw !== pass) {
     return res.status(401).json({ detail: 'Access restricted. Please provide the passcode.' });
   }
 
