@@ -802,7 +802,11 @@ app.get('/api/sessions', async (req, res) => {
       }
     }
 
-    const updated = await db.getSessions();
+    let updated = await db.getSessions();
+
+    // Sort by the required order
+    const order = required.map(s => s.id);
+    updated.sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
 
     // If judgeId is provided, annotate which sessions they have scored in
     const judgeId = req.query.judgeId;
