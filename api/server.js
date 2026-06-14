@@ -1042,6 +1042,13 @@ app.get('/api/public/leaderboard', async (req, res) => {
 function smartInstKey(name) {
   if (!name) return 'Unspecified';
   const raw = name.trim();
+  const upper = raw.toUpperCase();
+
+  // Special group for Chinmaya institutions (including CEPS)
+  if (upper.includes('CHINMAYA') || upper.includes('CEPS')) {
+    return 'CHINMAYA';
+  }
+
   const drops = new Set(['college', 'school', 'pu', 'junior', 'degree', 'university', 'institute', 'academy', 'high', 'primary', 'secondary', 'commerce', 'science', 'arts', 'english', 'medium', 'cbse', 'public', 'society', 'campus', 'of', 'the', '&', 'and', 'at', 'in', 'for', 'vidyalaya', 'vidyanikethana', 'school', 'college', 'hostel']);
   const parts = raw.split(/[\s,/-]+/).filter(Boolean);
   if (!parts.length) return 'Unspecified';
